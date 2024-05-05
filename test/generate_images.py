@@ -1,5 +1,5 @@
-from panna import Diffuser, save_images
 from time import time
+from panna import Diffuser, save_images
 
 prompts = [
     "The philosopher, MF Doom, by Diego Velázquez",
@@ -9,18 +9,19 @@ prompts_neg = [
     "peaceful, warm",
     "monotone"
 ]
-model = Diffuser()
+model = Diffuser(enable_model_cpu_offload=False)
 
 if __name__ == '__main__':
-    start = time()
-    images, _ = model.text2image(prompts, batch_size=1)
-    elapsed = time() - start
-    print(f"{elapsed} sec")
-    save_images(images, "./test/test_images", file_prefix="generate_images")
+    for i, (p, p_n) in enumerate(zip(prompts, prompts_neg)):
+        start = time()
+        images, _ = model.text2image([p], batch_size=1)
+        elapsed = time() - start
+        print(f"{elapsed} sec")
+        save_images(images, "./test/test_images", file_prefix=f"generate_images.{i}")
 
-    start = time()
-    images, _ = model.text2image(prompts, negative_prompt=prompts_neg, batch_size=1)
-    elapsed = time() - start
-    print(f"{elapsed} sec")
-    save_images(images, "./test/test_images", file_prefix="generate_images.negative_prompt")
+        start = time()
+        images, _ = model.text2image([p], negative_prompt=[p_n], batch_size=1)
+        elapsed = time() - start
+        print(f"{elapsed} sec")
+        save_images(images, "./test/test_images", file_prefix=f"generate_images.negative_prompt.{i}")
 
