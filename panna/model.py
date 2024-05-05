@@ -107,7 +107,7 @@ class Diffuser:
                     negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
                     height=height,
                     width=width,
-                    # guidance_scale=guidance_scale,
+                    guidance_scale=guidance_scale,
                 )
             idx += 1
             gc.collect()
@@ -136,7 +136,7 @@ class Diffuser:
             height=height,
             width=width,
             image=image,
-            guidance_scale=guidance_scale,
+            # guidance_scale=guidance_scale,
             **self.generation_config
         ).images
         return image
