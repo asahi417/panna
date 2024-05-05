@@ -23,14 +23,14 @@ class Diffuser:
     config: Dict[str, Any]
     generation_config: Dict[str, Any]
 
-    def __int__(self,
-                use_refiner: bool = True,
-                base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
-                refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
-                num_inference_steps: int = 40,
-                denoising_end: float = 0.8,
-                enable_model_cpu_offload: bool = False,
-                torch_compile: bool = True):
+    def __init__(self,
+                 use_refiner: bool = True,
+                 base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
+                 refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
+                 num_inference_steps: int = 40,
+                 denoising_end: float = 0.8,
+                 enable_model_cpu_offload: bool = False,
+                 torch_compile: bool = True):
         """ Diffuser main class.
 
         :param use_refiner: Use refiner or not.
