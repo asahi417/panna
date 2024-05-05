@@ -123,7 +123,7 @@ class Diffuser:
         assert self.refiner_model
         image = self.base_model(
             prompt=prompt,
-            negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
+            # negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
             # height=height,
             # width=width,
             guidance_scale=guidance_scale,
@@ -132,7 +132,7 @@ class Diffuser:
         ).images
         image = self.refiner_model(
             prompt=prompt,
-            negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
+            # negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
             # height=height,
             # width=width,
             image=image,
