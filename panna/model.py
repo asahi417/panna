@@ -77,16 +77,15 @@ class Diffuser:
     def text2image(self,
                    prompts: List[str],
                    batch_size: Optional[int] = None,
-                   negative_prompt: Optional[List[str]]=None,
+                   negative_prompt: Optional[List[str]] = None,
                    guidance_scale: float = 7.5,
                    height: Optional[int] = None,
                    width: Optional[int] = None) -> Tuple[List[Image], List[Image]]:
         """ https://huggingface.co/docs/diffusers/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLInpaintPipeline.__call__ """
-        if negative_prompt is None:
-            negative_prompt = [""] * len(prompts)
+        if negative_prompt is not None:
+            assert len(negative_prompt) == len(prompts), f"{len(negative_prompt)} != {len(prompts)}"
         if batch_size is None:
             batch_size = len(prompts)
-        assert len(negative_prompt) == len(prompts), f"{len(negative_prompt)} != {len(prompts)}"
         idx = 0
         raw_image_list = []
         refined_image_list = []
@@ -96,7 +95,7 @@ class Diffuser:
             end = min((idx + 1) * batch_size, len(prompts))
             image = self.base_model(
                 prompt=prompts[start:end],
-                negative_prompt=negative_prompt[start:end],
+                negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
                 height=height,
                 width=width,
                 guidance_scale=guidance_scale,
@@ -108,7 +107,7 @@ class Diffuser:
                 logger.info(f"[batch: {idx + 1}] refining...")
                 image_refined = self.refiner_model(
                     prompt=prompts[start:end],
-                    negative_prompt=negative_prompt[start:end],
+                    negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
                     height=height,
                     width=width,
                     image=image,

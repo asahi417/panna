@@ -1,3 +1,4 @@
+from time import time
 from panna import Diffuser, save_images
 
 prompts = [
@@ -11,9 +12,15 @@ prompts_neg = [
 model = Diffuser(enable_model_cpu_offload=True)
 
 if __name__ == '__main__':
+    start = time()
     images, _ = model.text2image(prompts, batch_size=1)
-    save_images(images, "./test/test_images", file_prefix="generate_images")
+    elapsed = time() - start
+    print(f"{elapsed} sec")
+    save_images(images, "./test/test_images", file_prefix="generate_images_cpu_offload")
 
+    start = time()
     images, _ = model.text2image(prompts, negative_prompt=prompts_neg, batch_size=1)
-    save_images(images, "./test/test_images", file_prefix="generate_images.negative_prompt")
+    elapsed = time() - start
+    print(f"{elapsed} sec")
+    save_images(images, "./test/test_images", file_prefix="generate_images_cpu_offload.negative_prompt")
 
