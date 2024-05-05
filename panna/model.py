@@ -16,7 +16,6 @@ logging.basicConfig(
 
 
 class Diffuser:
-
     refiner_model: Optional[StableDiffusionXLPipeline]
     base_model: StableDiffusionXLPipeline
     device: str
@@ -84,7 +83,7 @@ class Diffuser:
                    width: Optional[int] = None) -> Tuple[List[Image], List[Image]]:
         """ https://huggingface.co/docs/diffusers/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLInpaintPipeline.__call__ """
         if negative_prompt is None:
-            negative_prompt = [None] * len(prompts)
+            negative_prompt = [""] * len(prompts)
         if batch_size is None:
             batch_size = len(prompts)
         assert len(negative_prompt) == len(prompts), f"{len(negative_prompt)} != {len(prompts)}"
