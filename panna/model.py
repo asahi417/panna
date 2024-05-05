@@ -1,7 +1,7 @@
 """ """
 import gc
 import logging
-from typing import Optional, Dict, List, Any, Tuple
+from typing import Optional, Dict, List, Any
 
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
