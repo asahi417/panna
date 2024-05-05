@@ -76,47 +76,81 @@ class Diffuser:
                 self.refiner_model.unet = torch.compile(self.refiner_model.unet, mode="reduce-overhead", fullgraph=True)
 
     def text2image(self,
-                   prompts: List[str],
+                   prompt: List[str],
                    batch_size: Optional[int] = None,
                    negative_prompt: Optional[List[str]] = None,
                    guidance_scale: float = 7.5,
                    height: Optional[int] = None,
-                   width: Optional[int] = None) -> Tuple[List[Image], List[Image]]:
+                   width: Optional[int] = None) -> List[Image]:
         """ https://huggingface.co/docs/diffusers/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLInpaintPipeline.__call__ """
         if negative_prompt is not None:
-            assert len(negative_prompt) == len(prompts), f"{len(negative_prompt)} != {len(prompts)}"
+            assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
         if batch_size is None:
-            batch_size = len(prompts)
+            batch_size = len(prompt)
         idx = 0
-        raw_image_list = []
-        refined_image_list = []
-        while idx * batch_size < len(prompts):
+        output_list = []
+        while idx * batch_size < len(prompt):
             logger.info(f"[batch: {idx + 1}] generating...")
             start = idx * batch_size
-            end = min((idx + 1) * batch_size, len(prompts))
-            image = self.base_model(
-                prompt=prompts[start:end],
-                negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
-                height=height,
-                width=width,
-                guidance_scale=guidance_scale,
-                output_type="latent",
-                **self.generation_config
-            ).images
-            raw_image_list += image.copy()
+            end = min((idx + 1) * batch_size, len(prompt))
             if self.refiner_model:
-                logger.info(f"[batch: {idx + 1}] refining...")
-                image_refined = self.refiner_model(
-                    prompt=prompts[start:end],
+                output_list += self._text2image_refiner(
+                    prompt=prompt[start:end],
                     negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
                     height=height,
                     width=width,
-                    image=image,
                     guidance_scale=guidance_scale,
-                    **self.generation_config
-                ).images
-                refined_image_list += image_refined
+                )
+            else:
+                output_list += self._text2image(
+                    prompt=prompt[start:end],
+                    negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
+                    height=height,
+                    width=width,
+                    guidance_scale=guidance_scale,
+                )
             idx += 1
             gc.collect()
             torch.cuda.empty_cache()
-        return refined_image_list, raw_image_list
+        return output_list
+
+    def _text2image_refiner(self,
+                            prompt: List[str],
+                            negative_prompt: Optional[List[str]] = None,
+                            guidance_scale: float = 7.5,
+                            height: Optional[int] = None,
+                            width: Optional[int] = None) -> List[Image]:
+        assert self.refiner_model
+        image = self.base_model(
+            prompt=prompt,
+            negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
+            height=height,
+            width=width,
+            guidance_scale=guidance_scale,
+            output_type="latent",
+            **self.generation_config
+        ).images
+        image = self.refiner_model(
+            prompt=prompt,
+            negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
+            height=height,
+            width=width,
+            image=image,
+            guidance_scale=guidance_scale,
+            **self.generation_config
+        ).images
+        return image
+
+    def _text2image(self,
+                    prompt: List[str],
+                    negative_prompt: Optional[List[str]] = None,
+                    guidance_scale: float = 7.5,
+                    height: Optional[int] = None,
+                    width: Optional[int] = None) -> List[Image]:
+        return self.base_model(
+            prompt=prompt,
+            negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
+            height=height,
+            width=width,
+            guidance_scale=guidance_scale,
+        ).images
