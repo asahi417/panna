@@ -126,7 +126,7 @@ class Diffuser:
             # negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
             # height=height,
             # width=width,
-            guidance_scale=guidance_scale,
+            # guidance_scale=guidance_scale,
             output_type="latent",
             **self.generation_config
         ).images
