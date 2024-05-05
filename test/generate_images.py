@@ -17,13 +17,13 @@ if __name__ == '__main__':
         refined_image_list, raw_image_list = model.text2image([p], batch_size=1)
         elapsed = time() - start
         print(f"{elapsed} sec")
-        save_images(raw_image_list, "./test/test_images", file_prefix=f"generate_images.{i}")
         save_images(refined_image_list, "./test/test_images", file_prefix=f"generate_images.{i}.refined")
+        save_images(raw_image_list, "./test/test_images", file_prefix=f"generate_images.{i}")
 
         start = time()
         refined_image_list, raw_image_list = model.text2image([p], negative_prompt=[p_n], batch_size=1)
         elapsed = time() - start
         print(f"{elapsed} sec")
-        save_images(raw_image_list, "./test/test_images", file_prefix=f"generate_images.negative_prompt.{i}")
         save_images(refined_image_list, "./test/test_images", file_prefix=f"generate_images.negative_prompt.{i}.refined")
+        save_images(raw_image_list, "./test/test_images", file_prefix=f"generate_images.negative_prompt.{i}")
 

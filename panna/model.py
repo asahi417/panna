@@ -1,4 +1,5 @@
 """ """
+import gc
 import logging
 from typing import Optional, Dict, List, Any, Tuple
 
@@ -116,4 +117,6 @@ class Diffuser:
                 ).images
                 refined_image_list += image_refined
             idx += 1
+            gc.collect()
+            torch.cuda.empty_cache()
         return refined_image_list, raw_image_list
