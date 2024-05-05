@@ -3,13 +3,13 @@ from panna import Diffuser, save_images
 
 prompts = [
     "A majestic lion jumping from a big stone at night",
-    "MF Doom by Diego Velázquez",
-    "Study for a portrait of lady reading newspaper by Francis Bacon, the British painter"
+    # "MF Doom by Diego Velázquez",
+    # "Study for a portrait of lady reading newspaper by Francis Bacon, the British painter"
 ]
 prompts_neg = [
     "low quality",
-    "peaceful, warm",
-    "monotone"
+    # "peaceful, warm",
+    # "monotone"
 ]
 model = Diffuser()
 

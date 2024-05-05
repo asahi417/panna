@@ -124,8 +124,8 @@ class Diffuser:
         image = self.base_model(
             prompt=prompt,
             negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
-            height=height,
-            width=width,
+            # height=height,
+            # width=width,
             guidance_scale=guidance_scale,
             output_type="latent",
             **self.generation_config
@@ -133,10 +133,9 @@ class Diffuser:
         image = self.refiner_model(
             prompt=prompt,
             negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
-            height=height,
-            width=width,
+            # height=height,
+            # width=width,
             image=image,
-            # guidance_scale=guidance_scale,
             **self.generation_config
         ).images
         return image
