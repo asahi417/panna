@@ -21,14 +21,13 @@ class Diffuser:
     base_model: StableDiffusionXLPipeline
     device: str
     config: Dict[str, Any]
-    generation_config: Dict[str, Any]
 
     def __init__(self,
                  use_refiner: bool = True,
                  base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
                  refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
                  num_inference_steps: int = 40,
-                 denoising_end: float = 0.8,
+                 high_noise_frac: float = 0.8,
                  enable_model_cpu_offload: bool = False,
                  torch_compile: bool = False):
         """ Diffuser main class.
@@ -37,12 +36,13 @@ class Diffuser:
         :param base_model_id: HF model ID for the base text-to-image model.
         :param refiner_model_id: HF model ID for the refiner model.
         :param num_inference_steps: Define how many steps and what % of steps to be run on each expert (80/20) here.
-        :param denoising_end: Define how many steps and what % of steps to be run on each expert (80/20) here.
+        :param high_noise_frac: Define how many steps and what % of steps to be run on each expert (80/20) here.
         :param enable_model_cpu_offload: Run pipe.enable_model_cpu_offload().
         :param torch_compile: Run torch.compile.
         """
         self.config = {"use_safetensors": True}
-        self.generation_config = {"num_inference_steps": num_inference_steps, "denoising_end": denoising_end}
+        self.num_inference_steps = num_inference_steps
+        self.high_noise_frac = high_noise_frac
         if torch.cuda.is_available():
             self.device = "cuda:0"
             self.config["variant"] = "fp16"
@@ -123,20 +123,23 @@ class Diffuser:
         assert self.refiner_model
         image = self.base_model(
             prompt=prompt,
-            # negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
-            # height=height,
-            # width=width,
-            # guidance_scale=guidance_scale,
+            negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
+            height=height,
+            width=width,
+            guidance_scale=guidance_scale,
             output_type="latent",
-            **self.generation_config
+            num_inference_steps=self.num_inference_steps,
+            denoising_end=self.high_noise_frac,
+
         ).images
         image = self.refiner_model(
             prompt=prompt,
-            # negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
-            # height=height,
-            # width=width,
+            negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
+            height=height,
+            width=width,
             image=image,
-            **self.generation_config
+            num_inference_steps=self.num_inference_steps,
+            denoising_start=self.high_noise_frac,
         ).images
         return image
 
