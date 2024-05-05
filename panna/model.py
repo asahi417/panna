@@ -29,7 +29,7 @@ class Diffuser:
                  num_inference_steps: int = 40,
                  denoising_end: float = 0.8,
                  enable_model_cpu_offload: bool = False,
-                 torch_compile: bool = True):
+                 torch_compile: bool = False):
         """ Diffuser main class.
 
         :param use_refiner: Use refiner or not.
