@@ -1,7 +1,0 @@
-torch>=2.0
-datasets
-transformers
-diffusers>=0.19.0
-invisible_watermark
-accelerate
-safetensors
