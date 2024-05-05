@@ -103,7 +103,7 @@ class Diffuser:
                 output_type="latent",
                 **self.generation_config
             ).images
-            raw_image_list += image
+            raw_image_list += image.copy()
             if self.refiner_model:
                 logger.info(f"[batch: {idx + 1}] refining...")
                 image_refined = self.refiner_model(
