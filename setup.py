@@ -34,6 +34,7 @@ setup(
         "invisible_watermark",
         "accelerate",
         "safetensors",
+        "sentencepiece",
     ],
     python_requires='>=3.8',
     entry_points={
