@@ -1,7 +1,7 @@
-""" """
+"""Model class for stable diffusion2."""
 import gc
 import logging
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Union
 
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
@@ -16,18 +16,18 @@ logging.basicConfig(
 )
 
 
-class Diffuser:
-    refiner_model: Optional[StableDiffusionXLPipeline]
-    base_model: StableDiffusionXLPipeline
-    device: str
+class Diffuser2:
+
     config: Dict[str, Any]
+    base_model_id: str
+    device: str
+    base_model: StableDiffusionXLPipeline
+    refiner_model: Optional[StableDiffusionXLPipeline]
 
     def __init__(self,
                  use_refiner: bool = True,
                  base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
                  refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
-                 num_inference_steps: int = 40,
-                 high_noise_frac: float = 0.8,
                  enable_model_cpu_offload: bool = False,
                  torch_compile: bool = False):
         """ Diffuser main class.
@@ -35,14 +35,11 @@ class Diffuser:
         :param use_refiner: Use refiner or not.
         :param base_model_id: HF model ID for the base text-to-image model.
         :param refiner_model_id: HF model ID for the refiner model.
-        :param num_inference_steps: Define how many steps and what % of steps to be run on each expert (80/20) here.
-        :param high_noise_frac: Define how many steps and what % of steps to be run on each expert (80/20) here.
         :param enable_model_cpu_offload: Run pipe.enable_model_cpu_offload().
         :param torch_compile: Run torch.compile.
         """
         self.config = {"use_safetensors": True}
-        self.num_inference_steps = num_inference_steps
-        self.high_noise_frac = high_noise_frac
+        self.base_model_id = base_model_id
         if torch.cuda.is_available():
             self.device = "cuda:0"
             self.config["variant"] = "fp16"
@@ -50,7 +47,7 @@ class Diffuser:
         else:
             self.device = "cpu"
         logger.info(f"pipeline config: {self.config}")
-        self.base_model = DiffusionPipeline.from_pretrained(base_model_id, **self.config)
+        self.base_model = StableDiffusionXLPipeline.from_pretrained(self.base_model_id, **self.config)
         if use_refiner:
             self.refiner_model = DiffusionPipeline.from_pretrained(
                 refiner_model_id,
@@ -80,9 +77,22 @@ class Diffuser:
                    batch_size: Optional[int] = None,
                    negative_prompt: Optional[List[str]] = None,
                    guidance_scale: float = 7.5,
+                   num_inference_steps: int = 40,
+                   high_noise_frac: float = 0.8,
                    height: Optional[int] = None,
                    width: Optional[int] = None) -> List[Image]:
-        """ https://huggingface.co/docs/diffusers/en/api/pipelines/stable_diffusion/stable_diffusion_xl#diffusers.StableDiffusionXLInpaintPipeline.__call__ """
+        """ Generate image from text.
+
+        :param prompt:
+        :param batch_size:
+        :param negative_prompt:
+        :param guidance_scale:
+        :param num_inference_steps: Define how many steps and what % of steps to be run on each expert (80/20) here.
+        :param high_noise_frac: Define how many steps and what % of steps to be run on refiner.
+        :param height:
+        :param width:
+        :return: List of images.
+        """
         if negative_prompt is not None:
             assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
         if batch_size is None:
@@ -97,17 +107,20 @@ class Diffuser:
                 output_list += self._text2image_refiner(
                     prompt=prompt[start:end],
                     negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
+                    guidance_scale=guidance_scale,
+                    num_inference_steps=num_inference_steps,
+                    high_noise_frac=high_noise_frac,
                     height=height,
                     width=width,
-                    guidance_scale=guidance_scale,
                 )
             else:
                 output_list += self._text2image(
                     prompt=prompt[start:end],
                     negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
+                    guidance_scale=guidance_scale,
+                    num_inference_steps=num_inference_steps,
                     height=height,
                     width=width,
-                    guidance_scale=guidance_scale,
                 )
             idx += 1
             gc.collect()
@@ -116,43 +129,45 @@ class Diffuser:
 
     def _text2image_refiner(self,
                             prompt: List[str],
-                            negative_prompt: Optional[List[str]] = None,
-                            guidance_scale: float = 7.5,
-                            height: Optional[int] = None,
-                            width: Optional[int] = None) -> List[Image]:
+                            negative_prompt: Optional[List[str]],
+                            guidance_scale: float,
+                            num_inference_steps: int,
+                            high_noise_frac: float,
+                            height: Optional[int],
+                            width: Optional[int]) -> List[Image]:
         assert self.refiner_model
         image = self.base_model(
             prompt=prompt,
-            negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
-            height=height,
-            width=width,
+            negative_prompt=negative_prompt,
             guidance_scale=guidance_scale,
+            num_inference_steps=num_inference_steps,
             output_type="latent",
-            num_inference_steps=self.num_inference_steps,
-            denoising_end=self.high_noise_frac,
-
-        ).images
-        image = self.refiner_model(
-            prompt=prompt,
-            negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
+            denoising_end=high_noise_frac,
             height=height,
             width=width,
-            image=image,
-            num_inference_steps=self.num_inference_steps,
-            denoising_start=self.high_noise_frac,
         ).images
-        return image
+        return self.refiner_model(
+            image=image,
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            num_inference_steps=num_inference_steps,
+            denoising_start=high_noise_frac,
+            height=height,
+            width=width,
+        ).images
 
     def _text2image(self,
                     prompt: List[str],
-                    negative_prompt: Optional[List[str]] = None,
-                    guidance_scale: float = 7.5,
-                    height: Optional[int] = None,
-                    width: Optional[int] = None) -> List[Image]:
+                    negative_prompt: Optional[List[str]],
+                    guidance_scale: float,
+                    num_inference_steps: int,
+                    height: Optional[int],
+                    width: Optional[int]) -> List[Image]:
         return self.base_model(
             prompt=prompt,
-            negative_prompt=negative_prompt if negative_prompt is None else negative_prompt,
+            negative_prompt=negative_prompt,
+            guidance_scale=guidance_scale,
+            num_inference_steps=num_inference_steps,
             height=height,
             width=width,
-            guidance_scale=guidance_scale,
         ).images

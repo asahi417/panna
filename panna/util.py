@@ -3,7 +3,7 @@ from typing import List
 from PIL.Image import Image
 
 
-def save_image(image: Image, filename: str, file_format: str = "PNG") -> None:
+def save_image(image: Image, filename: str, file_format: str = "png") -> None:
     image.save(filename, file_format)
 
 

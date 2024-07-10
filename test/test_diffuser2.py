@@ -1,5 +1,5 @@
 from time import time
-from panna import Diffuser, save_images
+from panna import Diffuser2, save_images
 
 prompts = [
     "A majestic lion jumping from a big stone at night",
@@ -11,7 +11,7 @@ prompts_neg = [
     "peaceful, warm",
     "monotone"
 ]
-model = Diffuser()
+model = Diffuser2()
 
 
 if __name__ == '__main__':
@@ -20,11 +20,11 @@ if __name__ == '__main__':
         output = model.text2image([p], batch_size=1)
         elapsed = time() - start
         print(f"{elapsed} sec")
-        save_images(output, "./test/test_images", file_prefix=f"generate_images.{i}")
+        save_images(output, "./test/test_images", file_prefix=f"diffuser2.{i}")
 
         start = time()
         output = model.text2image([p], negative_prompt=[p_n], batch_size=1)
         elapsed = time() - start
         print(f"{elapsed} sec")
-        save_images(output, "./test/test_images", file_prefix=f"generate_images.negative_prompt.{i}")
+        save_images(output, "./test/test_images", file_prefix=f"diffuser2.negative_prompt.{i}")
 

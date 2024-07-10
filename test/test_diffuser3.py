@@ -1,5 +1,5 @@
 from time import time
-from panna import Diffuser, save_images
+from panna import Diffuser3, save_images
 
 prompts = [
     "A majestic lion jumping from a big stone at night",
@@ -11,8 +11,11 @@ prompts_neg = [
     "peaceful, warm",
     "monotone"
 ]
-model = Diffuser(use_refiner=False)
+model = Diffuser3()
 
+# p = "A burger shop called basement6, high quality"
+# i = 1
+# save_image(model.text2image([p], batch_size=1)[0], f"~/Desktop/b6_logo.{i}")
 
 if __name__ == '__main__':
     for i, (p, p_n) in enumerate(zip(prompts, prompts_neg)):
@@ -20,10 +23,11 @@ if __name__ == '__main__':
         output = model.text2image([p], batch_size=1)
         elapsed = time() - start
         print(f"{elapsed} sec")
-        save_images(output, "./test/test_images", file_prefix=f"generate_images_no_refiner.{i}")
+        save_images(output, "./test/test_images", file_prefix=f"diffuser3.{i}")
 
         start = time()
         output = model.text2image([p], negative_prompt=[p_n], batch_size=1)
         elapsed = time() - start
         print(f"{elapsed} sec")
-        save_images(output, "./test/test_images", file_prefix=f"generate_images_no_refiner.negative_prompt.{i}")
+        save_images(output, "./test/test_images", file_prefix=f"diffuser3.negative_prompt.{i}")
+
