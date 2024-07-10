@@ -35,6 +35,7 @@ setup(
         "accelerate",
         "safetensors",
         "sentencepiece",
+        "protobuf"
     ],
     python_requires='>=3.8',
     entry_points={
