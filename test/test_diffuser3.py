@@ -13,9 +13,6 @@ prompts_neg = [
 ]
 model = Diffuser3()
 
-# p = "A burger shop called basement6, high quality"
-# i = 1
-# save_image(model.text2image([p], batch_size=1)[0], f"~/Desktop/b6_logo.{i}")
 
 if __name__ == '__main__':
     for i, (p, p_n) in enumerate(zip(prompts, prompts_neg)):

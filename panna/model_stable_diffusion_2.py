@@ -28,24 +28,28 @@ class Diffuser2:
                  use_refiner: bool = True,
                  base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
                  refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
-                 enable_model_cpu_offload: bool = False,
-                 torch_compile: bool = False):
-        """ Diffuser main class.
+                 variant: str = "fp16",
+                 torch_dtype: torch.dtype = torch.float16,
+                 device_map: str = "balanced",
+                 low_cpu_mem_usage: bool = True):
+        """
+         Diffuser main class.
 
         :param use_refiner: Use refiner or not.
         :param base_model_id: HF model ID for the base text-to-image model.
         :param refiner_model_id: HF model ID for the refiner model.
-        :param enable_model_cpu_offload: Run pipe.enable_model_cpu_offload().
-        :param torch_compile: Run torch.compile.
+        :param variant:
+        :param torch_dtype:
+        :param device_map:
+        :param low_cpu_mem_usage:
         """
         self.config = {"use_safetensors": True}
         self.base_model_id = base_model_id
         if torch.cuda.is_available():
-            self.device = "cuda:0"
-            self.config["variant"] = "fp16"
-            self.config["torch_dtype"] = torch.float16
-        else:
-            self.device = "cpu"
+            self.config["variant"] = variant
+            self.config["torch_dtype"] = torch_dtype
+            self.config["device_map"] = device_map
+            self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
         logger.info(f"pipeline config: {self.config}")
         self.base_model = StableDiffusionXLPipeline.from_pretrained(self.base_model_id, **self.config)
         if use_refiner:
@@ -57,20 +61,6 @@ class Diffuser2:
             )
         else:
             self.refiner_model = None
-        if enable_model_cpu_offload:
-            logger.info("`enable_model_cpu_offload` models.")
-            self.base_model.enable_model_cpu_offload()
-            if self.refiner_model:
-                self.refiner_model.enable_model_cpu_offload()
-        else:
-            self.base_model.to(self.device)
-            if self.refiner_model:
-                self.refiner_model.to(self.device)
-        if torch_compile:
-            logger.info("`torch.compile` models.")
-            self.base_model.unet = torch.compile(self.base_model.unet, mode="reduce-overhead", fullgraph=True)
-            if self.refiner_model:
-                self.refiner_model.unet = torch.compile(self.refiner_model.unet, mode="reduce-overhead", fullgraph=True)
 
     def text2image(self,
                    prompt: List[str],
