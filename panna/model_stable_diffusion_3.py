@@ -1,4 +1,6 @@
-"""Model class for stable diffusion3."""
+"""Model class for stable diffusion3.
+https://stability.ai/news/stable-diffusion-3-research-paper
+"""
 import gc
 import logging
 from typing import Optional, Dict, List, Any
