@@ -1,5 +1,4 @@
 import gradio as gr
-import cv2
 import matplotlib
 import numpy as np
 import os
@@ -8,10 +7,7 @@ import spaces
 import torch
 import tempfile
 from gradio_imageslider import ImageSlider
-from huggingface_hub import hf_hub_download
-from transformers import AutoImageProcessor, AutoModelForDepthEstimation
-
-from depth_anything_v2.dpt import DepthAnythingV2
+from transformers import pipeline
 
 
 css = """
@@ -28,54 +24,27 @@ css = """
     height: 62px;
 }
 """
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-# model_configs = {
-#     'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},
-#     'vitb': {'encoder': 'vitb', 'features': 128, 'out_channels': [96, 192, 384, 768]},
-#     'vitl': {'encoder': 'vitl', 'features': 256, 'out_channels': [256, 512, 1024, 1024]},
-#     'vitg': {'encoder': 'vitg', 'features': 384, 'out_channels': [1536, 1536, 1536, 1536]}
-# }
-# encoder2name = {
-#     'vits': 'Small',
-#     'vitb': 'Base',
-#     'vitl': 'Large',
-#     'vitg': 'Giant', # we are undergoing company review procedures to release our giant model checkpoint
-# }
-# encoder = 'vitl'
-# model_name = encoder2name[encoder]
-# model = DepthAnythingV2(**model_configs[encoder])
-# filepath = hf_hub_download(repo_id=f"depth-anything/Depth-Anything-V2-{model_name}", filename=f"depth_anything_v2_{encoder}.pth", repo_type="model")
-# state_dict = torch.load(filepath, map_location="cpu")
-# model.load_state_dict(state_dict)
-# model = model.to(DEVICE).eval()
-
 model_id = "depth-anything/Depth-Anything-V2-Large-hf"
-image_processor = AutoImageProcessor.from_pretrained(model_id)
-model = AutoModelForDepthEstimation.from_pretrained(model_id)
-model = model.to(DEVICE).eval()
-#
-# # prepare image for the model
-# inputs = image_processor(images=image, return_tensors="pt")
-#
-# with torch.no_grad():
-#     outputs = model(**inputs)
-#     predicted_depth = outputs.predicted_depth
-#
-# # interpolate to original size
-# prediction = torch.nn.functional.interpolate(
-#     predicted_depth.unsqueeze(1),
-#     size=image.size[::-1],
-#     mode="bicubic",
-#     align_corners=False,
-# )
+
+if torch.cuda.is_available():
+    pipe = pipeline(
+        task="depth-estimation",
+        model=model_id,
+        torch_dtype=torch.float16,
+        device="cuda"
+    )
+else:
+    pipe = pipeline(task="depth-estimation", model=model_id)
 
 title = "# Depth Anything V2"
 description = """Official demo for **Depth Anything V2**.
 Please refer to our [paper](https://arxiv.org/abs/2406.09414), [project page](https://depth-anything-v2.github.io), and [github](https://github.com/DepthAnything/Depth-Anything-V2) for more details."""
 
+
 @spaces.GPU
 def predict_depth(image):
-    return model.infer_image(image)
+    return pipe(image)
+
 
 with gr.Blocks(css=css) as demo:
     gr.Markdown(title)
@@ -95,16 +64,17 @@ with gr.Blocks(css=css) as demo:
         original_image = image.copy()
 
         depth = predict_depth(image[:, :, ::-1])
+        depth_pil = depth["depth"]
+        depth_tensor = depth["predicted_depth"]
 
-        raw_depth = Image.fromarray(depth.astype('uint16'))
         tmp_raw_depth = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-        raw_depth.save(tmp_raw_depth.name)
+        depth_pil.save(tmp_raw_depth.name)
 
-        depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
-        depth = depth.astype(np.uint8)
-        colored_depth = (cmap(depth)[:, :, :3] * 255).astype(np.uint8)
+        depth_tensor = (depth_tensor - depth_tensor.min()) / (depth_tensor.max() - depth_tensor.min()) * 255.0
+        depth_tensor = depth_tensor.astype(np.uint8)
+        colored_depth = (cmap(depth_tensor)[:, :, :3] * 255).astype(np.uint8)
 
-        gray_depth = Image.fromarray(depth)
+        gray_depth = Image.fromarray(depth_tensor)
         tmp_gray_depth = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
         gray_depth.save(tmp_gray_depth.name)
 
