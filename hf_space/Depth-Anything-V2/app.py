@@ -30,7 +30,6 @@ if torch.cuda.is_available():
     pipe = pipeline(
         task="depth-estimation",
         model=model_id,
-        torch_dtype=torch.float16,
         device="cuda"
     )
 else:
@@ -43,7 +42,7 @@ Please refer to our [paper](https://arxiv.org/abs/2406.09414), [project page](ht
 
 @spaces.GPU
 def predict_depth(image):
-    return pipe(image)
+    return pipe(Image.fromarray(np.uint8(image)))["depth"]
 
 
 with gr.Blocks(css=css) as demo:
@@ -56,36 +55,28 @@ with gr.Blocks(css=css) as demo:
         depth_image_slider = ImageSlider(label="Depth Map with Slider View", elem_id='img-display-output', position=0.5)
     submit = gr.Button(value="Compute Depth")
     gray_depth_file = gr.File(label="Grayscale depth map", elem_id="download",)
-    raw_file = gr.File(label="16-bit raw output (can be considered as disparity)", elem_id="download",)
-
     cmap = matplotlib.colormaps.get_cmap('Spectral_r')
 
     def on_submit(image):
-        original_image = image.copy()
+        # gray scale
+        tmp_gray_depth_path = tempfile.NamedTemporaryFile(suffix='.png', delete=False).name
+        depth = predict_depth(image)
+        depth.save(tmp_gray_depth_path)
+        # colored
+        depth = np.array(depth)
+        depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
+        colored_depth = (cmap(depth.astype(np.uint8))[:, :, :3] * 255).astype(np.uint8)
+        return [(image, colored_depth), tmp_gray_depth_path]
 
-        depth = predict_depth(image[:, :, ::-1])
-        depth_pil = depth["depth"]
-        depth_tensor = depth["predicted_depth"]
+    submit.click(on_submit, inputs=[input_image], outputs=[depth_image_slider, gray_depth_file])
 
-        tmp_raw_depth = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-        depth_pil.save(tmp_raw_depth.name)
-
-        depth_tensor = (depth_tensor - depth_tensor.min()) / (depth_tensor.max() - depth_tensor.min()) * 255.0
-        depth_tensor = depth_tensor.astype(np.uint8)
-        colored_depth = (cmap(depth_tensor)[:, :, :3] * 255).astype(np.uint8)
-
-        gray_depth = Image.fromarray(depth_tensor)
-        tmp_gray_depth = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-        gray_depth.save(tmp_gray_depth.name)
-
-        return [(original_image, colored_depth), tmp_gray_depth.name, tmp_raw_depth.name]
-
-    submit.click(on_submit, inputs=[input_image], outputs=[depth_image_slider, gray_depth_file, raw_file])
-
+    # example
     example_files = os.listdir('assets/examples')
     example_files.sort()
     example_files = [os.path.join('assets/examples', filename) for filename in example_files]
-    examples = gr.Examples(examples=example_files, inputs=[input_image], outputs=[depth_image_slider, gray_depth_file, raw_file], fn=on_submit)
+    examples = gr.Examples(
+        examples=example_files, inputs=[input_image], outputs=[depth_image_slider, gray_depth_file], fn=on_submit
+    )
 
 
 if __name__ == '__main__':

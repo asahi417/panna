@@ -1,9 +1,8 @@
 """Model class for stable DepthAnythingV2."""
 import gc
 import logging
-from typing import Optional, Dict, List, Any, Union
+from typing import Optional, Dict, List, Any
 
-import numpy as np
 import torch
 from diffusers import StableDiffusion3Pipeline
 
@@ -32,10 +31,7 @@ class DepthAnythingV2:
         """ Diffuser main class.
 
         :param base_model_id: HF model ID for the base text-to-image model.
-        :param variant:
         :param torch_dtype:
-        :param device_map:
-        :param low_cpu_mem_usage:
         """
         if torch.cuda.is_available():
             self.pipe = pipeline(
@@ -48,21 +44,17 @@ class DepthAnythingV2:
             self.pipe = pipeline(task="depth-estimation", model=base_model_id)
 
     def image2depth(self,
-                    images: List[Union[Image, np.ndarray, torch.Tensor]],
-                    batch_size: Optional[int] = None,
-                    return_pil: bool = False) -> List[Union[Image, np.ndarray]]:
+                    images: List[Image],
+                    batch_size: Optional[int] = None) -> List[Image]:
         """ Generate depth map from images.
 
         :param images:
         :param batch_size:
-        :param return_pil:
-        :return: List of images.
+        :return: List of images. (batch, width, height)
         """
         if batch_size is None:
             batch_size = len(images)
         depth = self.pipe(images, batch_size=batch_size)
         gc.collect()
         torch.cuda.empty_cache()
-        if return_pil:
-            return [i["depth"] for i in depth]
-        return [i["predicted_depth"] for i in depth]
+        return [i["depth"] for i in depth]
