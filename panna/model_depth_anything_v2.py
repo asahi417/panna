@@ -4,10 +4,11 @@ import logging
 from typing import Optional, Dict, List, Any
 
 import torch
+import numpy as np
 from diffusers import StableDiffusion3Pipeline
 
 from transformers import pipeline
-from PIL.Image import Image
+from PIL.Image import Image, fromarray
 
 
 logger = logging.getLogger(__name__)
@@ -16,6 +17,19 @@ logging.basicConfig(
     datefmt="%m/%d/%Y %H:%M:%S",
     level=logging.INFO,
 )
+
+
+def tensor_to_image(predicted_depth: torch.Tensor, image: Image) -> Image:
+    prediction = torch.nn.functional.interpolate(
+        predicted_depth.unsqueeze(1),
+        size=image.size[::-1],
+        mode="bicubic",
+        align_corners=False,
+    )
+    # prediction = prediction
+    prediction = (prediction - prediction.min()) / (prediction.max() - prediction.min()) * 255.0
+    prediction = prediction.numpy()[0][0].astype(np.uint8)
+    return fromarray(prediction)
 
 
 class DepthAnythingV2:
@@ -33,6 +47,7 @@ class DepthAnythingV2:
         :param base_model_id: HF model ID for the base text-to-image model.
         :param torch_dtype:
         """
+
         if torch.cuda.is_available():
             self.pipe = pipeline(
                 task="depth-estimation",
@@ -57,4 +72,6 @@ class DepthAnythingV2:
         depth = self.pipe(images, batch_size=batch_size)
         gc.collect()
         torch.cuda.empty_cache()
-        return [i["depth"] for i in depth]
+        return [tensor_to_image(d["predicted_depth"], i) for d, i in zip(depth, images)]
+
+

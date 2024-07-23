@@ -58,14 +58,13 @@ with gr.Blocks(css=css) as demo:
     cmap = matplotlib.colormaps.get_cmap('Spectral_r')
 
     def on_submit(image):
-        # gray scale
         tmp_gray_depth_path = tempfile.NamedTemporaryFile(suffix='.png', delete=False).name
         depth = predict_depth(image)
-        depth.save(tmp_gray_depth_path)
-        # colored
         depth = np.array(depth)
         depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
-        colored_depth = (cmap(depth.astype(np.uint8))[:, :, :3] * 255).astype(np.uint8)
+        depth = depth.astype(np.uint8)
+        Image.fromarray(depth).save(tmp_gray_depth_path)
+        colored_depth = cmap(depth[:, :, :3] * 255).astype(np.uint8)
         return [(image, colored_depth), tmp_gray_depth_path]
 
     submit.click(on_submit, inputs=[input_image], outputs=[depth_image_slider, gray_depth_file])
