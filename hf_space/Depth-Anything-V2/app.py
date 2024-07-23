@@ -40,9 +40,23 @@ description = """Official demo for **Depth Anything V2**.
 Please refer to our [paper](https://arxiv.org/abs/2406.09414), [project page](https://depth-anything-v2.github.io), and [github](https://github.com/DepthAnything/Depth-Anything-V2) for more details."""
 
 
+def tensor_to_image(predicted_depth: torch.Tensor, image: Image.Image) -> Image.Image:
+    prediction = torch.nn.functional.interpolate(
+        predicted_depth.unsqueeze(1),
+        size=image.size[::-1],
+        mode="bicubic",
+        align_corners=False,
+    )
+    # prediction = prediction
+    prediction = (prediction - prediction.min()) / (prediction.max() - prediction.min()) * 255.0
+    prediction = prediction.numpy()[0][0].astype(np.uint8)
+    return Image.fromarray(prediction)
+
+
 @spaces.GPU
 def predict_depth(image):
-    return pipe(Image.fromarray(np.uint8(image)))["depth"]
+    image = Image.fromarray(np.uint8(image))
+    return tensor_to_image(pipe(image)["predicted_depth"], image)
 
 
 with gr.Blocks(css=css) as demo:
