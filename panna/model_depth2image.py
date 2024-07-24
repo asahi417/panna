@@ -48,7 +48,6 @@ class Depth2Image:
             self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
         logger.info(f"pipeline config: {self.config}")
         self.base_model = StableDiffusionDepth2ImgPipeline.from_pretrained(self.base_model_id, **self.config)
-        self.seed = seed
 
     def text2image(self,
                    init_images: List[Image],
