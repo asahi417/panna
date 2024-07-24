@@ -21,3 +21,16 @@ elapsed = time() - start
 print(f"{elapsed} sec")
 save_image(output[0], "./test/test_images/test_depth2image_depth_anything.png")
 
+# reverse depth
+depth = model_depth.image2depth([img], return_tensor=True, reverse_depth=True)
+start = time()
+output = model.text2image(
+    [img],
+    depth_maps=depth,
+    prompt=["space stars, intergalactic universe, SF, high quality"],
+    seed=42
+)
+elapsed = time() - start
+print(f"{elapsed} sec")
+save_image(output[0], "./test/test_images/test_depth2image_depth_anything.reverse.png")
+
