@@ -6,7 +6,6 @@ import os
 from PIL import Image
 import spaces
 import torch
-import tempfile
 from gradio_imageslider import ImageSlider
 from transformers import pipeline
 from diffusers import StableDiffusionDepth2ImgPipeline
@@ -36,9 +35,6 @@ css = """
 #img-display-output {
     max-height: 80vh;
 }
-#download {
-    height: 62px;
-}
 """
 
 
@@ -56,7 +52,9 @@ def predict_depth(
     if randomize_seed:
         seed = random.randint(0, max_seed)
     init_image = Image.fromarray(np.uint8(init_image))
+    # generate depth
     predicted_depth = pipe_depth(init_image)["predicted_depth"]
+    # generate image
     image = pipe_depth2image(
         prompt=prompt,
         image=init_image,
@@ -68,30 +66,12 @@ def predict_depth(
         width=width,
         generator=torch.Generator().manual_seed(seed)
     ).images[0]
-    predicted_depth = torch.nn.functional.interpolate(
-        predicted_depth.unsqueeze(1),
-        size=init_image.size[::-1],
-        mode="bicubic",
-        align_corners=False,
-    )
-    predicted_depth = (predicted_depth - predicted_depth.min()) / (predicted_depth.max() - predicted_depth.min()) * 255.0
-    predicted_depth = predicted_depth.numpy()[0][0].astype(np.uint8)
-    return image, seed, Image.fromarray(predicted_depth)
-
-
-def on_submit(image):
-    tmp_gray_depth_path = tempfile.NamedTemporaryFile(suffix='.png', delete=False).name
-    depth = predict_depth(image)
-    depth = np.array(depth)
-    depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
-    depth = depth.astype(np.uint8)
-    Image.fromarray(depth).save(tmp_gray_depth_path)
-    colored_depth = (cmap(depth)[:, :, :3] * 255).astype(np.uint8)
-    return [(image, colored_depth), tmp_gray_depth_path]
+    return image, seed
 
 
 with gr.Blocks(css=css) as demo:
-    gr.Markdown("# Demo [Depth Anything V2](https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf)")
+    gr.Markdown("# Demo [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth) with depth map"
+                "estimated by [Depth Anything V2](https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf).")
     with gr.Row():
         input_image = gr.Image(label="Input Image", type='numpy', elem_id='img-display-input')
         depth_image_slider = ImageSlider(label="Depth Map with Slider View", elem_id='img-display-output', position=0.5)

@@ -43,20 +43,15 @@ def predict_depth(image):
         mode="bicubic",
         align_corners=False,
     )
-    # prediction = prediction
     prediction = (prediction - prediction.min()) / (prediction.max() - prediction.min()) * 255.0
-    prediction = prediction.numpy()[0][0].astype(np.uint8)
-    return Image.fromarray(prediction)
+    return prediction.numpy()[0][0]
 
 
 def on_submit(image):
     tmp_gray_depth_path = tempfile.NamedTemporaryFile(suffix='.png', delete=False).name
     depth = predict_depth(image)
-    depth = np.array(depth)
-    depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
-    depth = depth.astype(np.uint8)
-    Image.fromarray(depth).save(tmp_gray_depth_path)
-    colored_depth = (cmap(depth)[:, :, :3] * 255).astype(np.uint8)
+    Image.fromarray(depth.astype(np.uint8)).save(tmp_gray_depth_path)
+    colored_depth = (cmap(depth.astype(np.uint8))[:, :, :3] * 255).astype(np.uint8)
     return [(image, colored_depth), tmp_gray_depth_path]
 
 
