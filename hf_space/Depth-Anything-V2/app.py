@@ -78,7 +78,7 @@ with gr.Blocks(css=css) as demo:
         depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
         depth = depth.astype(np.uint8)
         Image.fromarray(depth).save(tmp_gray_depth_path)
-        colored_depth = cmap(depth[:, :, :3] * 255).astype(np.uint8)
+        colored_depth = (cmap(depth)[:, :, :3] * 255).astype(np.uint8)
         return [(image, colored_depth), tmp_gray_depth_path]
 
     submit.click(on_submit, inputs=[input_image], outputs=[depth_image_slider, gray_depth_file])
