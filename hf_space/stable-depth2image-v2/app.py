@@ -38,9 +38,7 @@ def infer(
     if randomize_seed:
         seed = random.randint(0, max_seed)
     init_image = Image.fromarray(np.uint8(init_image))
-    # generate depth
     predicted_depth = pipe_depth(init_image)["predicted_depth"]
-    # generate image
     image = pipe_depth2image(
         prompt=prompt,
         image=init_image,
@@ -56,18 +54,19 @@ def infer(
 
 
 with gr.Blocks() as demo:
-    gr.Markdown("# Demo [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth) with depth map estimated by [Depth Anything V2](https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf).")
-    prompt = gr.Text(
-        label="Prompt",
-        show_label=False,
-        max_lines=1,
-        placeholder="Enter your prompt",
-        container=False,
-    )
+    gr.Markdown("# Demo [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth) with depth map estimated by [Depth Anything V2](https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf)")
+    with gr.Row():
+        prompt = gr.Text(
+                label="Prompt",
+                show_label=True,
+                max_lines=1,
+                placeholder="Enter your prompt",
+                container=False,
+            )
+        run_button = gr.Button("Run", scale=0)
     with gr.Row():
         init_image = gr.Image(label="Input Image", type='numpy')
-        result = gr.Image(label="Result", show_label=False)
-    run_button = gr.Button("Run", scale=0)
+        result = gr.Image(label="Result")
     with gr.Accordion("Advanced Settings", open=False):
         negative_prompt = gr.Text(
             label="Negative Prompt",
@@ -110,7 +109,7 @@ with gr.Blocks() as demo:
                 minimum=1,
                 maximum=50,
                 step=1,
-                value=5,
+                value=50,
             )
     gr.on(
         triggers=[run_button.click, prompt.submit, negative_prompt.submit],
@@ -119,7 +118,7 @@ with gr.Blocks() as demo:
         outputs=[result, seed]
     )
     examples = gr.Examples(
-        examples=example_files, inputs=[init_image], outputs=[depth_image_slider, gray_depth_file], fn=on_submit
+        examples=example_files, inputs=[init_image], outputs=[result, seed]
     )
 
 
