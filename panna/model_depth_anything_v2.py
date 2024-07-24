@@ -1,7 +1,7 @@
 """Model class for stable DepthAnythingV2."""
 import gc
 import logging
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Union
 
 import torch
 import numpy as np
@@ -60,11 +60,13 @@ class DepthAnythingV2:
 
     def image2depth(self,
                     images: List[Image],
-                    batch_size: Optional[int] = None) -> List[Image]:
+                    batch_size: Optional[int] = None,
+                    return_tensor: bool = False) -> List[Union[Image, torch.Tensor]]:
         """ Generate depth map from images.
 
         :param images:
         :param batch_size:
+        :param return_tensor:
         :return: List of images. (batch, width, height)
         """
         if batch_size is None:
@@ -72,6 +74,8 @@ class DepthAnythingV2:
         depth = self.pipe(images, batch_size=batch_size)
         gc.collect()
         torch.cuda.empty_cache()
+        if return_tensor:
+            return [d["predicted_depth"] for d in depth]
         return [tensor_to_image(d["predicted_depth"], i) for d, i in zip(depth, images)]
 
 

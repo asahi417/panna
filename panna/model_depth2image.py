@@ -49,6 +49,7 @@ class Depth2Image:
     def text2image(self,
                    init_images: List[Image],
                    prompt: List[str],
+                   depth_maps: Optional[List[torch.Tensor]] = None,
                    batch_size: Optional[int] = None,
                    negative_prompt: Optional[List[str]] = None,
                    guidance_scale: float = 7.5,
@@ -59,6 +60,8 @@ class Depth2Image:
 
         :param init_images:
         :param prompt:
+        :param depth_maps: Depth prediction to be used as additional conditioning for the image generation process. If
+            not defined, it automatically predicts the depth with self.depth_estimator.
         :param batch_size:
         :param negative_prompt: eg. "bad, deformed, ugly, bad anatomy"
         :param guidance_scale:
@@ -70,6 +73,8 @@ class Depth2Image:
         assert len(init_images) == len(prompt), f"{len(init_images)} != {len(prompt)}"
         if negative_prompt is not None:
             assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
+        if depth_maps is not None:
+            assert len(depth_maps) == len(prompt), f"{len(depth_maps)} != {len(prompt)}"
         if batch_size is None:
             batch_size = len(prompt)
         idx = 0
@@ -81,8 +86,8 @@ class Depth2Image:
             output_list += self.base_model(
                 prompt=prompt[start:end],
                 image=init_images[start:end],
-                # depth_map=
-                negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
+                depth_map=None if depth_maps is None else depth_maps[start:end],
+                negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
                 guidance_scale=guidance_scale,
                 num_inference_steps=num_inference_steps,
                 height=height,
