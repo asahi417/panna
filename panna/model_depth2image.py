@@ -86,7 +86,7 @@ class Depth2Image:
             output_list += self.base_model(
                 prompt=prompt[start:end],
                 image=init_images[start:end],
-                depth_map=None if depth_maps is None else depth_maps[start:end],
+                depth_map=None if depth_maps is None else torch.concat(depth_maps[start:end]),
                 negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
                 guidance_scale=guidance_scale,
                 num_inference_steps=num_inference_steps,
