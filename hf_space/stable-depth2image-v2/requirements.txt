@@ -2,7 +2,5 @@ git+https://github.com/huggingface/diffusers.git
 transformers
 accelerate
 sentencepiece
-gradio_imageslider
 gradio==4.36.0
 torch
-matplotlib

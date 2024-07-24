@@ -3,9 +3,11 @@ https://stability.ai/news/stable-diffusion-3-research-paper
 """
 import gc
 import logging
+import random
 from typing import Optional, Dict, List, Any
 
 import torch
+import numpy as np
 from diffusers import StableDiffusion3Pipeline
 from PIL.Image import Image
 
@@ -16,6 +18,7 @@ logging.basicConfig(
     datefmt="%m/%d/%Y %H:%M:%S",
     level=logging.INFO,
 )
+max_seed = np.iinfo(np.int32).max
 
 
 class Diffuser3:
@@ -56,7 +59,8 @@ class Diffuser3:
                    guidance_scale: float = 7.0,
                    num_inference_steps: int = 28,
                    height: Optional[int] = None,
-                   width: Optional[int] = None) -> List[Image]:
+                   width: Optional[int] = None,
+                   seed: Optional[int] = None) -> List[Image]:
         """ Generate image from text.
 
         :param prompt:
@@ -66,6 +70,7 @@ class Diffuser3:
         :param num_inference_steps: Define how many steps and what % of steps to be run on each expert (80/20) here.
         :param height:
         :param width:
+        :param seed:
         :return: List of images.
         """
         if negative_prompt is not None:
@@ -74,6 +79,8 @@ class Diffuser3:
             batch_size = len(prompt)
         idx = 0
         output_list = []
+        seed = seed if seed else random.randint(0, max_seed)
+        assert seed <= max_seed, f"{seed} > {max_seed}"
         while idx * batch_size < len(prompt):
             logger.info(f"[batch: {idx + 1}] generating...")
             start = idx * batch_size
@@ -85,6 +92,7 @@ class Diffuser3:
                 num_inference_steps=num_inference_steps,
                 height=height,
                 width=width,
+                generator=torch.Generator().manual_seed(seed)
             ).images
             idx += 1
             gc.collect()

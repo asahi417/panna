@@ -1,12 +1,10 @@
 import gradio as gr
-import matplotlib
 import numpy as np
 import random
 import os
 from PIL import Image
 import spaces
 import torch
-from gradio_imageslider import ImageSlider
 from transformers import pipeline
 from diffusers import StableDiffusionDepth2ImgPipeline
 
@@ -24,22 +22,10 @@ else:
 max_seed = np.iinfo(np.int32).max
 max_image_size = 1344
 example_files = [os.path.join('assets/examples', filename) for filename in sorted(os.listdir('assets/examples'))]
-cmap = matplotlib.colormaps.get_cmap('Spectral_r')
-css = """
-#img-display-container {
-    max-height: 100vh;
-}
-#img-display-input {
-    max-height: 80vh;
-}
-#img-display-output {
-    max-height: 80vh;
-}
-"""
 
 
 @spaces.GPU
-def predict_depth(
+def infer(
         init_image,
         prompt,
         negative_prompt,
@@ -69,19 +55,72 @@ def predict_depth(
     return image, seed
 
 
-with gr.Blocks(css=css) as demo:
-    gr.Markdown("# Demo [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth) with depth map"
-                "estimated by [Depth Anything V2](https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf).")
+with gr.Blocks() as demo:
+    gr.Markdown("# Demo [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth) with depth map estimated by [Depth Anything V2](https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf).")
+    prompt = gr.Text(
+        label="Prompt",
+        show_label=False,
+        max_lines=1,
+        placeholder="Enter your prompt",
+        container=False,
+    )
     with gr.Row():
-        input_image = gr.Image(label="Input Image", type='numpy', elem_id='img-display-input')
-        depth_image_slider = ImageSlider(label="Depth Map with Slider View", elem_id='img-display-output', position=0.5)
-    submit = gr.Button(value="Compute Depth")
-    gray_depth_file = gr.File(label="Grayscale depth map", elem_id="download",)
-    submit.click(on_submit, inputs=[input_image], outputs=[depth_image_slider, gray_depth_file])
+        init_image = gr.Image(label="Input Image", type='numpy')
+        result = gr.Image(label="Result", show_label=False)
+    run_button = gr.Button("Run", scale=0)
+    with gr.Accordion("Advanced Settings", open=False):
+        negative_prompt = gr.Text(
+            label="Negative Prompt",
+            max_lines=1,
+            placeholder="Enter a negative prompt",
+        )
+        seed = gr.Slider(
+            label="Seed",
+            minimum=0,
+            maximum=max_seed,
+            step=1,
+            value=0,
+        )
+        randomize_seed = gr.Checkbox(label="Randomize seed", value=True)
+        with gr.Row():
+            width = gr.Slider(
+                label="Width",
+                minimum=256,
+                maximum=max_image_size,
+                step=64,
+                value=1024,
+            )
+            height = gr.Slider(
+                label="Height",
+                minimum=256,
+                maximum=max_image_size,
+                step=64,
+                value=1024,
+            )
+        with gr.Row():
+            guidance_scale = gr.Slider(
+                label="Guidance scale",
+                minimum=0.0,
+                maximum=10.0,
+                step=0.1,
+                value=7.5,
+            )
+            num_inference_steps = gr.Slider(
+                label="Number of inference steps",
+                minimum=1,
+                maximum=50,
+                step=1,
+                value=5,
+            )
+    gr.on(
+        triggers=[run_button.click, prompt.submit, negative_prompt.submit],
+        fn=infer,
+        inputs=[init_image, prompt, negative_prompt, seed, randomize_seed, width, height, guidance_scale, num_inference_steps],
+        outputs=[result, seed]
+    )
     examples = gr.Examples(
-        examples=example_files, inputs=[input_image], outputs=[depth_image_slider, gray_depth_file], fn=on_submit
+        examples=example_files, inputs=[init_image], outputs=[depth_image_slider, gray_depth_file], fn=on_submit
     )
 
 
-if __name__ == '__main__':
-    demo.queue().launch(share=True)
+demo.queue().launch()

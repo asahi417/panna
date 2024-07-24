@@ -1,6 +1,6 @@
 ---
 title: Stable Depth2Image V2
-emoji: 🌖
+emoji: 🦷
 colorFrom: green
 colorTo: indigo
 sdk: gradio

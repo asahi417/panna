@@ -17,14 +17,14 @@ model = Diffuser3()
 if __name__ == '__main__':
     for i, (p, p_n) in enumerate(zip(prompts, prompts_neg)):
         start = time()
-        output = model.text2image([p], batch_size=1)
+        output = model.text2image([p], batch_size=1, seed=42)
         elapsed = time() - start
         print(f"{elapsed} sec")
-        save_images(output, "./test/test_images", file_prefix=f"diffuser3.{i}")
+        save_images(output, "./test/test_images", file_prefix=f"test_diffuser3.{i}")
 
         start = time()
-        output = model.text2image([p], negative_prompt=[p_n], batch_size=1)
+        output = model.text2image([p], negative_prompt=[p_n], batch_size=1, seed=42)
         elapsed = time() - start
         print(f"{elapsed} sec")
-        save_images(output, "./test/test_images", file_prefix=f"diffuser3.negative_prompt.{i}")
+        save_images(output, "./test/test_images", file_prefix=f"test_diffuser3.negative_prompt.{i}")
 

@@ -32,6 +32,10 @@ def tensor_to_image(predicted_depth: torch.Tensor, image: Image) -> Image:
     return fromarray(prediction)
 
 
+def reverse_value(predicted_depth: torch.Tensor) -> torch.Tensor:
+    return (predicted_depth - predicted_depth.max()) * -1
+
+
 class DepthAnythingV2:
 
     config: Dict[str, Any]
@@ -61,12 +65,14 @@ class DepthAnythingV2:
     def image2depth(self,
                     images: List[Image],
                     batch_size: Optional[int] = None,
-                    return_tensor: bool = False) -> List[Union[Image, torch.Tensor]]:
+                    return_tensor: bool = False,
+                    reverse_depth: bool = False) -> List[Union[Image, torch.Tensor]]:
         """ Generate depth map from images.
 
         :param images:
         :param batch_size:
         :param return_tensor:
+        :param reverse_depth:
         :return: List of images. (batch, width, height)
         """
         if batch_size is None:
@@ -74,8 +80,13 @@ class DepthAnythingV2:
         depth = self.pipe(images, batch_size=batch_size)
         gc.collect()
         torch.cuda.empty_cache()
+        if reverse_depth:
+            depth = [reverse_value(d["predicted_depth"]) for d in depth]
+        else:
+            depth = [d["predicted_depth"] for d in depth]
         if return_tensor:
-            return [d["predicted_depth"] for d in depth]
-        return [tensor_to_image(d["predicted_depth"], i) for d, i in zip(depth, images)]
+            return depth
+        return [tensor_to_image(d, i) for d, i in zip(depth, images)]
+
 
 

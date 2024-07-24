@@ -1,9 +1,11 @@
 """Model class for stable depth2image."""
 import gc
 import logging
+import random
 from typing import Optional, Dict, List, Any
 
 import torch
+import numpy as np
 from diffusers import StableDiffusionDepth2ImgPipeline
 from PIL.Image import Image
 
@@ -14,6 +16,7 @@ logging.basicConfig(
     datefmt="%m/%d/%Y %H:%M:%S",
     level=logging.INFO,
 )
+max_seed = np.iinfo(np.int32).max
 
 
 class Depth2Image:
@@ -45,6 +48,7 @@ class Depth2Image:
             self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
         logger.info(f"pipeline config: {self.config}")
         self.base_model = StableDiffusionDepth2ImgPipeline.from_pretrained(self.base_model_id, **self.config)
+        self.seed = seed
 
     def text2image(self,
                    init_images: List[Image],
@@ -55,7 +59,8 @@ class Depth2Image:
                    guidance_scale: float = 7.5,
                    num_inference_steps: int = 50,
                    height: Optional[int] = None,
-                   width: Optional[int] = None) -> List[Image]:
+                   width: Optional[int] = None,
+                   seed: Optional[int] = None) -> List[Image]:
         """ Generate image from text.
 
         :param init_images:
@@ -68,6 +73,7 @@ class Depth2Image:
         :param num_inference_steps: Define how many steps and what % of steps to be run on each expert (80/20) here.
         :param height:
         :param width:
+        :param seed:
         :return: List of images.
         """
         assert len(init_images) == len(prompt), f"{len(init_images)} != {len(prompt)}"
@@ -79,6 +85,8 @@ class Depth2Image:
             batch_size = len(prompt)
         idx = 0
         output_list = []
+        seed = seed if seed else random.randint(0, max_seed)
+        assert seed <= max_seed, f"{seed} > {max_seed}"
         while idx * batch_size < len(prompt):
             logger.info(f"[batch: {idx + 1}] generating...")
             start = idx * batch_size
@@ -92,6 +100,7 @@ class Depth2Image:
                 num_inference_steps=num_inference_steps,
                 height=height,
                 width=width,
+                generator=torch.Generator().manual_seed(seed)
             ).images
             idx += 1
             gc.collect()

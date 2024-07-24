@@ -5,4 +5,7 @@ model = DepthAnythingV2()
 img = Image.open("test/test_images/sample.png")
 
 output = model.image2depth([img], batch_size=1)
-save_image(output[0], "./test/test_images/sample.depth.png")
+save_image(output[0], "./test/test_images/test_depth_anything.png")
+
+output = model.image2depth([img], batch_size=1, reverse_depth=True)
+save_image(output[0], "./test/test_images/test_depth_anything.reverse.png")

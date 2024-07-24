@@ -1,9 +1,11 @@
 """Model class for stable diffusion2."""
 import gc
 import logging
-from typing import Optional, Dict, List, Any, Union
+import random
+from typing import Optional, Dict, List, Any
 
 import torch
+import numpy as np
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
 from PIL.Image import Image
 
@@ -14,6 +16,7 @@ logging.basicConfig(
     datefmt="%m/%d/%Y %H:%M:%S",
     level=logging.INFO,
 )
+max_seed = np.iinfo(np.int32).max
 
 
 class Diffuser2:
@@ -32,8 +35,7 @@ class Diffuser2:
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
-        """
-         Diffuser main class.
+        """ Diffuser main class.
 
         :param use_refiner: Use refiner or not.
         :param base_model_id: HF model ID for the base text-to-image model.
@@ -42,6 +44,7 @@ class Diffuser2:
         :param torch_dtype:
         :param device_map:
         :param low_cpu_mem_usage:
+        :param seed:
         """
         self.config = {"use_safetensors": True}
         self.base_model_id = base_model_id
@@ -70,7 +73,8 @@ class Diffuser2:
                    num_inference_steps: int = 40,
                    high_noise_frac: float = 0.8,
                    height: Optional[int] = None,
-                   width: Optional[int] = None) -> List[Image]:
+                   width: Optional[int] = None,
+                   seed: Optional[int] = None) -> List[Image]:
         """ Generate image from text.
 
         :param prompt:
@@ -81,6 +85,7 @@ class Diffuser2:
         :param high_noise_frac: Define how many steps and what % of steps to be run on refiner.
         :param height:
         :param width:
+        :param seed:
         :return: List of images.
         """
         if negative_prompt is not None:
@@ -102,6 +107,7 @@ class Diffuser2:
                     high_noise_frac=high_noise_frac,
                     height=height,
                     width=width,
+                    seed=seed
                 )
             else:
                 output_list += self._text2image(
@@ -111,6 +117,7 @@ class Diffuser2:
                     num_inference_steps=num_inference_steps,
                     height=height,
                     width=width,
+                    seed=seed
                 )
             idx += 1
             gc.collect()
@@ -124,8 +131,11 @@ class Diffuser2:
                             num_inference_steps: int,
                             high_noise_frac: float,
                             height: Optional[int],
-                            width: Optional[int]) -> List[Image]:
+                            width: Optional[int],
+                            seed: Optional[int] = None) -> List[Image]:
         assert self.refiner_model
+        seed = seed if seed else random.randint(0, max_seed)
+        assert seed <= max_seed, f"{seed} > {max_seed}"
         image = self.base_model(
             prompt=prompt,
             negative_prompt=negative_prompt,
@@ -135,6 +145,7 @@ class Diffuser2:
             denoising_end=high_noise_frac,
             height=height,
             width=width,
+            generator=torch.Generator().manual_seed(seed)
         ).images
         return self.refiner_model(
             image=image,
@@ -144,6 +155,7 @@ class Diffuser2:
             denoising_start=high_noise_frac,
             height=height,
             width=width,
+            generator=torch.Generator().manual_seed(seed)
         ).images
 
     def _text2image(self,
@@ -152,7 +164,10 @@ class Diffuser2:
                     guidance_scale: float,
                     num_inference_steps: int,
                     height: Optional[int],
-                    width: Optional[int]) -> List[Image]:
+                    width: Optional[int],
+                    seed: Optional[int] = None) -> List[Image]:
+        seed = seed if seed else random.randint(0, max_seed)
+        assert seed <= max_seed, f"{seed} > {max_seed}"
         return self.base_model(
             prompt=prompt,
             negative_prompt=negative_prompt,
@@ -160,4 +175,5 @@ class Diffuser2:
             num_inference_steps=num_inference_steps,
             height=height,
             width=width,
+            generator=torch.Generator().manual_seed(seed)
         ).images
