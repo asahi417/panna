@@ -47,7 +47,7 @@ def infer(
 
 
 with gr.Blocks() as demo:
-    gr.Markdown("# Demo [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth).")
+    gr.Markdown("# Demo [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth)")
     with gr.Row():
         prompt = gr.Text(
                 label="Prompt",
