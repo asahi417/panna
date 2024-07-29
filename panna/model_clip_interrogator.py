@@ -1,11 +1,11 @@
-import os
-import subprocess
 from typing import List
 from tqdm import tqdm
-
 import torch
 from clip_interrogator import Config, Interrogator
 from PIL.Image import Image
+from .util import clear_cache, get_logger
+
+logger = get_logger(__name__)
 
 
 class CLIPInterrogator:
@@ -24,5 +24,5 @@ class CLIPInterrogator:
         for image in tqdm(images):
             image = image.convert('RGB')
             captions.append(self.ci.interrogate(image, max_flavors=best_max_flavors))
+            clear_cache()
         return captions
-
