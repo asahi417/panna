@@ -36,6 +36,8 @@ setup(
         "safetensors",
         "sentencepiece",
         "protobuf",
+        "clip-interrogator",
+        "accelerate"
     ],
     python_requires='>=3.8',
     entry_points={
