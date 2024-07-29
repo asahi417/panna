@@ -1,11 +1,9 @@
+import os
 from PIL import Image
-from panna import DepthAnythingV2, save_image
+from panna import DepthAnythingV2
 
 model = DepthAnythingV2()
-img = Image.open("./test/test_images/sample_image.png")
-
+os.makedirs("./test/test_image", exist_ok=True)
+img = Image.open("./test/sample_image.png")
 output = model.image2depth([img], batch_size=1)
-save_image(output[0], "./test/test_images/test_depth_anything.png")
-
-output = model.image2depth([img], batch_size=1, reverse_depth=True)
-save_image(output[0], "./test/test_images/test_depth_anything.reverse.png")
+model.export(output[0], "./test/test_image/test_depth_anything.png")

@@ -1,22 +1,13 @@
 """Model class for stable DepthAnythingV2."""
-import gc
-import logging
 from typing import Optional, Dict, List, Any, Union
-
 import torch
 import numpy as np
 from diffusers import StableDiffusion3Pipeline
-
 from transformers import pipeline
 from PIL.Image import Image, fromarray
+from .util import clear_cache, get_logger
 
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-    datefmt="%m/%d/%Y %H:%M:%S",
-    level=logging.INFO,
-)
+logger = get_logger(__name__)
 
 
 def tensor_to_image(predicted_depth: torch.Tensor, image: Image) -> Image:
@@ -40,18 +31,11 @@ class DepthAnythingV2:
 
     config: Dict[str, Any]
     base_model_id: str
-    device: str
     base_model: StableDiffusion3Pipeline
 
     def __init__(self,
                  base_model_id: str = "depth-anything/Depth-Anything-V2-Large-hf",
                  torch_dtype: torch.dtype = torch.float16):
-        """ Diffuser main class.
-
-        :param base_model_id: HF model ID for the base text-to-image model.
-        :param torch_dtype:
-        """
-
         if torch.cuda.is_available():
             self.pipe = pipeline(
                 task="depth-estimation",
@@ -78,8 +62,7 @@ class DepthAnythingV2:
         if batch_size is None:
             batch_size = len(images)
         depth = self.pipe(images, batch_size=batch_size)
-        gc.collect()
-        torch.cuda.empty_cache()
+        clear_cache()
         if reverse_depth:
             depth = [reverse_value(d["predicted_depth"]) for d in depth]
         else:
@@ -88,5 +71,6 @@ class DepthAnythingV2:
             return depth
         return [tensor_to_image(d, i) for d, i in zip(depth, images)]
 
-
-
+    @staticmethod
+    def export(data: Image, output_path: str, file_format: str = "png") -> None:
+        data.save(output_path, file_format)

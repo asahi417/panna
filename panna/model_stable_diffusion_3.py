@@ -40,7 +40,7 @@ class SD3:
                    height: Optional[int] = None,
                    width: Optional[int] = None,
                    seed: Optional[int] = None) -> List[Image]:
-        """ Generate image from text.
+        """Generate image from text.
 
         :param prompt:
         :param batch_size:
