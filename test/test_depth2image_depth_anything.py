@@ -1,15 +1,14 @@
-from time import time
-from panna import Depth2Image, DepthAnythingV2, save_image
+import os
 from PIL import Image
+from panna import Depth2Image, DepthAnythingV2
 
 
 model = Depth2Image()
 model_depth = DepthAnythingV2()
-img = Image.open("./test/test_images/sample_image.png")
+os.makedirs("./test/test_image", exist_ok=True)
+img = Image.open("./test/sample_image.png")
 
-# generate depth map
 depth = model_depth.image2depth([img], return_tensor=True)
-start = time()
 output = model.text2image(
     [img],
     depth_maps=depth,
@@ -17,20 +16,4 @@ output = model.text2image(
     negative_prompt=["bad, deformed, ugly, bad anatomy"],
     seed=42
 )
-elapsed = time() - start
-print(f"{elapsed} sec")
-save_image(output[0], "./test/test_images/test_depth2image_depth_anything.png")
-
-# reverse depth
-depth = model_depth.image2depth([img], return_tensor=True, reverse_depth=True)
-start = time()
-output = model.text2image(
-    [img],
-    depth_maps=depth,
-    prompt=["space stars, intergalactic universe, SF, high quality"],
-    seed=42
-)
-elapsed = time() - start
-print(f"{elapsed} sec")
-save_image(output[0], "./test/test_images/test_depth2image_depth_anything.reverse.png")
-
+model.export(output[0], "./test/test_image/test_depth2image.depth_anything.png")
