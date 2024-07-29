@@ -32,10 +32,9 @@ def infer(
         num_inference_steps):
     if randomize_seed:
         seed = random.randint(0, max_seed)
-    init_image = Image.fromarray(np.uint8(init_image))
     image = pipe_depth2image(
         prompt=prompt,
-        image=init_image,
+        image=Image.fromarray(np.uint8(init_image)),
         negative_prompt=negative_prompt,
         guidance_scale=guidance_scale,
         num_inference_steps=num_inference_steps,
@@ -50,12 +49,12 @@ with gr.Blocks() as demo:
     gr.Markdown("# Demo [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth)")
     with gr.Row():
         prompt = gr.Text(
-                label="Prompt",
-                show_label=True,
-                max_lines=1,
-                placeholder="Enter your prompt",
-                container=False,
-            )
+            label="Prompt",
+            show_label=True,
+            max_lines=1,
+            placeholder="Enter your prompt",
+            container=False,
+        )
         run_button = gr.Button("Run", scale=0)
     with gr.Row():
         init_image = gr.Image(label="Input Image", type='numpy')
@@ -107,12 +106,20 @@ with gr.Blocks() as demo:
     gr.on(
         triggers=[run_button.click, prompt.submit, negative_prompt.submit],
         fn=infer,
-        inputs=[init_image, prompt, negative_prompt, seed, randomize_seed, width, height, guidance_scale, num_inference_steps],
+        inputs=[
+            init_image,
+            prompt,
+            negative_prompt,
+            seed,
+            randomize_seed,
+            width,
+            height,
+            guidance_scale,
+            num_inference_steps
+        ],
         outputs=[result, seed]
     )
     examples = gr.Examples(
         examples=example_files, inputs=[init_image], outputs=[result, seed]
     )
-
-
 demo.queue().launch()

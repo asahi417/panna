@@ -57,12 +57,12 @@ with gr.Blocks() as demo:
     gr.Markdown("# Demo [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth) with depth map estimated by [Depth Anything V2](https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf)")
     with gr.Row():
         prompt = gr.Text(
-                label="Prompt",
-                show_label=True,
-                max_lines=1,
-                placeholder="Enter your prompt",
-                container=False,
-            )
+            label="Prompt",
+            show_label=True,
+            max_lines=1,
+            placeholder="Enter your prompt",
+            container=False,
+        )
         run_button = gr.Button("Run", scale=0)
     with gr.Row():
         init_image = gr.Image(label="Input Image", type='numpy')
@@ -120,6 +120,4 @@ with gr.Blocks() as demo:
     examples = gr.Examples(
         examples=example_files, inputs=[init_image], outputs=[result, seed]
     )
-
-
 demo.queue().launch()

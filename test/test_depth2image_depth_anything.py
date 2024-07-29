@@ -5,7 +5,7 @@ from PIL import Image
 
 model = Depth2Image()
 model_depth = DepthAnythingV2()
-img = Image.open("./test/test_images/test_diffuser3_simple.png")
+img = Image.open("./test/test_images/sample_image.png")
 
 # generate depth map
 depth = model_depth.image2depth([img], return_tensor=True)

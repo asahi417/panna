@@ -3,7 +3,7 @@ from panna import Depth2Image, save_image
 from PIL import Image
 
 model = Depth2Image()
-img = Image.open("./test/test_images/test_diffuser3_simple.png")
+img = Image.open("./test/test_images/sample_image.png")
 
 start = time()
 output = model.text2image(

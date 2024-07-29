@@ -66,7 +66,4 @@ with gr.Blocks(css=css) as demo:
     examples = gr.Examples(
         examples=example_files, inputs=[input_image], outputs=[depth_image_slider, gray_depth_file], fn=on_submit
     )
-
-
-if __name__ == '__main__':
-    demo.queue().launch(share=True)
+demo.queue().launch(share=True)

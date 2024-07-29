@@ -9,6 +9,8 @@ import numpy as np
 from diffusers import StableDiffusionDepth2ImgPipeline
 from PIL.Image import Image
 
+from .util import get_generator
+
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
