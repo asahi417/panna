@@ -14,7 +14,6 @@ class SVD:
 
     config: Dict[str, Any]
     base_model_id: str
-    device: str
     base_model: StableVideoDiffusionPipeline
     height: int = 576
     width: int = 1024
@@ -80,5 +79,5 @@ class SVD:
         return output_list
 
     @staticmethod
-    def export(data: List[Image], output_path: str, fps: int = 7):
+    def export(data: List[Image], output_path: str, fps: int = 7) -> None:
         export_to_video(data, output_path, fps=fps)
