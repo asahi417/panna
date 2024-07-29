@@ -43,7 +43,8 @@ class SVD:
                     noise_aug_strength: float = 0.02,
                     height: Optional[int] = None,
                     width: Optional[int] = None,
-                    seed: Optional[int] = None) -> List[List[Image]]:
+                    seed: Optional[int] = None,
+                    skip_reshape: bool = False) -> List[List[Image]]:
         """Generate video from image.
 
         :param images:
@@ -58,12 +59,17 @@ class SVD:
         :param height:
         :param width:
         :param seed:
+        :param skip_reshape:
         :return:
         """
-        height = self.height if height is None else height
-        width = self.width if width is None else width
+
         output_list = []
         for image in tqdm(images):
+            if skip_reshape:
+                height, width = image.height, image.width
+            else:
+                height = self.height if height is None else height
+                width = self.width if width is None else width
             output_list.append(self.base_model(
                 load_image(image).resize((width, height)),
                 decode_chunk_size=decode_chunk_size,

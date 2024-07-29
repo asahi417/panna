@@ -14,3 +14,6 @@ model.export(data[0], "./test/test_video/test_svd.motion_bucket_id=180.noise_aug
 
 data = model.image2video([img], seed=42, motion_bucket_id=180, noise_aug_strength=0.1)
 model.export(data[0], "./test/test_video/test_svd.motion_bucket_id=180.noise_aug_strength=0.1.mp4")
+
+data = model.image2video([img], seed=42, motion_bucket_id=180, noise_aug_strength=0.1, skip_reshape=True)
+model.export(data[0], "./test/test_video/test_svd.motion_bucket_id=180.noise_aug_strength=0.1.skip_reshape.mp4")
