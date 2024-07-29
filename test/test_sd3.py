@@ -2,7 +2,7 @@ import os
 from panna import SD3
 
 model = SD3()
-os.makedirs("./test/test_image", exist_ok=True)
+os.makedirs("./test/test_images", exist_ok=True)
 prompts = [
     "A majestic lion jumping from a big stone at night",
     "Study for a portrait of lady reading newspaper by Francis Bacon, the British painter"
