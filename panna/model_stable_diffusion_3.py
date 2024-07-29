@@ -1,15 +1,9 @@
-"""Model class for stable diffusion3.
-https://stability.ai/news/stable-diffusion-3-research-paper
-"""
-import gc
-import logging
-import random
+"""Model class for stable diffusion3."""
 from typing import Optional, Dict, List, Any
 import torch
-import numpy as np
 from diffusers import StableDiffusion3Pipeline
 from PIL.Image import Image
-from .util import get_generator, clear_cache, get_logger, save_image
+from .util import get_generator, clear_cache, get_logger
 
 logger = get_logger(__name__)
 

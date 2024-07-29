@@ -1,7 +1,7 @@
 import os
-from panna import SD3
+from panna import SD2
 
-model = SD3()
+model = SD2()
 os.makedirs("./test/test_video", exist_ok=True)
 prompts = [
     "A majestic lion jumping from a big stone at night",
@@ -14,7 +14,7 @@ prompts_neg = [
 
 for i, (p, p_n) in enumerate(zip(prompts, prompts_neg)):
     output = model.text2image([p], batch_size=1, seed=42)
-    model.export(output[0], f"./test/test_images/test_sd3.{i}.png")
+    model.export(output[0], f"./test/test_images/test_sd2.{i}.png")
     output = model.text2image([p], negative_prompt=[p_n], batch_size=1, seed=42)
-    model.export(output[0], f"./test/test_images/test_sd3.{i}.negative.png")
+    model.export(output[0], f"./test/test_images/test_sd2.{i}.negative.png")
 
