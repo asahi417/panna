@@ -1,8 +1,8 @@
 ---
 title: Stable Depth2Image V1
-emoji: 🦴
-colorFrom: blue
-colorTo: indigo
+emoji: 🦷
+colorFrom: purple
+colorTo: green
 sdk: gradio
 sdk_version: 4.36.0
 app_file: app.py
