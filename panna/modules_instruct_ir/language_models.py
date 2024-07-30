@@ -28,15 +28,9 @@ class LanguageModel(nn.Module):
     def forward(self, text_batch):
         inputs = self.tokenizer(text_batch, padding=True, truncation=True, return_tensors="pt")
         with torch.no_grad():
-            if "clip" in self.model_name:
-                sentence_embedding = self.model.get_text_features(**inputs)
-                return sentence_embedding
-            outputs = self.model(**inputs)
-        if any(model in self.model_name for model in POOL_MODELS):
-            sentence_embeddings = mean_pooling(outputs, inputs['attention_mask'])
-            sentence_embedding = normalize(sentence_embeddings, p=2, dim=1)
-        else:
-            sentence_embedding = outputs.last_hidden_state[:, 0, :]
+            outputs = self.model(**{k: v.to(self.model.device) for k, v in inputs.items()})
+        sentence_embeddings = mean_pooling(outputs, inputs['attention_mask'])
+        sentence_embedding = normalize(sentence_embeddings, p=2, dim=1)
         return sentence_embedding
     
 
