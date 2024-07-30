@@ -1,6 +1,6 @@
 # PANNA
+PANNA is a collection of image/video models with a unified interface.
 
-## TODO
-- generated image quality is a bit worse than [the official demo](https://huggingface.co/spaces/stabilityai/stable-diffusion-3-medium)
-- 
-
+```shell
+pip install panna
+```

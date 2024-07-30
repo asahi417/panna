@@ -5,7 +5,7 @@ import torch
 from diffusers import StableVideoDiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 from PIL.Image import Image
-from .util import get_generator, clear_cache, get_logger
+from .util import get_generator, clear_cache, get_logger, resize_image
 
 logger = get_logger(__name__)
 
@@ -60,13 +60,12 @@ class SVD:
         :param seed:
         :return:
         """
-
         output_list = []
+        height = self.height if height is None else height
+        width = self.width if width is None else width
         for image in tqdm(images):
-            height = self.height if height is None else height
-            width = self.width if width is None else width
             output_list.append(self.base_model(
-                load_image(image).resize((width, height)),
+                resize_image(load_image(image), width=width, height=height),
                 decode_chunk_size=decode_chunk_size,
                 num_frames=num_frames,
                 motion_bucket_id=motion_bucket_id,
