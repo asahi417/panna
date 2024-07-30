@@ -1,7 +1,7 @@
 from typing import Optional
 from tqdm import tqdm
 from PIL.Image import Image
-from panna import SVD, SDUpScaler
+from panna import SVD, SDUpScaler, InstructIR
 from panna.util import get_logger
 
 logger = get_logger(__name__)
@@ -9,9 +9,14 @@ logger = get_logger(__name__)
 
 class PipelineSVDUpscale:
 
-    def __init__(self):
+    def __init__(self, upscaler: str = "diffusion"):
         self.svd = SVD()
-        self.upscaler = SDUpScaler()
+        if upscaler == "diffusion":
+            self.upscaler = SDUpScaler()
+        elif upscaler == "instruct_ir":
+            self.upscaler = InstructIR()
+        else:
+            raise ValueError(f"Unknown upscaler: {upscaler}")
 
     def __call__(self,
                  image: Image,
@@ -38,8 +43,7 @@ class PipelineSVDUpscale:
         for frame in tqdm(frames):
             frame = self.upscaler.image2image(
                 [frame],
-                prompt=[prompt],
-                reshape_method="downscale"
+                prompt=[prompt]
             )[0]
             new_frames.append(frame)
         self.svd.export(new_frames, output_path, fps)

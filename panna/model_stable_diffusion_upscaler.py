@@ -35,7 +35,7 @@ class SDUpScaler:
     def image2image(self,
                     image: List[Image],
                     prompt: Optional[List[str]] = None,
-                    reshape_method: Optional[str] = None,
+                    reshape_method: Optional[str] = "downscale",
                     upscale_factor: int = 4,
                     batch_size: Optional[int] = None) -> List[Image]:
         """Generate high resolution image from low resolution image.
