@@ -19,7 +19,7 @@ class SVD:
     width: int = 1024
 
     def __init__(self,
-                 base_model_id: str = "stabilityai/stable-video-diffusion-img2vid-xt",
+                 base_model_id: str = "stabilityai/stable-video-diffusion-img2vid-xt-1-1",
                  variant: str = "fp16",
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
@@ -36,7 +36,7 @@ class SVD:
 
     def image2video(self,
                     image: List[Image],
-                    decode_chunk_size: int = 2,
+                    decode_chunk_size: Optional[int] = None,
                     num_frames: int = 25,
                     motion_bucket_id: int = 127,
                     fps: int = 7,

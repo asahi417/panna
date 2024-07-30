@@ -17,10 +17,10 @@ class PipelineSVDUpscale:
                  image: Image,
                  output_path: str,
                  prompt: Optional[str] = None,
-                 decode_chunk_size: int = 4,
-                 num_frames: int = 40,
-                 motion_bucket_id: int = 120,
-                 fps: int = 10,
+                 decode_chunk_size: Optional[int] = None,
+                 num_frames: int = 25,
+                 motion_bucket_id: int = 127,
+                 fps: int = 7,
                  noise_aug_strength: float = 0.02,
                  seed: Optional[int] = None):
         logger.info("run image2video")
