@@ -1,4 +1,4 @@
-"""Model class for InstructIR."""
+"""Model class for InstructIR. https://huggingface.co/spaces/marcosv/InstructIR"""
 from typing import List, Optional
 import torch
 import numpy as np
@@ -26,7 +26,7 @@ class InstructIR:
         self.language_model = LanguageModel()
         self.language_model.model = self.language_model.model.to(self.device)
 
-    def preprocess(self, image: Image.Image):
+    def preprocess(self, image: Image.Image) -> torch.Tensor:
         image = np.array(image)
         image = image / 255.
         image = image.astype(np.float32)
@@ -50,7 +50,7 @@ class InstructIR:
                 lm_embd = self.language_model(prompt).to(self.device)
                 text_embd, deg_pred = self.lm_head(lm_embd)
                 x_hat = self.model(y, text_embd)
-                restored_img = x_hat.squeeze().permute(1,2,0).clamp_(0, 1).cpu().detach().numpy()
+                restored_img = x_hat.squeeze().permute(1, 2, 0).clamp_(0, 1).cpu().detach().numpy()
                 restored_img = np.clip(restored_img, 0. , 1.)
                 restored_img = (restored_img * 255.0).round().astype(np.uint8)
             output_list.append(Image.fromarray(restored_img))
