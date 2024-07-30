@@ -13,8 +13,8 @@ class SDUpScaler:
     config: Dict[str, Any]
     base_model_id: str
     base_model: StableDiffusionUpscalePipeline
-    height: int = 576
-    width: int = 1024
+    height: int = 128
+    width: int = 128
 
     def __init__(self,
                  base_model_id: str = "stabilityai/stable-diffusion-x4-upscaler",

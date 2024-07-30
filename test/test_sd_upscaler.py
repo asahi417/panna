@@ -10,7 +10,7 @@ os.makedirs("./test/test_image", exist_ok=True)
 output = model.image2image([sample_image])
 model.export(output[0], "./test/test_image/test_sd_upscaler.png")
 
-output = model.image2image([sample_image], prompt=["a lady blinking"],)
+output = model.image2image([sample_image], prompt=["a lady blinking"])
 model.export(output[0], "./test/test_image/test_sd_upscaler.prompt.png")
 
 output = model.image2image([sample_image], prompt=["a lady blinking"], reshape_method="best")
