@@ -1,10 +1,13 @@
 import gradio as gr
 import spaces
-from panna import SD3
+from panna import SD2
 
 
-model = SD3("stabilityai/stable-diffusion-3-medium-diffusers")
-title = ("# [Stable Diffusion 3 Medium](https://huggingface.co/stabilityai/stable-diffusion-3-medium)\n"
+model = SD2(
+    base_model_id="stabilityai/stable-diffusion-xl-base-1.0",
+    refiner_model_id="stabilityai/stable-diffusion-xl-refiner-1.0"
+)
+title = ("# Stable Diffusion 2 XL ([base model](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0), [refiner model](https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0))\n"
          "The demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
 examples = [
     "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k",
@@ -46,7 +49,7 @@ with gr.Blocks(css=css) as demo:
                 height = gr.Slider(label="Height", minimum=256, maximum=1344, step=64, value=1024)
             with gr.Row():
                 guidance_scale = gr.Slider(label="Guidance scale", minimum=0.0, maximum=10.0, step=0.1, value=7.5)
-                num_inference_steps = gr.Slider(label="Inference steps", minimum=1, maximum=50, step=1, value=50)
+                num_inference_steps = gr.Slider(label="Inference steps", minimum=1, maximum=50, step=1, value=40)
         gr.Examples(examples=examples, inputs=[prompt])
     gr.on(
         triggers=[run_button.click, prompt.submit, negative_prompt.submit],

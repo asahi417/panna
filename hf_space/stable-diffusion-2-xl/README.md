@@ -1,8 +1,8 @@
 ---
-title: Stable Diffusion 3 Medium
+title: Stable Diffusion 2 XL
 emoji: 🎨
-colorFrom: purple
-colorTo: yellow
+colorFrom: yellow
+colorTo: purple
 sdk: gradio
 sdk_version: 4.36.1
 app_file: app.py
