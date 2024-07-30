@@ -1,9 +1,9 @@
 import os
-from panna import SDUpScaler
+from panna import InstructIR
 from diffusers.utils import load_image
 
 
-model = SDUpScaler()
+model = InstructIR()
 sample_image = load_image("https://huggingface.co/spaces/multimodalart/stable-video-diffusion/resolve/main/images/wink_meme.png")
 os.makedirs("./test/test_image", exist_ok=True)
 

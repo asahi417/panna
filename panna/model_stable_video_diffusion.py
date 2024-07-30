@@ -35,7 +35,7 @@ class SVD:
         self.base_model = StableVideoDiffusionPipeline.from_pretrained(self.base_model_id, **self.config)
 
     def image2video(self,
-                    images: List[Image],
+                    image: List[Image],
                     decode_chunk_size: int = 2,
                     num_frames: int = 25,
                     motion_bucket_id: int = 127,
@@ -46,7 +46,7 @@ class SVD:
                     seed: Optional[int] = None) -> List[List[Image]]:
         """Generate video from image.
 
-        :param images:
+        :param image:
         :param decode_chunk_size:
         :param num_frames:
         :param motion_bucket_id: The motion bucket id to use for the generated video. This can be used to control the
@@ -63,9 +63,9 @@ class SVD:
         output_list = []
         height = self.height if height is None else height
         width = self.width if width is None else width
-        for image in tqdm(images):
+        for i in tqdm(image):
             output_list.append(self.base_model(
-                resize_image(load_image(image), width=width, height=height),
+                resize_image(load_image(i), width=width, height=height),
                 decode_chunk_size=decode_chunk_size,
                 num_frames=num_frames,
                 motion_bucket_id=motion_bucket_id,

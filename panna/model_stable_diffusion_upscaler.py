@@ -33,14 +33,14 @@ class SDUpScaler:
         self.base_model = StableDiffusionUpscalePipeline.from_pretrained(self.base_model_id, **self.config)
 
     def image2image(self,
-                    images: List[Image],
+                    image: List[Image],
                     prompt: Optional[List[str]] = None,
                     reshape_method: Optional[str] = None,
                     upscale_factor: int = 4,
                     batch_size: Optional[int] = None) -> List[Image]:
-        """Generate high resolution images from low resolution images.
+        """Generate high resolution image from low resolution image.
 
-        :param images:
+        :param image:
         :param prompt:
         :param reshape_method:
         :param upscale_factor:
@@ -51,8 +51,8 @@ class SDUpScaler:
         def downscale_image(image: Image) -> Image:
             return resize_image(image, width=int(image.width / upscale_factor), height=int(image.height / upscale_factor))
 
-        prompt = [""] * len(images) if prompt is None else prompt
-        assert len(prompt) == len(images), f"{len(prompt)} != {len(images)}"
+        prompt = [""] * len(image) if prompt is None else prompt
+        assert len(prompt) == len(image), f"{len(prompt)} != {len(image)}"
         batch_size = len(prompt) if batch_size is None else batch_size
         idx = 0
         output_list = []
@@ -60,11 +60,11 @@ class SDUpScaler:
             logger.info(f"[batch: {idx + 1}] generating...")
             start = idx * batch_size
             end = min((idx + 1) * batch_size, len(prompt))
-            batch = images[start:end]
+            batch = image[start:end]
             if reshape_method == "best":
-                batch = [resize_image(i, width=self.width, height=self.height) for i in images]
+                batch = [resize_image(i, width=self.width, height=self.height) for i in image]
             elif reshape_method == "downscale":
-                batch = [downscale_image(i) for i in images]
+                batch = [downscale_image(i) for i in image]
             elif reshape_method is not None:
                 raise ValueError(f"unknown reshape method: {reshape_method}")
             output_list += self.base_model(image=batch, prompt=prompt[start:end]).images

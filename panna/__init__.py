@@ -5,3 +5,4 @@ from .model_stable_diffusion_upscaler import SDUpScaler
 from .model_depth_anything_v2 import DepthAnythingV2
 from .model_depth2image import Depth2Image
 from .model_clip_interrogator import CLIPInterrogator
+from .model_instruct_ir import InstructIR

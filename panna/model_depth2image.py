@@ -31,7 +31,7 @@ class Depth2Image:
         self.base_model = StableDiffusionDepth2ImgPipeline.from_pretrained(self.base_model_id, **self.config)
 
     def text2image(self,
-                   init_images: List[Image],
+                   image: List[Image],
                    prompt: List[str],
                    depth_maps: Optional[List[torch.Tensor]] = None,
                    batch_size: Optional[int] = None,
@@ -44,7 +44,7 @@ class Depth2Image:
                    seed: Optional[int] = None) -> List[Image]:
         """Generate image from text.
 
-        :param init_images:
+        :param image:
         :param prompt:
         :param depth_maps: Depth prediction to be used as additional conditioning for the image generation process. If
             not defined, it automatically predicts the depth with self.depth_estimator.
@@ -58,7 +58,7 @@ class Depth2Image:
         :param seed:
         :return:
         """
-        assert len(init_images) == len(prompt), f"{len(init_images)} != {len(prompt)}"
+        assert len(image) == len(prompt), f"{len(image)} != {len(prompt)}"
         if negative_prompt is not None:
             assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
         if depth_maps is not None:
@@ -72,7 +72,7 @@ class Depth2Image:
             end = min((idx + 1) * batch_size, len(prompt))
             output_list += self.base_model(
                 prompt=prompt[start:end],
-                image=init_images[start:end],
+                image=image[start:end],
                 depth_map=None if depth_maps is None else torch.concat(depth_maps[start:end]),
                 negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
                 guidance_scale=guidance_scale,

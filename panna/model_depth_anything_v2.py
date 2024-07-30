@@ -47,21 +47,21 @@ class DepthAnythingV2:
             self.pipe = pipeline(task="depth-estimation", model=base_model_id)
 
     def image2depth(self,
-                    images: List[Image],
+                    image: List[Image],
                     batch_size: Optional[int] = None,
                     return_tensor: bool = False,
                     reverse_depth: bool = False) -> List[Union[Image, torch.Tensor]]:
-        """ Generate depth map from images.
+        """ Generate depth map from image.
 
-        :param images:
+        :param image:
         :param batch_size:
         :param return_tensor:
         :param reverse_depth:
-        :return: List of images. (batch, width, height)
+        :return: List of image. (batch, width, height)
         """
         if batch_size is None:
-            batch_size = len(images)
-        depth = self.pipe(images, batch_size=batch_size)
+            batch_size = len(image)
+        depth = self.pipe(image, batch_size=batch_size)
         clear_cache()
         if reverse_depth:
             depth = [reverse_value(d["predicted_depth"]) for d in depth]
@@ -69,7 +69,7 @@ class DepthAnythingV2:
             depth = [d["predicted_depth"] for d in depth]
         if return_tensor:
             return depth
-        return [tensor_to_image(d, i) for d, i in zip(depth, images)]
+        return [tensor_to_image(d, i) for d, i in zip(depth, image)]
 
     @staticmethod
     def export(data: Image, output_path: str, file_format: str = "png") -> None:
