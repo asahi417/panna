@@ -27,8 +27,9 @@ class LanguageModel(nn.Module):
 
     def forward(self, text_batch):
         inputs = self.tokenizer(text_batch, padding=True, truncation=True, return_tensors="pt")
+        inputs = {k: v.to(self.model.device) for k, v in inputs.items()}
         with torch.no_grad():
-            outputs = self.model(**{k: v.to(self.model.device) for k, v in inputs.items()})
+            outputs = self.model(**inputs)
         sentence_embeddings = mean_pooling(outputs, inputs['attention_mask'])
         sentence_embedding = normalize(sentence_embeddings, p=2, dim=1)
         return sentence_embedding
