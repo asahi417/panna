@@ -1,5 +1,4 @@
 import os
-from PIL import Image
 from panna.pipeline import PipelineSVDUpscale
 from diffusers.utils import load_image
 
