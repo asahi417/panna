@@ -37,9 +37,7 @@ class PipelineLEditsPP:
     refiner_model: Optional[DiffusionPipeline] = None
 
     def __init__(self,
-                 use_refiner: bool = False,
                  base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
-                 refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
                  variant: Optional[str] = "fp16",
                  torch_dtype: Optional[torch.dtype] = torch.float16,
                  device_map: str = "balanced",
@@ -55,13 +53,6 @@ class PipelineLEditsPP:
             self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
         logger.info(f"pipeline config: {self.config}")
         self.base_model = LEditsPPPipelineStableDiffusionXL.from_pretrained(self.base_model_id, **self.config)
-        if use_refiner:
-            self.refiner_model = DiffusionPipeline.from_pretrained(
-                refiner_model_id,
-                text_encoder_2=self.base_model.text_encoder_2,
-                vae=self.base_model.vae,
-                **self.config
-            )
 
     def __call__(self,
                  image: Image,
@@ -74,7 +65,6 @@ class PipelineLEditsPP:
                  edit_style: Optional[List[str]] = None,
                  refiner_prompt: str = "",
                  num_inversion_steps: int = 50,
-                 high_noise_frac: float = 0.8,
                  skip: float = 0.2,
                  seed: Optional[int] = None) -> None:
         edit_style = ["default"] * len(edit_prompt) if edit_style is None else edit_style
@@ -88,34 +78,14 @@ class PipelineLEditsPP:
         logger.info("image inversion")
         self.base_model.invert(image=image, num_inversion_steps=num_inversion_steps, skip=skip)
         logger.info("semantic guidance")
-        if self.refiner_model:
-            latents = self.base_model(
-                image=image,
-                editing_prompt=edit_prompt,
-                reverse_editing_direction=reverse_editing_direction,
-                edit_guidance_scale=edit_guidance_scale,
-                edit_threshold=edit_threshold,
-                edit_warmup_steps=edit_warmup_steps,
-                generator=get_generator(seed),
-                output_type="latent",
-                denoising_end=high_noise_frac
-            ).images
-            logger.info("refiner")
-            image = self.refiner_model(
-                image=latents,
-                prompt=refiner_prompt,
-                generator=get_generator(seed),
-                denoising_start=high_noise_frac
-            ).images[0]
-        else:
-            image = self.base_model(
-                image=image,
-                editing_prompt=edit_prompt,
-                reverse_editing_direction=reverse_editing_direction,
-                edit_guidance_scale=edit_guidance_scale,
-                edit_threshold=edit_threshold,
-                edit_warmup_steps=edit_warmup_steps,
-                generator=get_generator(seed)
-            ).images[0]
-        clear_cache()
+        image = self.base_model(
+            image=image,
+            editing_prompt=edit_prompt,
+            reverse_editing_direction=reverse_editing_direction,
+            edit_guidance_scale=edit_guidance_scale,
+            edit_threshold=edit_threshold,
+            edit_warmup_steps=edit_warmup_steps,
+            generator=get_generator(seed)
+        ).images[0]
         image.save(output_path)
+        clear_cache()
