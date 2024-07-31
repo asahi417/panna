@@ -74,6 +74,7 @@ class PipelineLEditsPP:
                  edit_style: Optional[List[str]] = None,
                  refiner_prompt: str = "",
                  num_inversion_steps: int = 50,
+                 high_noise_frac: float = 0.8,
                  skip: float = 0.2,
                  seed: Optional[int] = None) -> None:
         edit_style = ["default"] * len(edit_prompt) if edit_style is None else edit_style
@@ -96,9 +97,16 @@ class PipelineLEditsPP:
                 edit_threshold=edit_threshold,
                 edit_warmup_steps=edit_warmup_steps,
                 generator=get_generator(seed),
-                output_type="latent"
+                output_type="latent",
+                denoising_end=high_noise_frac
             ).images
-            image = self.refiner_model(latents, prompt=refiner_prompt).images[0]
+            logger.info("refiner")
+            image = self.refiner_model(
+                image=latents,
+                prompt=refiner_prompt,
+                generator=get_generator(seed),
+                denoising_start=high_noise_frac
+            ).images[0]
         else:
             image = self.base_model(
                 image=image,
@@ -111,20 +119,3 @@ class PipelineLEditsPP:
             ).images[0]
         clear_cache()
         image.save(output_path)
-
-    def latent_to_image(self, latents: torch.Tensor) -> Image:
-        # make sure the VAE is in float32 mode, as it overflows in float16
-        needs_upcasting = self.base_model.vae.dtype == torch.float16 and self.base_model.vae.config.force_upcast
-        if needs_upcasting:
-            self.base_model.upcast_vae()
-            latents = latents.to(next(iter(self.base_model.vae.post_quant_conv.parameters())).dtype)
-        image = self.base_model.vae.decode(latents / self.base_model.vae.config.scaling_factor, return_dict=False)[0]
-        # cast back to fp16 if needed
-        if needs_upcasting:
-            self.base_model.vae.to(dtype=torch.float16)
-        else:
-            image = latents
-        # apply watermark if available
-        if self.base_model.watermark is not None:
-            image = self.base_model.watermark.apply_watermark(image)
-        return self.base_model.image_processor.postprocess(image, output_type="pil")
