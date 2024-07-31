@@ -36,7 +36,6 @@ class PipelineLEditsPP:
     config: Dict[str, Any]
     base_model_id: str
     base_model: LEditsPPPipelineStableDiffusionXL
-    refiner_model: Optional[StableDiffusionXLPipeline]
     refiner_model: Optional[DiffusionPipeline] = None
     clip_interrogator: Optional[CLIPInterrogator] = None
 
@@ -80,13 +79,13 @@ class PipelineLEditsPP:
                  refiner_prompt: Optional[str] = None,
                  num_inversion_steps: int = 50,
                  skip: float = 0.2,
-                 seed: Optional[int] = None) -> Image:
+                 seed: Optional[int] = None) -> None:
         edit_style = ["default"] * len(edit_prompt) if edit_style is None else edit_style
-        if edit_guidance_scale is not None:
+        if edit_guidance_scale is None:
             edit_guidance_scale = [preset_parameter[i]["guidance_scale"] for i in edit_style]
-        if edit_threshold is not None:
+        if edit_threshold is None:
             edit_threshold = [preset_parameter[i]["threshold"] for i in edit_style]
-        if edit_warmup_steps is not None:
+        if edit_warmup_steps is None:
             edit_warmup_steps = [preset_parameter[i]["warmup_step"] for i in edit_style]
 
         logger.info("image inversion")
