@@ -40,8 +40,8 @@ class PipelineLEditsPP:
                  use_refiner: bool = False,
                  base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
                  refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
-                 variant: Optional[str] = None,  # "fp16",
-                 torch_dtype: Optional[torch.dtype] = None,  # torch.float16,
+                 variant: Optional[str] = "fp16",
+                 torch_dtype: Optional[torch.dtype] = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
         self.config = {"use_safetensors": True}
