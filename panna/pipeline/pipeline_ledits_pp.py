@@ -3,7 +3,6 @@ import torch
 from PIL.Image import Image
 from diffusers import LEditsPPPipelineStableDiffusionXL, DiffusionPipeline
 from panna.util import get_generator, clear_cache, get_logger
-from panna import CLIPInterrogator
 
 logger = get_logger(__name__)
 preset_parameter = {
@@ -36,22 +35,16 @@ class PipelineLEditsPP:
     base_model_id: str
     base_model: LEditsPPPipelineStableDiffusionXL
     refiner_model: Optional[DiffusionPipeline] = None
-    clip_interrogator: Optional[CLIPInterrogator] = None
 
     def __init__(self,
                  use_refiner: bool = False,
                  base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
                  refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
-                 # variant: str = "fp16",
-                 # torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
-                 clip_interrogator: bool = True,
                  low_cpu_mem_usage: bool = True):
         self.config = {"use_safetensors": True}
         self.base_model_id = base_model_id
         if torch.cuda.is_available():
-            # self.config["variant"] = variant
-            # self.config["torch_dtype"] = torch_dtype
             self.config["device_map"] = device_map
             self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
         logger.info(f"pipeline config: {self.config}")
@@ -63,8 +56,6 @@ class PipelineLEditsPP:
                 vae=self.base_model.vae,
                 **self.config
             )
-            if clip_interrogator:
-                self.clip_interrogator = CLIPInterrogator()
 
     def __call__(self,
                  image: Image,
@@ -75,7 +66,7 @@ class PipelineLEditsPP:
                  edit_threshold: Optional[List[float]] = None,
                  edit_warmup_steps: Optional[List[int]] = None,
                  edit_style: Optional[List[str]] = None,
-                 refiner_prompt: Optional[str] = None,
+                 refiner_prompt: str = "",
                  num_inversion_steps: int = 50,
                  skip: float = 0.2,
                  seed: Optional[int] = None) -> None:
@@ -101,11 +92,6 @@ class PipelineLEditsPP:
                 generator=get_generator(seed),
                 output_type="latent"
             ).images
-            if self.clip_interrogator and refiner_prompt is None:
-                image = self.latent_to_image(latents)
-                refiner_prompt = self.clip_interrogator.image2text([image])[0]
-            elif refiner_prompt is None:
-                refiner_prompt = ""
             image = self.refiner_model(latents, prompt=refiner_prompt).images[0]
         else:
             image = self.base_model(

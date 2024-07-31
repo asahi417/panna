@@ -19,11 +19,13 @@ pipe(img,
 pipe = PipelineLEditsPP(use_refiner=True)
 pipe(img,
      output_path="./test/test_image/test_ledits_pp.refiner.1.png",
+     refiner_prompt="a cat standing on a hil",
      edit_prompt=["lion", "cat"],
      reverse_editing_direction=[True, False],
      seed=42)
 pipe(img,
      output_path="./test/test_image/test_ledits_pp.refiner.2.png",
+     refiner_prompt="a cat standing on a hil",
      edit_prompt=["lion", "cat"],
      edit_style=["object", "object"],
      reverse_editing_direction=[True, False],
