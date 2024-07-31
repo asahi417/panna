@@ -1,10 +1,8 @@
-import os
 from PIL import Image
 from panna import Depth2Image
 
 model = Depth2Image()
 img = Image.open("./test/sample_image.png")
-os.makedirs("./test/test_image", exist_ok=True)
 output = model.text2image(
     [img],
     prompt=["a black cat"],
