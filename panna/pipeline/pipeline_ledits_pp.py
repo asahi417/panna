@@ -40,11 +40,17 @@ class PipelineLEditsPP:
                  use_refiner: bool = False,
                  base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
                  refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
+                 variant: Optional[str] = None,  # "fp16",
+                 torch_dtype: Optional[torch.dtype] = None,  # torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
         self.config = {"use_safetensors": True}
         self.base_model_id = base_model_id
         if torch.cuda.is_available():
+            if variant:
+                self.config["variant"] = variant
+            if torch_dtype:
+                self.config["torch_dtype"] = torch_dtype
             self.config["device_map"] = device_map
             self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
         logger.info(f"pipeline config: {self.config}")
