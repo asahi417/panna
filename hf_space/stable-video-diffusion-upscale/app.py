@@ -14,7 +14,7 @@ for example in examples:
     load_image(f"{root_url}/{example}").save(example)
 tmp_output_dir = "outputs"
 os.makedirs(tmp_output_dir, exist_ok=True)
-title = ("# [Stable Video Diffusion](ttps://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt)\n"
+title = ("# [Stable Video Diffusion](ttps://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt) with [InstructIR as Upscaler](https://huggingface.co/spaces/marcosv/InstructIR)\n"
          "The demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
 
 
@@ -57,4 +57,4 @@ with gr.Blocks() as demo:
         outputs=[video]
     )
     gr.Examples(examples=examples, inputs=image)
-demo.launch()
+demo.launch(share=True)
