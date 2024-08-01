@@ -3,9 +3,9 @@ from diffusers.utils import load_image
 import spaces
 import torch
 from panna import Depth2Image, DepthAnythingV2
+from panna.pipeline import PipelineDepth2ImageV2
 
-model_depth = DepthAnythingV2("depth-anything/Depth-Anything-V2-Large-hf", torch_dtype=torch.float32)
-model_image = Depth2Image("stabilityai/stable-diffusion-2-depth")
+model = PipelineDepth2ImageV2(torch_dtype=None, variant=None)
 title = ("# [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth) with [DepthAnythingV2](https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf)\n"
          "Depth2Image with depth map predicted by DepthAnything V2. The demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
 example_files = []
@@ -16,18 +16,16 @@ for n in range(1, 10):
 
 @spaces.GPU
 def infer(init_image, prompt, negative_prompt, seed, width, height, guidance_scale, num_inference_steps):
-    depth = model_depth.image2depth([init_image], return_tensor=True)
-    return model_image.text2image(
-        [init_image],
-        depth_maps=depth,
-        prompt=[prompt],
-        negative_prompt=[negative_prompt],
+    return model(
+        init_image,
+        prompt=prompt,
+        negative_prompt=negative_prompt,
         guidance_scale=guidance_scale,
         num_inference_steps=num_inference_steps,
         height=height,
         width=width,
         seed=seed
-    )[0]
+    )
 
 
 with gr.Blocks() as demo:

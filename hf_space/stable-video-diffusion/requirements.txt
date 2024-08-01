@@ -5,4 +5,4 @@ accelerate
 safetensors
 opencv-python
 uuid
-panna>=0.0.1
+panna>=0.0.4

@@ -1,3 +1,4 @@
+import torch
 from typing import Optional
 from PIL.Image import Image
 from panna import Depth2Image, DepthAnythingV2
@@ -8,14 +9,18 @@ logger = get_logger(__name__)
 
 class PipelineDepth2ImageV2:
 
-    def __init__(self):
-        self.depth2image = Depth2Image()
-        self.depth_anything = DepthAnythingV2()
+    def __init__(self,
+                 variant: Optional[str] = "fp16",
+                 torch_dtype: Optional[torch.dtype] = torch.float16,
+                 device_map: str = "balanced",
+                 low_cpu_mem_usage: bool = True):
+        self.depth2image = Depth2Image(variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage)
+        self.depth_anything = DepthAnythingV2(torch_dtype=torch_dtype)
 
     def __call__(self,
                  image: Image,
                  prompt: str,
-                 output_path: str,
+                 output_path: Optional[str] = None,
                  negative_prompt: Optional[str] = None,
                  guidance_scale: float = 7.5,
                  num_inference_steps: int = 50,
@@ -36,5 +41,6 @@ class PipelineDepth2ImageV2:
             width=width,
             seed=seed
         )[0]
-        self.depth2image.export(image, output_path)
+        if output_path:
+            self.depth2image.export(image, output_path)
         return image

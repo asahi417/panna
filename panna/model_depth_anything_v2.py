@@ -35,14 +35,12 @@ class DepthAnythingV2:
 
     def __init__(self,
                  base_model_id: str = "depth-anything/Depth-Anything-V2-Large-hf",
-                 torch_dtype: torch.dtype = torch.float16):
+                 torch_dtype: Optional[torch.dtype] = torch.float16):
         if torch.cuda.is_available():
-            self.pipe = pipeline(
-                task="depth-estimation",
-                model=base_model_id,
-                torch_dtype=torch_dtype,
-                device="cuda"
-            )
+            if torch_dtype:
+                self.pipe = pipeline(task="depth-estimation", model=base_model_id, torch_dtype=torch_dtype, device="cuda")
+            else:
+                self.pipe = pipeline(task="depth-estimation", model=base_model_id, device="cuda")
         else:
             self.pipe = pipeline(task="depth-estimation", model=base_model_id)
 

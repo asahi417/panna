@@ -20,7 +20,7 @@ class PipelineSVDUpscale:
 
     def __call__(self,
                  image: Image,
-                 output_path: str,
+                 output_path: Optional[str] = None,
                  prompt: Optional[str] = None,
                  decode_chunk_size: Optional[int] = None,
                  num_frames: int = 25,
@@ -46,5 +46,6 @@ class PipelineSVDUpscale:
                 prompt=[prompt]
             )[0]
             new_frames.append(frame)
-        self.svd.export(new_frames, output_path, fps)
+        if output_path:
+            self.svd.export(new_frames, output_path, fps)
         return new_frames

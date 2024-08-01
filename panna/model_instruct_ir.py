@@ -41,7 +41,7 @@ class InstructIR:
         :param prompt:
         :return:
         """
-        prompt = [""] * len(image) if prompt is None else prompt
+        prompt = ["Correct the motion blur in this image so it is more clear"] * len(image) if prompt is None else prompt
         assert len(prompt) == len(image), f"{len(prompt)} != {len(image)}"
         output_list = []
         for i in image:

@@ -1,5 +1,5 @@
 ---
-title: Stable Diffusion 3 Medium
+title: Stable Diffusion 3
 emoji: 🎨
 colorFrom: purple
 colorTo: yellow

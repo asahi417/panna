@@ -1,4 +1,3 @@
 git+https://github.com/huggingface/diffusers.git
 accelerate
-sentencepiece
 panna>=0.0.4

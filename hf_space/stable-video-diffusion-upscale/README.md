@@ -1,5 +1,5 @@
 ---
-title: Stable Video Diffusion with Upscaler
+title: Stable Video Diffusion Upscale
 emoji: 📺
 colorFrom: gray
 colorTo: green

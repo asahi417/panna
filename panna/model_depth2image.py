@@ -16,15 +16,17 @@ class Depth2Image:
 
     def __init__(self,
                  base_model_id: str = "stabilityai/stable-diffusion-2-depth",
-                 variant: str = "fp16",
-                 torch_dtype: torch.dtype = torch.float16,
+                 variant: Optional[str] = "fp16",
+                 torch_dtype: Optional[torch.dtype] = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
         self.config = {"use_safetensors": True}
         self.base_model_id = base_model_id
         if torch.cuda.is_available():
-            self.config["variant"] = variant
-            self.config["torch_dtype"] = torch_dtype
+            if variant:
+                self.config["variant"] = variant
+            if torch_dtype:
+                self.config["torch_dtype"] = torch_dtype
             self.config["device_map"] = device_map
             self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
         logger.info(f"pipeline config: {self.config}")

@@ -1,5 +1,5 @@
 ---
-title: Stable Diffusion 2 XL
+title: Stable Diffusion 2
 emoji: 🎨
 colorFrom: yellow
 colorTo: purple

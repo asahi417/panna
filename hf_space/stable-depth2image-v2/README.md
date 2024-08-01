@@ -1,5 +1,5 @@
 ---
-title: Stable Depth2Image V2
+title: Depth2Image V2
 emoji: 🦷
 colorFrom: green
 colorTo: purple
