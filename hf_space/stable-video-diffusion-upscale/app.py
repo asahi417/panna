@@ -44,7 +44,9 @@ with gr.Blocks() as demo:
             run_button = gr.Button("Generate")
         video = gr.Video()
     with gr.Accordion("Advanced options", open=False):
-        upscaler_prompt = gr.Text(label="Prompt for upscaler", show_label=False, max_lines=1, placeholder="Enter your prompt", container=False)
+        upscaler_prompt = gr.Text(
+            label="Prompt for upscaler", show_label=False, max_lines=1, placeholder="Enter your prompt", container=False
+        )
         seed = gr.Slider(label="Seed", minimum=0, maximum=1_000_000, step=1, value=0)
         num_frames = gr.Slider(label="Number of frames", minimum=1, maximum=100, step=1, value=25)
         motion_bucket_id = gr.Slider(label="Motion bucket id", minimum=1, maximum=255, step=1, value=127)
@@ -57,4 +59,4 @@ with gr.Blocks() as demo:
         outputs=[video]
     )
     gr.Examples(examples=examples, inputs=image)
-demo.launch(share=True)
+demo.launch()
