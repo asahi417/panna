@@ -33,6 +33,7 @@ def infer(init_image,
     reverse_editing_direction = [x for x, y in zip(reverse_editing_direction, edit_prompt) if y]
     edit_style = [x for x, y in zip(edit_style, edit_prompt) if y]
     edit_prompt = [x for x in edit_prompt if x]
+    print(edit_prompt)
     return model(
         init_image,
         edit_prompt=edit_prompt,
