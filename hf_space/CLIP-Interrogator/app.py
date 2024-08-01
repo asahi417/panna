@@ -26,4 +26,4 @@ with gr.Blocks(css=css) as demo:
         run_button = gr.Button("Submit")
         output_text = gr.Textbox(label="Description Output")
     run_button.click(fn=infer, inputs=[input_image, flavor_input], outputs=[output_text], concurrency_limit=10)
-demo.launch()
+demo.launch(server_name="0.0.0.0")

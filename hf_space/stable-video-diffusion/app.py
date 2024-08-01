@@ -48,11 +48,11 @@ with gr.Blocks() as demo:
         motion_bucket_id = gr.Slider(label="Motion bucket id", minimum=1, maximum=255, step=1, value=127)
         noise_aug_strength = gr.Slider(label="Noise strength", minimum=0, maximum=1, step=0.01, value=0.02)
         fps = gr.Slider(label="Frames per second", minimum=5, maximum=30, step=1, value=7)
-        decode_chunk_size = gr.Slider(label="Decode chunk size", minimum=1, maximum=10, step=1, value=8)
+        decode_chunk_size = gr.Slider(label="Decode chunk size", minimum=1, maximum=25, step=1, value=7)
     run_button.click(
         fn=infer,
         inputs=[image, num_frames, motion_bucket_id, noise_aug_strength, decode_chunk_size, fps, seed],
         outputs=[video]
     )
     gr.Examples(examples=examples, inputs=image)
-demo.launch()
+demo.launch(server_name="0.0.0.0")

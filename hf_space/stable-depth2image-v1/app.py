@@ -50,4 +50,4 @@ with gr.Blocks() as demo:
         inputs=[init_image, prompt, negative_prompt, seed, width, height, guidance_scale, num_inference_steps],
         outputs=[result]
     )
-demo.launch()
+demo.launch(server_name="0.0.0.0")
