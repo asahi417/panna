@@ -3,7 +3,8 @@ from diffusers.utils import load_image
 import spaces
 from panna.pipeline import PipelineDepth2ImageV2
 
-model = PipelineDepth2ImageV2()
+
+model = PipelineDepth2ImageV2(torch_dtype=None, variant=None)
 title = ("# [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth) with [DepthAnythingV2](https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf)\n"
          "Depth2Image with depth map predicted by DepthAnything V2. The demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
 example_files = []
