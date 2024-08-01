@@ -21,7 +21,7 @@ class PipelineDepth2ImageV2:
                  num_inference_steps: int = 50,
                  height: Optional[int] = None,
                  width: Optional[int] = None,
-                 seed: Optional[int] = None):
+                 seed: Optional[int] = None) -> Image:
         logger.info("run depth anything v2")
         depth = self.depth_anything.image2depth([image], return_tensor=True)
         logger.info("run depth2image")
@@ -37,3 +37,4 @@ class PipelineDepth2ImageV2:
             seed=seed
         )[0]
         self.depth2image.export(image, output_path)
+        return image

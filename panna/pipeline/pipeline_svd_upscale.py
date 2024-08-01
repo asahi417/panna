@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from tqdm import tqdm
 from PIL.Image import Image
 from panna import SVD, SDUpScaler, InstructIR
@@ -27,7 +27,7 @@ class PipelineSVDUpscale:
                  motion_bucket_id: int = 127,
                  fps: int = 7,
                  noise_aug_strength: float = 0.02,
-                 seed: Optional[int] = None):
+                 seed: Optional[int] = None) -> List[Image]:
         logger.info("run image2video")
         frames = self.svd.image2video(
             [image],
@@ -47,3 +47,4 @@ class PipelineSVDUpscale:
             )[0]
             new_frames.append(frame)
         self.svd.export(new_frames, output_path, fps)
+        return new_frames

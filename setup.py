@@ -3,14 +3,14 @@ from setuptools import setup, find_packages
 with open('README.md', 'r', encoding="utf-8") as f:
     readme = f.read()
 
-version = '0.0.1'
+version = '0.0.2'
 setup(
     name='panna',
     packages=find_packages(exclude=["hf_space", "tests"]),
     version=version,
     license='MIT',
     description='PANNA',
-    url='https://github.com/abacws-abacus',
+    url='https://github.com/asahi417',
     keywords=['machine-learning', 'computational-art'],
     long_description=readme,
     long_description_content_type="text/markdown",

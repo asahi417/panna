@@ -66,7 +66,7 @@ class PipelineLEditsPP:
                  refiner_prompt: str = "",
                  num_inversion_steps: int = 50,
                  skip: float = 0.2,
-                 seed: Optional[int] = None) -> None:
+                 seed: Optional[int] = None) -> Image:
         edit_style = ["default"] * len(edit_prompt) if edit_style is None else edit_style
         if edit_guidance_scale is None:
             edit_guidance_scale = [preset_parameter[i]["guidance_scale"] for i in edit_style]
@@ -89,3 +89,4 @@ class PipelineLEditsPP:
         ).images[0]
         image.save(output_path)
         clear_cache()
+        return image
