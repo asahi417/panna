@@ -59,4 +59,4 @@ with gr.Blocks() as demo:
         outputs=[video]
     )
     gr.Examples(examples=examples, inputs=image)
-demo.launch()
+demo.launch(server_name="0.0.0.0")
