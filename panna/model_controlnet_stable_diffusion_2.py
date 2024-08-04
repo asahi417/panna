@@ -41,7 +41,7 @@ class ControlNetSD2:
             self.get_condition = get_canny_edge
         elif condition_type == "depth":
             controlnet = ControlNetModel.from_pretrained(
-                "diffusers/controlnet-zoe-depth-sdxl-1.0", use_safetensors=True, torch_dtype=torch_dtype, variant=variant, low_cpu_mem_usage=low_cpu_mem_usage
+                "diffusers/controlnet-zoe-depth-sdxl-1.0", torch_dtype=torch_dtype, variant=variant, low_cpu_mem_usage=low_cpu_mem_usage
             )
             depth = DepthAnythingV2()
             self.get_condition = lambda x: depth.image2depth([x])[0]
