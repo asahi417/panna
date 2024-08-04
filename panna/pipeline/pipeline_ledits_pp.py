@@ -49,7 +49,7 @@ class PipelineLEditsPP:
                 self.config["variant"] = variant
             if torch_dtype:
                 self.config["torch_dtype"] = torch_dtype
-            # self.config["device_map"] = device_map
+            self.config["device_map"] = device_map
             # self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
         logger.info(f"pipeline config: {self.config}")
         self.base_model = LEditsPPPipelineStableDiffusionXL.from_pretrained(self.base_model_id, **self.config)
