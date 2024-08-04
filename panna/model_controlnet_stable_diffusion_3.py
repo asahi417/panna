@@ -1,5 +1,5 @@
 """Model class for controlnet.
-The best image
+The best image resolution 1024 x 1024.
 """
 from typing import Optional, List
 import torch
@@ -74,7 +74,7 @@ class ControlNetSD3:
             end = min((idx + 1) * batch_size, len(prompt))
             output_list += self.base_model(
                 prompt=prompt[start:end],
-                image=image[start:end],
+                control_image=image[start:end],
                 controlnet_conditioning_scale=controlnet_conditioning_scale,
                 negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
                 guidance_scale=guidance_scale,
