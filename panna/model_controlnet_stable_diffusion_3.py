@@ -21,7 +21,7 @@ class ControlNetSD3:
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
-        config = dict(use_safetensors=True, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage)
+        config = dict(use_safetensors=True, torch_dtype=torch_dtype, low_cpu_mem_usage=low_cpu_mem_usage)
         if condition_type == "canny":
             self.controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Canny", **config)
         elif condition_type == "pose":
@@ -31,7 +31,7 @@ class ControlNetSD3:
         else:
             raise ValueError(f"unknown condition: {condition_type}")
         self.base_model = StableDiffusion3ControlNetPipeline.from_pretrained(
-            base_model_id, controlnet=self.controlnet, variant=variant, **config
+            base_model_id, controlnet=self.controlnet, variant=variant, device_map=device_map, **config
         )
 
     def text2image(self,
