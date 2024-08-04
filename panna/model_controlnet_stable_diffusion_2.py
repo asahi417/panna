@@ -90,6 +90,7 @@ class ControlNetSD2:
         condition = []
         for x in image:
             condition.append(self.get_condition(x))
+        logger.info("generate image")
         while idx * batch_size < len(prompt):
             logger.info(f"[batch: {idx + 1}] generating...")
             start = idx * batch_size

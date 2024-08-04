@@ -38,7 +38,8 @@ setup(
         "protobuf",
         "clip-interrogator",
         "accelerate",
-        "opencv-python"
+        "opencv-python",
+        "controlnet_aux"
     ],
     python_requires='>=3.8',
     entry_points={

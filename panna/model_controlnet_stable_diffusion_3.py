@@ -1,11 +1,14 @@
 """Model class for controlnet.
 The best image resolution 1024 x 1024.
 """
-from typing import Optional, List
+from typing import Optional, List, Callable
 import torch
 from diffusers import StableDiffusion3ControlNetPipeline, SD3ControlNetModel
 from PIL.Image import Image
+from controlnet_aux import OpenposeDetector
 from .util import get_generator, clear_cache, get_logger
+from .model_controlnet_stable_diffusion_2 import get_canny_edge
+
 
 logger = get_logger(__name__)
 
@@ -13,6 +16,7 @@ logger = get_logger(__name__)
 class ControlNetSD3:
 
     base_model: StableDiffusion3ControlNetPipeline
+    get_condition: Callable[[Image], Image]
 
     def __init__(self,
                  base_model_id: str = "stabilityai/stable-diffusion-3-medium-diffusers",
@@ -24,10 +28,13 @@ class ControlNetSD3:
         config = dict(use_safetensors=True, torch_dtype=torch_dtype, low_cpu_mem_usage=low_cpu_mem_usage)
         if condition_type == "canny":
             controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Canny", **config)
+            self.get_condition = get_canny_edge
         elif condition_type == "pose":
             controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Pose", **config)
+            self.get_condition = OpenposeDetector.from_pretrained('lllyasviel/ControlNet')
         elif condition_type == "tile":
             controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Tile", **config)
+            self.get_condition = lambda x: x
         else:
             raise ValueError(f"unknown condition: {condition_type}")
         if torch.cuda.is_available():
@@ -42,8 +49,8 @@ class ControlNetSD3:
                    controlnet_conditioning_scale: float = 0.5,
                    batch_size: Optional[int] = None,
                    negative_prompt: Optional[List[str]] = None,
-                   guidance_scale: float = 7.5,
-                   num_inference_steps: int = 40,
+                   guidance_scale: float = 7,
+                   num_inference_steps: int = 28,
                    num_images_per_prompt: int = 1,
                    height: Optional[int] = None,
                    width: Optional[int] = None,
@@ -70,6 +77,10 @@ class ControlNetSD3:
         idx = 0
         output_list = []
         logger.info("generate condition")
+        condition = []
+        for x in image:
+            condition.append(self.get_condition(x))
+        logger.info("generate image")
         while idx * batch_size < len(prompt):
             logger.info(f"[batch: {idx + 1}] generating...")
             start = idx * batch_size
