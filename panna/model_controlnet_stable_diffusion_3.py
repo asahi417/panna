@@ -23,17 +23,17 @@ class ControlNetSD3:
                  low_cpu_mem_usage: bool = True):
         config = dict(use_safetensors=True, torch_dtype=torch_dtype, low_cpu_mem_usage=low_cpu_mem_usage)
         if condition_type == "canny":
-            self.controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Canny", **config)
+            controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Canny", **config)
         elif condition_type == "pose":
-            self.controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Pose", **config)
+            controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Pose", **config)
         elif condition_type == "tile":
-            self.controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Tile", **config)
+            controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Tile", **config)
         else:
             raise ValueError(f"unknown condition: {condition_type}")
         if torch.cuda.is_available():
-            self.controlnet = self.controlnet.cuda()
+            controlnet = controlnet.cuda()
         self.base_model = StableDiffusion3ControlNetPipeline.from_pretrained(
-            base_model_id, controlnet=self.controlnet, variant=variant, device_map=device_map, **config
+            base_model_id, controlnet=controlnet, variant=variant, device_map=device_map, **config
         )
 
     def text2image(self,
