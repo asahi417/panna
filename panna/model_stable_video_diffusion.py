@@ -1,5 +1,5 @@
 """StableVideoDiffusion https://huggingface.co/docs/diffusers/en/using-diffusers/svd."""
-from typing import Dict, Any, Optional, List
+from typing import Optional, List
 from tqdm import tqdm
 import torch
 from diffusers import StableVideoDiffusionPipeline
@@ -12,8 +12,6 @@ logger = get_logger(__name__)
 
 class SVD:
 
-    config: Dict[str, Any]
-    base_model_id: str
     base_model: StableVideoDiffusionPipeline
     height: int = 576
     width: int = 1024
@@ -24,15 +22,9 @@ class SVD:
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
-        self.config = {"use_safetensors": True}
-        self.base_model_id = base_model_id
-        if torch.cuda.is_available():
-            self.config["variant"] = variant
-            self.config["torch_dtype"] = torch_dtype
-            self.config["device_map"] = device_map
-            self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
-        logger.info(f"pipeline config: {self.config}")
-        self.base_model = StableVideoDiffusionPipeline.from_pretrained(self.base_model_id, **self.config)
+        self.base_model = StableVideoDiffusionPipeline.from_pretrained(
+            base_model_id, use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
+        )
 
     def image2video(self,
                     image: List[Image],

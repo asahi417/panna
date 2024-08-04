@@ -13,6 +13,7 @@ logger = get_logger(__name__)
 
 
 class InstructIR:
+
     def __init__(self):
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         model_path = hf_hub_download(repo_id="marcosv/InstructIR", filename="im_instructir-7d.pt")
@@ -51,7 +52,7 @@ class InstructIR:
                 text_embd, deg_pred = self.lm_head(lm_embd)
                 x_hat = self.model(y, text_embd)
                 restored_img = x_hat.squeeze().permute(1, 2, 0).clamp_(0, 1).cpu().detach().numpy()
-                restored_img = np.clip(restored_img, 0. , 1.)
+                restored_img = np.clip(restored_img, 0.0, 1.)
                 restored_img = (restored_img * 255.0).round().astype(np.uint8)
             output_list.append(Image.fromarray(restored_img))
             clear_cache()

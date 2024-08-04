@@ -23,24 +23,11 @@ class SD2:
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
-        self.config = {"use_safetensors": True}
-        self.base_model_id = base_model_id
-        if torch.cuda.is_available():
-            self.config["variant"] = variant
-            self.config["torch_dtype"] = torch_dtype
-            self.config["device_map"] = device_map
-            self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
-        logger.info(f"pipeline config: {self.config}")
-        self.base_model = StableDiffusionXLPipeline.from_pretrained(self.base_model_id, **self.config)
+        config = dict(use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage)
+        self.base_model = StableDiffusionXLPipeline.from_pretrained(base_model_id, **config)
+        self.refiner_model = None
         if use_refiner:
-            self.refiner_model = DiffusionPipeline.from_pretrained(
-                refiner_model_id,
-                text_encoder_2=self.base_model.text_encoder_2,
-                vae=self.base_model.vae,
-                **self.config
-            )
-        else:
-            self.refiner_model = None
+            self.refiner_model = DiffusionPipeline.from_pretrained(refiner_model_id, text_encoder_2=self.base_model.text_encoder_2, vae=self.base_model.vae, **config)
 
     def text2image(self,
                    prompt: List[str],

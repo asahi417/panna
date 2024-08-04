@@ -1,5 +1,5 @@
 """Model class for stable diffusion upscaler."""
-from typing import Optional, Dict, List, Any
+from typing import Optional, List
 import torch
 from diffusers import StableDiffusionUpscalePipeline
 from PIL.Image import Image
@@ -10,8 +10,6 @@ logger = get_logger(__name__)
 
 class SDUpScaler:
 
-    config: Dict[str, Any]
-    base_model_id: str
     base_model: StableDiffusionUpscalePipeline
     height: int = 128
     width: int = 128
@@ -22,15 +20,9 @@ class SDUpScaler:
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
-        self.config = {"use_safetensors": True}
-        self.base_model_id = base_model_id
-        if torch.cuda.is_available():
-            self.config["variant"] = variant
-            self.config["torch_dtype"] = torch_dtype
-            self.config["device_map"] = device_map
-            self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
-        logger.info(f"pipeline config: {self.config}")
-        self.base_model = StableDiffusionUpscalePipeline.from_pretrained(self.base_model_id, **self.config)
+        self.base_model = StableDiffusionUpscalePipeline.from_pretrained(
+            base_model_id, use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
+        )
 
     def image2image(self,
                     image: List[Image],
@@ -48,8 +40,8 @@ class SDUpScaler:
         :return:
         """
 
-        def downscale_image(image: Image) -> Image:
-            return resize_image(image, width=int(image.width / upscale_factor), height=int(image.height / upscale_factor))
+        def downscale_image(x: Image) -> Image:
+            return resize_image(x, width=int(x.width / upscale_factor), height=int(x.height / upscale_factor))
 
         prompt = [""] * len(image) if prompt is None else prompt
         assert len(prompt) == len(image), f"{len(prompt)} != {len(image)}"

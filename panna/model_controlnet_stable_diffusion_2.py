@@ -5,8 +5,8 @@ import numpy as np
 from cv2 import Canny
 from diffusers import StableDiffusionXLControlNetPipeline, ControlNetModel, AutoencoderKL
 from PIL.Image import Image, fromarray
-from panna.util import get_generator, clear_cache, get_logger
-from panna.model_depth_anything_v2 import DepthAnythingV2
+from .util import get_generator, clear_cache, get_logger
+from .model_depth_anything_v2 import DepthAnythingV2
 
 logger = get_logger(__name__)
 

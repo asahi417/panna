@@ -1,5 +1,5 @@
 """Model class for stable depth2image."""
-from typing import Optional, Dict, List, Any
+from typing import Optional, List
 import torch
 from diffusers import StableDiffusionDepth2ImgPipeline
 from PIL.Image import Image
@@ -10,8 +10,6 @@ logger = get_logger(__name__)
 
 class Depth2Image:
 
-    config: Dict[str, Any]
-    base_model_id: str
     base_model: StableDiffusionDepth2ImgPipeline
 
     def __init__(self,
@@ -20,17 +18,9 @@ class Depth2Image:
                  torch_dtype: Optional[torch.dtype] = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
-        self.config = {"use_safetensors": True}
-        self.base_model_id = base_model_id
-        if torch.cuda.is_available():
-            if variant:
-                self.config["variant"] = variant
-            if torch_dtype:
-                self.config["torch_dtype"] = torch_dtype
-            self.config["device_map"] = device_map
-            self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
-        logger.info(f"pipeline config: {self.config}")
-        self.base_model = StableDiffusionDepth2ImgPipeline.from_pretrained(self.base_model_id, **self.config)
+        self.base_model = StableDiffusionDepth2ImgPipeline.from_pretrained(
+            base_model_id, use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
+        )
 
     def text2image(self,
                    image: List[Image],

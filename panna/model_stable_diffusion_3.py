@@ -1,5 +1,5 @@
 """Model class for stable diffusion3."""
-from typing import Optional, Dict, List, Any
+from typing import Optional, List
 import torch
 from diffusers import StableDiffusion3Pipeline
 from PIL.Image import Image
@@ -10,8 +10,6 @@ logger = get_logger(__name__)
 
 class SD3:
 
-    config: Dict[str, Any]
-    base_model_id: str
     base_model: StableDiffusion3Pipeline
 
     def __init__(self,
@@ -20,15 +18,9 @@ class SD3:
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
-        self.config = {"use_safetensors": True}
-        self.base_model_id = base_model_id
-        if torch.cuda.is_available():
-            self.config["variant"] = variant
-            self.config["torch_dtype"] = torch_dtype
-            self.config["device_map"] = device_map
-            self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
-        logger.info(f"pipeline config: {self.config}")
-        self.base_model = StableDiffusion3Pipeline.from_pretrained(self.base_model_id, **self.config)
+        self.base_model = StableDiffusion3Pipeline.from_pretrained(
+            base_model_id, use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
+        )
 
     def text2image(self,
                    prompt: List[str],

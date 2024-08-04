@@ -1,5 +1,5 @@
 """Model class for stable DepthAnythingV2."""
-from typing import Optional, Dict, List, Any, Union
+from typing import Optional, List, Union
 import torch
 import numpy as np
 from diffusers import StableDiffusion3Pipeline
@@ -17,7 +17,6 @@ def tensor_to_image(predicted_depth: torch.Tensor, image: Image) -> Image:
         mode="bicubic",
         align_corners=False,
     )
-    # prediction = prediction
     prediction = (prediction - prediction.min()) / (prediction.max() - prediction.min()) * 255.0
     prediction = prediction.numpy()[0][0].astype(np.uint8)
     return fromarray(prediction)
@@ -29,8 +28,6 @@ def reverse_value(predicted_depth: torch.Tensor) -> torch.Tensor:
 
 class DepthAnythingV2:
 
-    config: Dict[str, Any]
-    base_model_id: str
     base_model: StableDiffusion3Pipeline
 
     def __init__(self,
