@@ -3,7 +3,7 @@ from diffusers.utils import load_image
 import spaces
 from panna.pipeline import PipelineLEditsPP
 
-model = PipelineLEditsPP()
+model = PipelineLEditsPP(torch_dtype=None, variant=None, device_map="sequential")
 title = ("# [LEdits ++](https://huggingface.co/spaces/editing-images/leditsplusplus) with [Stable Diffusion XL](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0)\n"
          "The demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
 example_files = []
@@ -12,7 +12,7 @@ for n in range(1, 10):
     example_files.append(f"demo{n:0>2}.jpg")
 
 
-@spaces.GPU(duration=240)
+@spaces.GPU(duration=120)
 def infer(init_image,
           add_prompt_1,
           add_prompt_2,
