@@ -67,7 +67,10 @@ class PipelineLEditsPP:
                  num_inversion_steps: int = 50,
                  skip: float = 0.2,
                  seed: Optional[int] = None) -> Image:
-        self.base_model.upcast_vae()
+        # self.base_model.upcast_vae()
+
+        self.base_model.vae.to(dtype=torch.float16)
+
         edit_style = ["default"] * len(edit_prompt) if edit_style is None else edit_style
         if edit_guidance_scale is None:
             edit_guidance_scale = [preset_parameter[i]["guidance_scale"] for i in edit_style]
