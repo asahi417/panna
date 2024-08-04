@@ -50,7 +50,7 @@ class PipelineLEditsPP:
             if torch_dtype:
                 self.config["torch_dtype"] = torch_dtype
             self.config["device_map"] = device_map
-            # self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
+            self.config["low_cpu_mem_usage"] = low_cpu_mem_usage
         logger.info(f"pipeline config: {self.config}")
         self.base_model = LEditsPPPipelineStableDiffusionXL.from_pretrained(self.base_model_id, **self.config)
 
@@ -67,6 +67,7 @@ class PipelineLEditsPP:
                  num_inversion_steps: int = 50,
                  skip: float = 0.2,
                  seed: Optional[int] = None) -> Image:
+        self.base_model.upcast_vae()
         edit_style = ["default"] * len(edit_prompt) if edit_style is None else edit_style
         if edit_guidance_scale is None:
             edit_guidance_scale = [preset_parameter[i]["guidance_scale"] for i in edit_style]
