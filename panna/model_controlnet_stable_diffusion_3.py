@@ -30,6 +30,8 @@ class ControlNetSD3:
             self.controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Tile", **config)
         else:
             raise ValueError(f"unknown condition: {condition_type}")
+        if torch.cuda.is_available():
+            self.controlnet = self.controlnet.cuda()
         self.base_model = StableDiffusion3ControlNetPipeline.from_pretrained(
             base_model_id, controlnet=self.controlnet, variant=variant, device_map=device_map, **config
         )
