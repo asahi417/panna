@@ -77,6 +77,8 @@ class PipelineLEditsPP:
 
         logger.info("image inversion")
         self.base_model.invert(image=image, num_inversion_steps=num_inversion_steps, skip=skip)
+        clear_cache()
+
         logger.info("semantic guidance")
         image = self.base_model(
             image=image,

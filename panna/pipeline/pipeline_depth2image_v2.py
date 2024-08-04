@@ -14,8 +14,10 @@ class PipelineDepth2ImageV2:
                  torch_dtype: Optional[torch.dtype] = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
-        self.depth2image = Depth2Image(variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage)
-        self.depth_anything = DepthAnythingV2(torch_dtype=torch_dtype)
+        self.depth2image = Depth2Image(
+            variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
+        )
+        self.depth_anything = DepthAnythingV2()
 
     def __call__(self,
                  image: Image,
