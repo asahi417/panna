@@ -13,7 +13,7 @@ for n in range(1, 10):
     example_files.append(f"demo{n:0>2}.jpg")
 
 
-@spaces.GPU(duration=120)
+@spaces.GPU
 def infer(init_image,
           add_prompt_1,
           add_prompt_2,
