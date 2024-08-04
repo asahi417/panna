@@ -37,7 +37,8 @@ setup(
         "sentencepiece",
         "protobuf",
         "clip-interrogator",
-        "accelerate"
+        "accelerate",
+        "opencv-python"
     ],
     python_requires='>=3.8',
     entry_points={

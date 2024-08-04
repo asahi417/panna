@@ -46,7 +46,7 @@ class SD3:
         :param batch_size:
         :param negative_prompt:
         :param guidance_scale:
-        :param num_inference_steps: Define how many steps and what % of steps to be run on each expert (80/20) here.
+        :param num_inference_steps:
         :param num_images_per_prompt:
         :param height:
         :param width:
