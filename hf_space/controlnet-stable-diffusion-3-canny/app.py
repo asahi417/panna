@@ -1,4 +1,5 @@
 import gradio as gr
+import torch
 from diffusers.utils import load_image
 import spaces
 from panna import ControlNetSD3

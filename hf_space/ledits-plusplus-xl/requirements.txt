@@ -1,3 +1,4 @@
+git+https://github.com/rwightman/pytorch-image-models.git
 git+https://github.com/huggingface/diffusers.git
 accelerate
 panna>=0.0.8
