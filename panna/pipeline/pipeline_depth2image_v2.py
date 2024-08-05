@@ -26,8 +26,6 @@ class PipelineDepth2ImageV2:
                  negative_prompt: Optional[str] = None,
                  guidance_scale: float = 7.5,
                  num_inference_steps: int = 50,
-                 height: Optional[int] = None,
-                 width: Optional[int] = None,
                  seed: Optional[int] = None) -> Image:
         logger.info("run depth anything v2")
         depth = self.depth_anything.image2depth([image], return_tensor=True)
@@ -39,8 +37,6 @@ class PipelineDepth2ImageV2:
             negative_prompt=[negative_prompt],
             guidance_scale=guidance_scale,
             num_inference_steps=num_inference_steps,
-            height=height,
-            width=width,
             seed=seed
         )[0]
         if output_path:

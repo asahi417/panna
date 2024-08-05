@@ -31,8 +31,6 @@ class Depth2Image:
                    guidance_scale: float = 7.5,
                    num_inference_steps: int = 50,
                    num_images_per_prompt: int = 1,
-                   height: Optional[int] = None,
-                   width: Optional[int] = None,
                    seed: Optional[int] = None) -> List[Image]:
         """Generate image from text.
 
@@ -45,8 +43,6 @@ class Depth2Image:
         :param guidance_scale:
         :param num_inference_steps: Define how many steps and what % of steps to be run on each expert (80/20) here.
         :param num_images_per_prompt:
-        :param height:
-        :param width:
         :param seed:
         :return:
         """
@@ -70,8 +66,6 @@ class Depth2Image:
                 guidance_scale=guidance_scale,
                 num_inference_steps=num_inference_steps,
                 num_images_per_prompt=num_images_per_prompt,
-                height=height,
-                width=width,
                 generator=get_generator(seed)
             ).images
             idx += 1

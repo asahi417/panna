@@ -13,15 +13,13 @@ for n in range(1, 10):
 
 
 @spaces.GPU
-def infer(init_image, prompt, negative_prompt, seed, width, height, guidance_scale, num_inference_steps):
+def infer(init_image, prompt, negative_prompt, seed, guidance_scale, num_inference_steps):
     return model_image.text2image(
         [init_image],
         prompt=[prompt],
         negative_prompt=[negative_prompt],
         guidance_scale=guidance_scale,
         num_inference_steps=num_inference_steps,
-        height=height,
-        width=width,
         seed=seed
     )[0]
 
@@ -38,16 +36,13 @@ with gr.Blocks() as demo:
         negative_prompt = gr.Text(label="Negative Prompt", max_lines=1, placeholder="Enter a negative prompt")
         seed = gr.Slider(label="Seed", minimum=0, maximum=1_000_000, step=1, value=0)
         with gr.Row():
-            width = gr.Slider(label="Width", minimum=256, maximum=1344, step=64, value=1024)
-            height = gr.Slider(label="Height", minimum=256, maximum=1344, step=64, value=1024)
-        with gr.Row():
             guidance_scale = gr.Slider(label="Guidance scale", minimum=0.0, maximum=10.0, step=0.1, value=7.5)
             num_inference_steps = gr.Slider(label="Inference steps", minimum=1, maximum=50, step=1, value=50)
     examples = gr.Examples(examples=example_files, inputs=[init_image])
     gr.on(
         triggers=[run_button.click, prompt.submit, negative_prompt.submit],
         fn=infer,
-        inputs=[init_image, prompt, negative_prompt, seed, width, height, guidance_scale, num_inference_steps],
+        inputs=[init_image, prompt, negative_prompt, seed, guidance_scale, num_inference_steps],
         outputs=[result]
     )
 demo.launch(server_name="0.0.0.0")
