@@ -19,10 +19,9 @@ css = """
 
 
 @spaces.GPU
-def infer(prompt, negative_prompt, seed, width, height, guidance_scale, num_inference_steps):
+def infer(prompt, seed, width, height, guidance_scale, num_inference_steps):
     return model.text2image(
         prompt=[prompt],
-        negative_prompt=[negative_prompt],
         guidance_scale=guidance_scale,
         num_inference_steps=num_inference_steps,
         width=width,
@@ -39,7 +38,6 @@ with gr.Blocks(css=css) as demo:
             run_button = gr.Button("Run", scale=0)
         result = gr.Image(label="Result", show_label=False)
         with gr.Accordion("Advanced Settings", open=False):
-            negative_prompt = gr.Text(label="Negative Prompt", max_lines=1, placeholder="Enter a negative prompt")
             seed = gr.Slider(label="Seed", minimum=0, maximum=1_000_000, step=1, value=0)
             with gr.Row():
                 width = gr.Slider(label="Width", minimum=256, maximum=1344, step=64, value=1024)
@@ -49,9 +47,9 @@ with gr.Blocks(css=css) as demo:
                 num_inference_steps = gr.Slider(label="Inference steps", minimum=1, maximum=50, step=1, value=50)
         gr.Examples(examples=examples, inputs=[prompt])
     gr.on(
-        triggers=[run_button.click, prompt.submit, negative_prompt.submit],
+        triggers=[run_button.click, prompt.submit],
         fn=infer,
-        inputs=[prompt, negative_prompt, seed, width, height, guidance_scale, num_inference_steps],
+        inputs=[prompt, seed, width, height, guidance_scale, num_inference_steps],
         outputs=[result]
     )
 demo.launch(server_name="0.0.0.0")
