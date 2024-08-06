@@ -5,7 +5,7 @@ from panna import ControlNetSD3
 
 model = ControlNetSD3(condition_type="canny")
 title = ("# [ControlNet SD3](https://huggingface.co/docs/diffusers/en/api/pipelines/controlnet_sd3) (Tile Conditioning)\n"
-         "The demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
+         "The demo is part of [panna](https://github.com/asahi417/panna) project.")
 example_files = []
 for n in range(1, 10):
     load_image(f"https://huggingface.co/spaces/depth-anything/Depth-Anything-V2/resolve/main/assets/examples/demo{n:0>2}.jpg").save(f"demo{n:0>2}.jpg")
@@ -37,9 +37,9 @@ with gr.Blocks() as demo:
         negative_prompt = gr.Text(label="Negative Prompt", max_lines=1, placeholder="Enter a negative prompt")
         seed = gr.Slider(label="Seed", minimum=0, maximum=1_000_000, step=1, value=0)
         with gr.Row():
-            guidance_scale = gr.Slider(label="Guidance scale", minimum=0.0, maximum=10.0, step=0.1, value=7.5)
+            guidance_scale = gr.Slider(label="Guidance scale", minimum=0.0, maximum=10.0, step=0.1, value=7)
             controlnet_conditioning_scale = gr.Slider(label="Controlnet conditioning scale", minimum=0.0, maximum=1.0, step=0.05, value=0.5)
-            num_inference_steps = gr.Slider(label="Inference steps", minimum=1, maximum=50, step=1, value=50)
+            num_inference_steps = gr.Slider(label="Inference steps", minimum=1, maximum=50, step=1, value=28)
     examples = gr.Examples(examples=example_files, inputs=[init_image])
     gr.on(
         triggers=[run_button.click, prompt.submit, negative_prompt.submit],

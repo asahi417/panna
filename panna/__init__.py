@@ -8,3 +8,4 @@ from .model_clip_interrogator import CLIPInterrogator
 from .model_instruct_ir import InstructIR
 from .model_controlnet_stable_diffusion_2 import ControlNetSD2
 from .model_controlnet_stable_diffusion_3 import ControlNetSD3
+from .model_flux_1_dev import Flux1Dev

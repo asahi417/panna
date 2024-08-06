@@ -19,7 +19,7 @@ def infer(image, best_max_flavors):
 
 with gr.Blocks(css=css) as demo:
     with gr.Column(elem_id="col-container"):
-        gr.Markdown("# CLIP Interrogator\nThe demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
+        gr.Markdown("# CLIP Interrogator\nThe demo is part of [panna](https://github.com/asahi417/panna) project.")
         input_image = gr.Image(type='pil')
         with gr.Row():
             flavor_input = gr.Slider(minimum=2, maximum=48, step=2, value=32, label='best mode max flavors')

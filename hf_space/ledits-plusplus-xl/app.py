@@ -6,7 +6,7 @@ from panna.pipeline import PipelineLEditsPP
 
 model = PipelineLEditsPP()
 title = ("# [LEdits ++](https://huggingface.co/spaces/editing-images/leditsplusplus) with [Stable Diffusion XL](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0)\n"
-         "The demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
+         "The demo is part of [panna](https://github.com/asahi417/panna) project.")
 example_files = []
 for n in range(1, 10):
     load_image(f"https://huggingface.co/spaces/depth-anything/Depth-Anything-V2/resolve/main/assets/examples/demo{n:0>2}.jpg").save(f"demo{n:0>2}.jpg")

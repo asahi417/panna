@@ -5,7 +5,7 @@ from panna import ControlNetSD2
 
 model = ControlNetSD2(condition_type="canny")
 title = ("# [ControlNet XL](https://huggingface.co/docs/diffusers/api/pipelines/controlnet_sdxl) (Canny Edge Conditioning)\n"
-         "The demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
+         "The demo is part of [panna](https://github.com/asahi417/panna) project.")
 example_files = []
 for n in range(1, 10):
     load_image(f"https://huggingface.co/spaces/depth-anything/Depth-Anything-V2/resolve/main/assets/examples/demo{n:0>2}.jpg").save(f"demo{n:0>2}.jpg")

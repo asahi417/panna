@@ -15,7 +15,7 @@ for example in examples:
 tmp_output_dir = "outputs"
 os.makedirs(tmp_output_dir, exist_ok=True)
 title = ("# [Stable Video Diffusion](ttps://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt) with [InstructIR as Upscaler](https://huggingface.co/spaces/marcosv/InstructIR)\n"
-         "The demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
+         "The demo is part of [panna](https://github.com/asahi417/panna) project.")
 
 
 @spaces.GPU(duration=120)

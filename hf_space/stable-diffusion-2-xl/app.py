@@ -8,7 +8,7 @@ model = SD2(
     refiner_model_id="stabilityai/stable-diffusion-xl-refiner-1.0"
 )
 title = ("# Stable Diffusion 2 XL ([base model](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0), [refiner model](https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0))\n"
-         "The demo is part of [panna](https://github.com/abacws-abacus/panna) project.")
+         "The demo is part of [panna](https://github.com/asahi417/panna) project.")
 examples = [
     "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k",
     "A female model, high quality, fashion, Paris, Vogue, Maison Margiela, 8k",
