@@ -45,7 +45,7 @@ with gr.Blocks(css=css) as demo:
                 height = gr.Slider(label="Height", minimum=256, maximum=1344, step=64, value=1024)
             with gr.Row():
                 guidance_scale = gr.Slider(label="Guidance scale", minimum=0.0, maximum=10.0, step=0.1, value=3.5)
-                num_inference_steps = gr.Slider(label="Inference steps", minimum=1, maximum=50, step=1, value=50)
+                num_inference_steps = gr.Slider(label="Inference steps", minimum=1, maximum=50, step=1, value=28)
         gr.Examples(examples=examples, inputs=[prompt])
     gr.on(
         triggers=[run_button.click, prompt.submit],

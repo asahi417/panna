@@ -25,7 +25,7 @@ class Flux1Dev:
                    prompt: List[str],
                    batch_size: Optional[int] = None,
                    guidance_scale: float = 3.5,
-                   num_inference_steps: int = 50,
+                   num_inference_steps: int = 28,
                    num_images_per_prompt: int = 1,
                    height: Optional[int] = None,
                    width: Optional[int] = None,
