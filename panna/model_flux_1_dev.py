@@ -14,7 +14,7 @@ class Flux1Dev:
 
     def __init__(self,
                  base_model_id: str = "black-forest-labs/FLUX.1-dev",
-                 torch_dtype: torch.dtype = torch.float16,
+                 torch_dtype: torch.dtype = torch.bfloat16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
         self.base_model = FluxPipeline.from_pretrained(

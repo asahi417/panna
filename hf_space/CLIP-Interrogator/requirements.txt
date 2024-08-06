@@ -1,5 +1,6 @@
 --extra-index-url https://download.pytorch.org/whl/cu113
 git+https://github.com/rwightman/pytorch-image-models.git
+git+https://github.com/huggingface/diffusers.git
 torch
 torchvision
 spaces

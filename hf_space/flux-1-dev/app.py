@@ -1,9 +1,10 @@
+import torch
 import gradio as gr
 import spaces
 from panna import Flux1Dev
 
 
-model = Flux1Dev()
+model = Flux1Dev(torch_dtype=torch.bfloat16)
 title = ("# [Flux 1 Dev](https://huggingface.co/black-forest-labs/FLUX.1-dev)\n"
          "The demo is part of [panna](https://github.com/asahi417/panna) project.")
 examples = [
