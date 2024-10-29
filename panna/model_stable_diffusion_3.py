@@ -17,17 +17,21 @@ class SD3:
                  variant: str = "fp16",
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
-                 low_cpu_mem_usage: bool = True):
+                 low_cpu_mem_usage: bool = True,
+                 guidance_scale: float = 7.0,
+                 num_inference_steps: int = 28):
         self.base_model = StableDiffusion3Pipeline.from_pretrained(
             base_model_id, use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
         )
+        self.guidance_scale = guidance_scale
+        self.num_inference_steps = num_inference_steps
 
     def text2image(self,
                    prompt: List[str],
                    batch_size: Optional[int] = None,
                    negative_prompt: Optional[List[str]] = None,
-                   guidance_scale: float = 7.0,
-                   num_inference_steps: int = 28,
+                   guidance_scale: Optional[float] = None,
+                   num_inference_steps: Optional[int] = None,
                    num_images_per_prompt: int = 1,
                    height: Optional[int] = None,
                    width: Optional[int] = None,
@@ -45,6 +49,8 @@ class SD3:
         :param seed:
         :return:
         """
+        guidance_scale = self.guidance_scale if guidance_scale is None else guidance_scale
+        num_inference_steps = self.num_inference_steps if num_inference_steps is None else num_inference_steps
         if negative_prompt is not None:
             assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
         batch_size = len(prompt) if batch_size is None else batch_size
@@ -71,3 +77,45 @@ class SD3:
     @staticmethod
     def export(data: Image, output_path: str, file_format: str = "png") -> None:
         data.save(output_path, file_format)
+
+
+class SD3Medium(SD3):
+
+    def __init__(self):
+        super().__init__(
+            "stabilityai/stable-diffusion-3-medium-diffusers",
+            guidance_scale=7.0,
+            num_inference_steps=28,
+            variant="fp16",
+            torch_dtype=torch.float16,
+            device_map="balanced",
+            low_cpu_mem_usage=True,
+        )
+
+
+class SD3Large(SD3):
+
+    def __init__(self):
+        super().__init__(
+            "stabilityai/stable-diffusion-3.5-large",
+            guidance_scale=3.5,
+            num_inference_steps=28,
+            variant="fp16",
+            torch_dtype=torch.bfloat16,
+            device_map="balanced",
+            low_cpu_mem_usage=True
+        )
+
+
+class SD3LargeTurbo(SD3):
+
+    def __init__(self):
+        super().__init__(
+            "stabilityai/stable-diffusion-3.5-large-turbo",
+            guidance_scale=0.0,
+            num_inference_steps=4,
+            variant="fp16",
+            torch_dtype=torch.bfloat16,
+            device_map="balanced",
+            low_cpu_mem_usage=True
+        )
