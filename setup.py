@@ -39,7 +39,8 @@ setup(
         "clip-interrogator",
         "accelerate",
         "opencv-python",
-        "controlnet_aux"
+        "controlnet_aux",
+        "bitsandbytes"
     ],
     python_requires='>=3.8',
     entry_points={
