@@ -214,6 +214,10 @@ class SD3BitsAndBytesModel:
             clear_cache()
         return output_list
 
+    @staticmethod
+    def export(data: Image, output_path: str, file_format: str = "png") -> None:
+        data.save(output_path, file_format)
+
 
 class SD3LargeBitsAndBytesModel(SD3BitsAndBytesModel):
 
