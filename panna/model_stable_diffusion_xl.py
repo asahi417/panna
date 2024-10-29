@@ -1,14 +1,14 @@
 """Model class for stable diffusion2."""
 from typing import Optional, Dict, List, Any
 import torch
-from diffusers import DiffusionPipeline, StableDiffusionXLPipeline
+from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from PIL.Image import Image
 from .util import get_generator, clear_cache, get_logger
 
 logger = get_logger(__name__)
 
 
-class SD2:
+class SDXL:
 
     config: Dict[str, Any]
     base_model_id: str
@@ -19,11 +19,17 @@ class SD2:
                  use_refiner: bool = True,
                  base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
                  refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
+                 guidance_scale: float = 5.0,
+                 num_inference_steps: int = 40,
+                 high_noise_frac: float = 0.8,
                  variant: str = "fp16",
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True):
         config = dict(use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage)
+        self.guidance_scale = guidance_scale
+        self.num_inference_steps = num_inference_steps
+        self.high_noise_frac = high_noise_frac
         self.base_model = StableDiffusionXLPipeline.from_pretrained(base_model_id, **config)
         self.refiner_model = None
         if use_refiner:
@@ -33,10 +39,10 @@ class SD2:
                    prompt: List[str],
                    batch_size: Optional[int] = None,
                    negative_prompt: Optional[List[str]] = None,
-                   guidance_scale: float = 7.5,
-                   num_inference_steps: int = 40,
+                   guidance_scale: Optional[float] = None,
+                   num_inference_steps: Optional[int] = None,
                    num_images_per_prompt: int = 1,
-                   high_noise_frac: float = 0.8,
+                   high_noise_frac: Optional[float] = None,
                    height: Optional[int] = None,
                    width: Optional[int] = None,
                    seed: Optional[int] = None) -> List[Image]:
@@ -54,6 +60,9 @@ class SD2:
         :param seed:
         :return: List of images.
         """
+        guidance_scale = self.guidance_scale if guidance_scale is None else guidance_scale
+        num_inference_steps = self.num_inference_steps if num_inference_steps is None else num_inference_steps
+        high_noise_frac = self.high_noise_frac if high_noise_frac is None else high_noise_frac
         if negative_prompt is not None:
             assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
         batch_size = len(prompt) if batch_size is None else batch_size
@@ -147,3 +156,35 @@ class SD2:
     @staticmethod
     def export(data: Image, output_path: str, file_format: str = "png") -> None:
         data.save(output_path, file_format)
+
+
+class SDXLTurbo(SDXL):
+
+    def __init__(self):
+        super().__init__(
+            use_refiner=False,
+            base_model_id="stabilityai/sdxl-turbo",
+            guidance_scale=0.0,
+            num_inference_steps=1,
+            variant="fp16",
+            torch_dtype=torch.float16,
+            device_map="balanced",
+            low_cpu_mem_usage=True
+        )
+
+
+class SDXLBase(SDXL):
+
+    def __init__(self):
+        super().__init__(
+            use_refiner=True,
+            base_model_id="stabilityai/stable-diffusion-xl-base-1.0",
+            refiner_model_id="stabilityai/stable-diffusion-xl-refiner-1.0",
+            guidance_scale=5.0,
+            num_inference_steps=40,
+            high_noise_frac=0.8,
+            variant="fp16",
+            torch_dtype=torch.float16,
+            device_map="balanced",
+            low_cpu_mem_usage=True
+        )

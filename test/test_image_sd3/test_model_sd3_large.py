@@ -16,7 +16,7 @@ for i, (p, p_n) in enumerate(zip(prompts, prompts_neg)):
     output = model.text2image([p], batch_size=1, seed=42)
     model.export(output[0], f"./test/test_image_sd3/output/test_sd3_large.{i}.png")
     output = model.text2image([p], negative_prompt=[p_n], batch_size=1, seed=42)
-    model.export(output[0], f"./test/test_image_sd3/output/test_sd3.large.{i}.negative.png")
+    model.export(output[0], f"./test/test_image_sd3/output/test_sd3_large.{i}.negative.png")
     output = model.text2image([p], negative_prompt=[p_n], batch_size=1, seed=42, width=1024, height=720)
-    model.export(output[0], f"./test/test_image_sd3/output/test_sd3.large.{i}.negative.landscape.png")
+    model.export(output[0], f"./test/test_image_sd3/output/test_sd3_large.{i}.negative.landscape.png")
 

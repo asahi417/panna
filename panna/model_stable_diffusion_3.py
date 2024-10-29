@@ -23,7 +23,8 @@ class SD3:
                  device_map: str = "balanced",
                  low_cpu_mem_usage: bool = True,
                  guidance_scale: float = 7.0,
-                 num_inference_steps: int = 28):
+                 num_inference_steps: int = 28,
+                 max_sequence_length: int = 256):
         self.base_model = StableDiffusion3Pipeline.from_pretrained(
             base_model_id,
             use_safetensors=True,
@@ -34,6 +35,7 @@ class SD3:
         )
         self.guidance_scale = guidance_scale
         self.num_inference_steps = num_inference_steps
+        self.max_sequence_length = max_sequence_length
 
     def text2image(self,
                    prompt: List[str],
@@ -44,7 +46,8 @@ class SD3:
                    num_images_per_prompt: int = 1,
                    height: Optional[int] = None,
                    width: Optional[int] = None,
-                   seed: Optional[int] = None) -> List[Image]:
+                   seed: Optional[int] = None,
+                   max_sequence_length: Optional[int] = None) -> List[Image]:
         """Generate image from text.
 
         :param prompt:
@@ -60,6 +63,7 @@ class SD3:
         """
         guidance_scale = self.guidance_scale if guidance_scale is None else guidance_scale
         num_inference_steps = self.num_inference_steps if num_inference_steps is None else num_inference_steps
+        max_sequence_length = self.max_sequence_length if max_sequence_length is None else max_sequence_length
         if negative_prompt is not None:
             assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
         batch_size = len(prompt) if batch_size is None else batch_size
@@ -99,6 +103,7 @@ class SD3Medium(SD3):
             torch_dtype=torch.float16,
             device_map="balanced",
             low_cpu_mem_usage=True,
+            max_sequence_length=256
         )
 
 
@@ -112,7 +117,8 @@ class SD3Large(SD3):
             variant="fp16",
             torch_dtype=torch.bfloat16,
             device_map="balanced",
-            low_cpu_mem_usage=True
+            low_cpu_mem_usage=True,
+            max_sequence_length=256
         )
 
 
@@ -136,7 +142,7 @@ class SD3BitsAndBytesModel:
                  model_id: str = "stabilityai/stable-diffusion-3.5-large-turbo",
                  num_inference_steps: int = 4,
                  guidance_scale: float = 0.0,
-                 max_sequence_length: int = 512):
+                 max_sequence_length: int = 256):
         self.guidance_scale = guidance_scale
         self.num_inference_steps = num_inference_steps
         self.max_sequence_length = max_sequence_length
@@ -226,7 +232,7 @@ class SD3LargeBitsAndBytesModel(SD3BitsAndBytesModel):
             model_id="stabilityai/stable-diffusion-3.5-large",
             num_inference_steps=28,
             guidance_scale=4.5,
-            max_sequence_length=512
+            max_sequence_length=256
         )
 
 
@@ -237,5 +243,5 @@ class SD3LargeTurboBitsAndBytesModel(SD3BitsAndBytesModel):
             model_id="stabilityai/stable-diffusion-3.5-large-turbo",
             num_inference_steps=4,
             guidance_scale=0.0,
-            max_sequence_length=512
+            max_sequence_length=256
         )

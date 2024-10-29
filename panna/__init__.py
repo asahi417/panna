@@ -1,5 +1,5 @@
 from .model_stable_video_diffusion import SVD
-from .model_stable_diffusion_2 import SD2
+from .model_stable_diffusion_xl import SDXL, SDXLBase, SDXLTurbo
 from .model_stable_diffusion_3 import (
     SD3, SD3Medium, SD3Large, SD3LargeTurbo,
     SD3BitsAndBytesModel, SD3LargeBitsAndBytesModel, SD3LargeTurboBitsAndBytesModel
