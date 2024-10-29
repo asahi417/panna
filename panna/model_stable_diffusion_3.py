@@ -167,7 +167,7 @@ class SD3BitsAndBytesModel:
                    batch_size: Optional[int] = None,
                    negative_prompt: Optional[List[str]] = None,
                    num_inference_steps: Optional[int] = None,
-                   guidance_scale: Optional[float] = 0.0,
+                   guidance_scale: Optional[float] = None,
                    num_images_per_prompt: int = 1,
                    height: Optional[int] = None,
                    width: Optional[int] = None,

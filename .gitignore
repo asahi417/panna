@@ -9,3 +9,4 @@ dist
 __pycache__
 *.nfs000*
 .eggs
+test/test_image_sd3/output
