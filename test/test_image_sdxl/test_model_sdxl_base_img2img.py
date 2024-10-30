@@ -8,12 +8,10 @@ def test(model, output_path, prefix):
     prompt = "geometric, modern, artificial, HQ, detail, fine-art"
     negative_prompt = "low quality"
     for i in sample_images:
-        output = model(image=[i], batch_size=1, seed=42)
-        model.export(output[0], f"{output_path}/{prefix}.{i}.png")
         output = model(image=[i], prompt=[prompt], batch_size=1, seed=42)
-        model.export(output[0], f"{output_path}/{prefix}.{i}.prompt.png")
+        model.export(output[0], f"{output_path}/{prefix}.{i}.png")
         output = model(image=[i], prompt=[prompt], negative_prompt=[negative_prompt], batch_size=1, seed=42)
-        model.export(output[0], f"{output_path}/{prefix}.{i}.prompt.negative.png")
+        model.export(output[0], f"{output_path}/{prefix}.{i}.negative.png")
 
 
 test(SDXLBaseImg2Img(), "./test/test_image_sdxl/output", "test_sdxl_base_img2img")

@@ -32,9 +32,7 @@ class SDXL:
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
                  img2img: bool = False,
-                 low_cpu_mem_usage: bool = True,
-                 width: Optional[int] = None,
-                 height: Optional[int] = None):
+                 low_cpu_mem_usage: bool = True):
         config = dict(
             use_safetensors=True,
             variant=variant,
@@ -58,29 +56,23 @@ class SDXL:
     def validate_input(self,
                        prompt: Optional[List[str]] = None,
                        image: Optional[List[PipelineImageInput]] = None,
-                       negative_prompt: Optional[List[str]] = None) -> int:
+                       negative_prompt: Optional[List[str]] = None) -> None:
+        if prompt is None:
+            raise ValueError("No prompt provided.")
         if self.img2img:
             if image is None:
                 raise ValueError("No image provided for img2img generation.")
-            if prompt is not None:
-                if len(image) != len(prompt):
-                    raise ValueError(f"Wrong shape: {len(image)} != {len(prompt)}")
-            if negative_prompt is not None:
-                if len(image) != len(negative_prompt):
-                    raise ValueError(f"Wrong shape: {len(image)} != {len(negative_prompt)}")
-            return len(image)
+            if len(image) != len(prompt):
+                raise ValueError(f"Wrong shape: {len(image)} != {len(prompt)}")
         else:
-            if prompt is None:
-                raise ValueError("No prompt provided for text2img generation.")
             if image is not None:
                 raise ValueError("Text2img cannot take image input.")
-            if negative_prompt is not None:
-                if len(prompt) != len(negative_prompt):
-                    raise ValueError(f"Wrong shape: {len(prompt)} != {len(negative_prompt)}")
-            return len(prompt)
+        if negative_prompt is not None:
+            if len(prompt) != len(negative_prompt):
+                raise ValueError(f"Wrong shape: {len(prompt)} != {len(negative_prompt)}")
 
     def __call__(self,
-                 prompt: Optional[List[str]] = None,
+                 prompt: List[str] = None,
                  image: Optional[List[PipelineImageInput]] = None,
                  strength: Optional[float] = None,
                  batch_size: Optional[int] = None,
@@ -108,7 +100,7 @@ class SDXL:
         :param seed:
         :return: List of images.
         """
-        data_size = self.validate_input(prompt, image, negative_prompt)
+        self.validate_input(prompt, image, negative_prompt)
         shared_config = dict(
             num_inference_steps=self.num_inference_steps if num_inference_steps is None else num_inference_steps,
             num_images_per_prompt=num_images_per_prompt,
@@ -122,13 +114,13 @@ class SDXL:
         if self.refiner_model:
             shared_config["output_type"] = "latent"
             shared_config["denoising_end"] = self.high_noise_frac if high_noise_frac is None else high_noise_frac
-        batch_size = data_size if batch_size is None else batch_size
+        batch_size = len(prompt) if batch_size is None else batch_size
         idx = 0
         output_list = []
-        while idx * batch_size < data_size:
+        while idx * batch_size < len(prompt):
             logger.info(f"[batch: {idx + 1}] generating...")
             start = idx * batch_size
-            end = min((idx + 1) * batch_size, data_size)
+            end = min((idx + 1) * batch_size, len(prompt))
             if self.img2img:
                 output = self.base_model(
                     image=image[start:end],
