@@ -11,7 +11,11 @@ logger = get_logger(__name__)
 
 class SDXL:
 
-    config: Dict[str, Any]
+    guidance_scale: float
+    num_inference_steps: float
+    high_noise_frac: float
+    strength: float
+    img2img: bool
     base_model_id: str
     base_model: Union[StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline]
     refiner_model: Optional[StableDiffusionXLPipeline]
@@ -28,8 +32,16 @@ class SDXL:
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
                  img2img: bool = False,
-                 low_cpu_mem_usage: bool = True):
-        config = dict(use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage)
+                 low_cpu_mem_usage: bool = True,
+                 width: Optional[int] = None,
+                 height: Optional[int] = None):
+        config = dict(
+            use_safetensors=True,
+            variant=variant,
+            torch_dtype=torch_dtype,
+            device_map=device_map,
+            low_cpu_mem_usage=low_cpu_mem_usage
+        )
         self.guidance_scale = guidance_scale
         self.num_inference_steps = num_inference_steps
         self.high_noise_frac = high_noise_frac
