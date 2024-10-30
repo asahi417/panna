@@ -37,17 +37,17 @@ class SD3:
         self.num_inference_steps = num_inference_steps
         self.max_sequence_length = max_sequence_length
 
-    def text2image(self,
-                   prompt: List[str],
-                   batch_size: Optional[int] = None,
-                   negative_prompt: Optional[List[str]] = None,
-                   guidance_scale: Optional[float] = None,
-                   num_inference_steps: Optional[int] = None,
-                   num_images_per_prompt: int = 1,
-                   height: Optional[int] = None,
-                   width: Optional[int] = None,
-                   seed: Optional[int] = None,
-                   max_sequence_length: Optional[int] = None) -> List[Image]:
+    def __call__(self,
+                 prompt: List[str],
+                 batch_size: Optional[int] = None,
+                 negative_prompt: Optional[List[str]] = None,
+                 guidance_scale: Optional[float] = None,
+                 num_inference_steps: Optional[int] = None,
+                 num_images_per_prompt: int = 1,
+                 height: Optional[int] = None,
+                 width: Optional[int] = None,
+                 seed: Optional[int] = None,
+                 max_sequence_length: Optional[int] = None) -> List[Image]:
         """Generate image from text.
 
         :param prompt:
@@ -168,17 +168,17 @@ class SD3BitsAndBytesModel:
         )
         self.base_model.enable_model_cpu_offload()
 
-    def text2image(self,
-                   prompt: List[str],
-                   batch_size: Optional[int] = None,
-                   negative_prompt: Optional[List[str]] = None,
-                   num_inference_steps: Optional[int] = None,
-                   guidance_scale: Optional[float] = None,
-                   num_images_per_prompt: int = 1,
-                   height: Optional[int] = None,
-                   width: Optional[int] = None,
-                   seed: Optional[int] = None,
-                   max_sequence_length: Optional[int] = None) -> List[Image]:
+    def __call__(self,
+                 prompt: List[str],
+                 batch_size: Optional[int] = None,
+                 negative_prompt: Optional[List[str]] = None,
+                 num_inference_steps: Optional[int] = None,
+                 guidance_scale: Optional[float] = None,
+                 num_images_per_prompt: int = 1,
+                 height: Optional[int] = None,
+                 width: Optional[int] = None,
+                 seed: Optional[int] = None,
+                 max_sequence_length: Optional[int] = None) -> List[Image]:
         """Generate image from text.
 
         :param prompt:

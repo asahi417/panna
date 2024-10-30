@@ -50,25 +50,34 @@ class SDXL:
         if self.img2img:
             if image is None:
                 raise ValueError("No image provided for img2img generation.")
+            if prompt is not None:
+                if len(image) != len(prompt):
+                    raise ValueError(f"Wrong shape: {len(image)} != {len(prompt)}")
+            if negative_prompt is not None:
+                if len(image) != len(negative_prompt):
+                    raise ValueError(f"Wrong shape: {len(image)} != {len(negative_prompt)}")
         else:
             if prompt is None:
                 raise ValueError("No prompt provided for text2img generation.")
-        if not (len(image) == len(prompt) == len(negative_prompt)):
-            raise ValueError(f"Wrong shape: {len(image)} != {len(prompt)} != {len(negative_prompt)}")
+            if image is not None:
+                raise ValueError("Text2img cannot take image input.")
+            if negative_prompt is not None:
+                if len(prompt) != len(negative_prompt):
+                    raise ValueError(f"Wrong shape: {len(prompt)} != {len(negative_prompt)}")
 
-    def text2image(self,
-                   prompt: Optional[List[str]] = None,
-                   image: Optional[List[PipelineImageInput]] = None,
-                   strength: Optional[float] = None,
-                   batch_size: Optional[int] = None,
-                   negative_prompt: Optional[List[str]] = None,
-                   guidance_scale: Optional[float] = None,
-                   num_inference_steps: Optional[int] = None,
-                   num_images_per_prompt: int = 1,
-                   high_noise_frac: Optional[float] = None,
-                   height: Optional[int] = None,
-                   width: Optional[int] = None,
-                   seed: Optional[int] = None) -> List[Image]:
+    def __call__(self,
+                 prompt: Optional[List[str]] = None,
+                 image: Optional[List[PipelineImageInput]] = None,
+                 strength: Optional[float] = None,
+                 batch_size: Optional[int] = None,
+                 negative_prompt: Optional[List[str]] = None,
+                 guidance_scale: Optional[float] = None,
+                 num_inference_steps: Optional[int] = None,
+                 num_images_per_prompt: int = 1,
+                 high_noise_frac: Optional[float] = None,
+                 height: Optional[int] = None,
+                 width: Optional[int] = None,
+                 seed: Optional[int] = None) -> List[Image]:
         """Generate image from text.
 
         :param prompt:
