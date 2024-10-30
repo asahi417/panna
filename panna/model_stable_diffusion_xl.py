@@ -36,9 +36,9 @@ class SDXL:
         self.strength = strength
         self.img2img = img2img
         if self.img2img:
-            self.base_model = StableDiffusionXLPipeline.from_pretrained(base_model_id, **config)
-        else:
             self.base_model = StableDiffusionXLImg2ImgPipeline.from_pretrained(base_model_id, **config)
+        else:
+            self.base_model = StableDiffusionXLPipeline.from_pretrained(base_model_id, **config)
         self.refiner_model = None
         if use_refiner:
             self.refiner_model = DiffusionPipeline.from_pretrained(refiner_model_id, text_encoder_2=self.base_model.text_encoder_2, vae=self.base_model.vae, **config)
