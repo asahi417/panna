@@ -58,7 +58,7 @@ class SDXL:
     def validate_input(self,
                        prompt: Optional[List[str]] = None,
                        image: Optional[List[PipelineImageInput]] = None,
-                       negative_prompt: Optional[List[str]] = None) -> None:
+                       negative_prompt: Optional[List[str]] = None) -> int:
         if self.img2img:
             if image is None:
                 raise ValueError("No image provided for img2img generation.")
@@ -68,6 +68,7 @@ class SDXL:
             if negative_prompt is not None:
                 if len(image) != len(negative_prompt):
                     raise ValueError(f"Wrong shape: {len(image)} != {len(negative_prompt)}")
+            return len(image)
         else:
             if prompt is None:
                 raise ValueError("No prompt provided for text2img generation.")
@@ -76,6 +77,7 @@ class SDXL:
             if negative_prompt is not None:
                 if len(prompt) != len(negative_prompt):
                     raise ValueError(f"Wrong shape: {len(prompt)} != {len(negative_prompt)}")
+            return len(prompt)
 
     def __call__(self,
                  prompt: Optional[List[str]] = None,
@@ -106,7 +108,7 @@ class SDXL:
         :param seed:
         :return: List of images.
         """
-        self.validate_input(prompt, image, negative_prompt)
+        data_size = self.validate_input(prompt, image, negative_prompt)
         shared_config = dict(
             num_inference_steps=self.num_inference_steps if num_inference_steps is None else num_inference_steps,
             num_images_per_prompt=num_images_per_prompt,
@@ -120,13 +122,13 @@ class SDXL:
         if self.refiner_model:
             shared_config["output_type"] = "latent"
             shared_config["denoising_end"] = self.high_noise_frac if high_noise_frac is None else high_noise_frac
-        batch_size = len(prompt) if batch_size is None else batch_size
+        batch_size = data_size if batch_size is None else batch_size
         idx = 0
         output_list = []
-        while idx * batch_size < len(prompt):
+        while idx * batch_size < data_size:
             logger.info(f"[batch: {idx + 1}] generating...")
             start = idx * batch_size
-            end = min((idx + 1) * batch_size, len(prompt))
+            end = min((idx + 1) * batch_size, data_size)
             if self.img2img:
                 output = self.base_model(
                     image=image[start:end],
