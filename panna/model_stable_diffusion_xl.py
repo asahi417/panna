@@ -2,7 +2,6 @@
 from typing import Optional, Dict, List, Any, Union
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
-from diffusers.image_processor import PipelineImageInput
 from PIL.Image import Image
 from .util import get_generator, clear_cache, get_logger
 
@@ -55,7 +54,7 @@ class SDXL:
 
     def validate_input(self,
                        prompt: Optional[List[str]] = None,
-                       image: Optional[List[PipelineImageInput]] = None,
+                       image: Optional[List[Image]] = None,
                        negative_prompt: Optional[List[str]] = None) -> None:
         if prompt is None:
             raise ValueError("No prompt provided.")
@@ -73,7 +72,7 @@ class SDXL:
 
     def __call__(self,
                  prompt: List[str] = None,
-                 image: Optional[List[PipelineImageInput]] = None,
+                 image: Optional[List[Image]] = None,
                  strength: Optional[float] = None,
                  batch_size: Optional[int] = None,
                  negative_prompt: Optional[List[str]] = None,

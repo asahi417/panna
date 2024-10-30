@@ -1,4 +1,5 @@
 import os
+from PIL import Image
 from panna import SDXLTurboImg2Img
 
 
@@ -8,7 +9,8 @@ def test(model, output_path, prefix):
     prompt = "geometric, modern, artificial, HQ, detail, fine-art"
     negative_prompt = "low quality"
     for i in sample_images:
-        output = model(image=[i], prompt=[prompt], batch_size=1, seed=42)
+        img = Image.open(i)
+        output = model(image=[img], prompt=[prompt], batch_size=1, seed=42)
         model.export(output[0], f"{output_path}/{prefix}.{i}.png")
         output = model(image=[i], prompt=[prompt], negative_prompt=[negative_prompt], batch_size=1, seed=42)
         model.export(output[0], f"{output_path}/{prefix}.{i}.negative.png")
