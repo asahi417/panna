@@ -124,7 +124,7 @@ class SDXL:
             if self.img2img:
                 output = self.base_model(
                     image=image[start:end],
-                    prompt=None if prompt is None else prompt[start:end],
+                    prompt=prompt[start:end],
                     negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
                     **shared_config
                 ).images
@@ -138,7 +138,7 @@ class SDXL:
                 logger.info(f"[batch: {idx + 1}] running refiner model...")
                 output_list += self.refiner_model(
                     image=output,
-                    prompt=None if prompt is None else prompt[start:end],
+                    prompt=prompt[start:end],
                     negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
                     num_inference_steps=shared_config["num_inference_steps"],
                     denoising_start=shared_config["denoising_end"],
