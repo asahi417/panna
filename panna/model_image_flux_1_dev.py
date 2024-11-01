@@ -16,10 +16,13 @@ class Flux1Dev:
                  base_model_id: str = "black-forest-labs/FLUX.1-dev",
                  torch_dtype: torch.dtype = torch.bfloat16,
                  device_map: str = "balanced",
-                 low_cpu_mem_usage: bool = True):
+                 low_cpu_mem_usage: bool = True,
+                 enable_model_cpu_offload: bool = True):
         self.base_model = FluxPipeline.from_pretrained(
             base_model_id, use_safetensors=True, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
         )
+        if enable_model_cpu_offload:
+            self.base_model.enable_model_cpu_offload()
 
     def __call__(self,
                  prompt: List[str],

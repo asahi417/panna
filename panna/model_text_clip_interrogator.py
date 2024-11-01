@@ -19,7 +19,7 @@ class CLIPInterrogator:
         config.blip_num_beams = 64
         self.ci = Interrogator(config)
 
-    def image2text(self, image: List[Image], best_max_flavors: int = 32):
+    def __call__(self, image: List[Image], best_max_flavors: int = 32):
         captions = []
         for i in tqdm(image):
             captions.append(self.ci.interrogate(i.convert('RGB'), max_flavors=best_max_flavors))
