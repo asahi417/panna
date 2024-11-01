@@ -33,9 +33,7 @@ class InstructIR:
         image = image.astype(np.float32)
         return torch.tensor(image).permute(2, 0, 1).unsqueeze(0).to(self.device)
 
-    def image2image(self,
-                    image: List[Image.Image],
-                    prompt: Optional[List[str]] = None) -> List[Image.Image]:
+    def __call__(self, image: List[Image.Image], prompt: Optional[List[str]] = None) -> List[Image.Image]:
         """Generate high resolution image from low resolution image.
 
         :param image:

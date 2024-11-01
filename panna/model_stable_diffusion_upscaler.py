@@ -1,4 +1,4 @@
-"""Model class for stable diffusion upscaler."""
+"""Model class for stable diffusion upscaler (note that this model suits for 128 x 128). """
 from typing import Optional, List
 import torch
 from diffusers import StableDiffusionUpscalePipeline
