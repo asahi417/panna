@@ -24,12 +24,12 @@ class SDUpScaler:
             base_model_id, use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
         )
 
-    def image2image(self,
-                    image: List[Image],
-                    prompt: Optional[List[str]] = None,
-                    reshape_method: Optional[str] = "downscale",
-                    upscale_factor: int = 4,
-                    batch_size: Optional[int] = None) -> List[Image]:
+    def __call__(self,
+                 image: List[Image],
+                 prompt: Optional[List[str]] = None,
+                 reshape_method: Optional[str] = "downscale",
+                 upscale_factor: int = 4,
+                 batch_size: Optional[int] = None) -> List[Image]:
         """Generate high resolution image from low resolution image.
 
         :param image:
