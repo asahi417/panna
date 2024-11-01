@@ -3,13 +3,15 @@ from typing import Optional, Dict, List, Any, Union
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from PIL.Image import Image
-from .util import get_generator, clear_cache, get_logger
+from .util import get_generator, clear_cache, get_logger, resize_image
 
 logger = get_logger(__name__)
 
 
 class SDXL:
 
+    height: Optional[int]
+    width: Optional[int]
     guidance_scale: float
     num_inference_steps: float
     high_noise_frac: float
@@ -23,10 +25,12 @@ class SDXL:
                  use_refiner: bool = True,
                  base_model_id: str = "stabilityai/stable-diffusion-xl-base-1.0",
                  refiner_model_id: str = "stabilityai/stable-diffusion-xl-refiner-1.0",
+                 height: Optional[int] = None,
+                 width: Optional[int] = None,
                  guidance_scale: float = 5.0,
                  num_inference_steps: int = 40,
                  high_noise_frac: float = 0.8,
-                 strength: float = 0.3,
+                 strength: float = 0.5,
                  variant: str = "fp16",
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: str = "balanced",
@@ -39,6 +43,8 @@ class SDXL:
             device_map=device_map,
             low_cpu_mem_usage=low_cpu_mem_usage
         )
+        self.height = height
+        self.width = width
         self.guidance_scale = guidance_scale
         self.num_inference_steps = num_inference_steps
         self.high_noise_frac = high_noise_frac
@@ -103,13 +109,15 @@ class SDXL:
         shared_config = dict(
             num_inference_steps=self.num_inference_steps if num_inference_steps is None else num_inference_steps,
             num_images_per_prompt=num_images_per_prompt,
-            height=height,
-            width=width,
+            height=height if height is not None else self.height,
+            width=width if width is not None else self.width,
             generator=get_generator(seed),
             guidance_scale=self.guidance_scale if guidance_scale is None else guidance_scale,
         )
         if self.img2img:
             shared_config["strength"] = self.strength if strength is None else strength
+            if shared_config["height"] is not None and shared_config["width"] is not None:
+                image = [resize_image(i, shared_config["width"], shared_config["height"]) for i in image]
         if self.refiner_model:
             shared_config["output_type"] = "latent"
             shared_config["denoising_end"] = self.high_noise_frac if high_noise_frac is None else high_noise_frac
@@ -177,13 +185,16 @@ class SDXLTurboImg2Img(SDXL):
         super().__init__(
             use_refiner=False,
             base_model_id="stabilityai/sdxl-turbo",
+            height=512,
+            width=512,
             guidance_scale=0.0,
-            num_inference_steps=1,
+            num_inference_steps=2,
+            strength=0.5,
             variant="fp16",
             torch_dtype=torch.float16,
             device_map="balanced",
             low_cpu_mem_usage=True,
-            img2img=True
+            img2img=True,
         )
 
 
@@ -212,8 +223,9 @@ class SDXLBaseImg2Img(SDXL):
             base_model_id="stabilityai/stable-diffusion-xl-base-1.0",
             refiner_model_id="stabilityai/stable-diffusion-xl-refiner-1.0",
             guidance_scale=5.0,
-            num_inference_steps=40,
+            num_inference_steps=80,
             high_noise_frac=0.8,
+            strength=0.5,
             variant="fp16",
             torch_dtype=torch.float16,
             device_map="balanced",

@@ -1,5 +1,5 @@
 import os
-from PIL import Image
+from diffusers.utils import load_image
 from panna import SDXLTurboImg2Img
 
 
@@ -9,11 +9,11 @@ def test(model, output_path, prefix):
     prompt = "geometric, modern, artificial, HQ, detail, fine-art"
     negative_prompt = "low quality"
     for i in sample_images:
-        img = Image.open(i)
-        output = model(image=[img], prompt=[prompt], batch_size=1, seed=42)
-        model.export(output[0], f"{output_path}/{prefix}.{i}.png")
-        output = model(image=[i], prompt=[prompt], negative_prompt=[negative_prompt], batch_size=1, seed=42)
-        model.export(output[0], f"{output_path}/{prefix}.{i}.negative.png")
+        init_image = load_image(i)
+        output = model(image=[init_image], prompt=[prompt], batch_size=1, seed=42)
+        model.export(output[0], f"{output_path}/{prefix}.{os.path.basename(i)}.png")
+        output = model(image=[init_image], prompt=[prompt], negative_prompt=[negative_prompt], batch_size=1, seed=42)
+        model.export(output[0], f"{output_path}/{prefix}.{os.path.basename(i)}.negative.png")
 
 
 test(SDXLTurboImg2Img(), "./test/test_image_sdxl/output", "test_sdxl_turbo_img2img")
