@@ -40,7 +40,9 @@ setup(
         "accelerate",
         "opencv-python",
         "controlnet_aux",
-        "bitsandbytes"
+        "bitsandbytes",
+        "streamdiffusion[tensorrt]",
+        "pywin32"
     ],
     python_requires='>=3.8',
     entry_points={

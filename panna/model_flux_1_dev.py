@@ -21,15 +21,15 @@ class Flux1Dev:
             base_model_id, use_safetensors=True, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
         )
 
-    def text2image(self,
-                   prompt: List[str],
-                   batch_size: Optional[int] = None,
-                   guidance_scale: float = 3.5,
-                   num_inference_steps: int = 28,
-                   num_images_per_prompt: int = 1,
-                   height: Optional[int] = None,
-                   width: Optional[int] = None,
-                   seed: Optional[int] = None) -> List[Image]:
+    def __call__(self,
+                 prompt: List[str],
+                 batch_size: Optional[int] = None,
+                 guidance_scale: float = 3.5,
+                 num_inference_steps: int = 28,
+                 num_images_per_prompt: int = 1,
+                 height: Optional[int] = None,
+                 width: Optional[int] = None,
+                 seed: Optional[int] = None) -> List[Image]:
         """Generate image from text.
 
         :param prompt:
