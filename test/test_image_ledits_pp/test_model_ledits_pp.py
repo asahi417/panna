@@ -13,7 +13,6 @@ def test(model, output_path, prefix):
         edit_prompt=["lion", "cat"],
         edit_style=["object", "object"],
         reverse_editing_direction=[True, False],
-        batch_size=1,
         seed=42
     )
     model.export(output[0], f"{output_path}/{prefix}.{os.path.basename(sample_image)}.png")
@@ -25,7 +24,6 @@ def test(model, output_path, prefix):
         edit_prompt=["woman", "man"],
         edit_style=["face", "face"],
         reverse_editing_direction=[True, False],
-        batch_size=1,
         seed=42
     )
     model.export(output[0], f"{output_path}/{prefix}.{os.path.basename(sample_image)}.png")
