@@ -20,11 +20,14 @@ class SVD:
                  base_model_id: str = "stabilityai/stable-video-diffusion-img2vid-xt-1-1",
                  variant: str = "fp16",
                  torch_dtype: torch.dtype = torch.float16,
-                 device_map: str = "balanced",
-                 low_cpu_mem_usage: bool = True):
+                 device_map: Optional[str] = "balanced",
+                 low_cpu_mem_usage: bool = True,
+                 enable_model_cpu_offload: bool = False):
         self.base_model = StableVideoDiffusionPipeline.from_pretrained(
             base_model_id, use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
         )
+        if enable_model_cpu_offload:
+            self.base_model.enable_model_cpu_offload()
 
     def __call__(self,
                  image: List[Image],
