@@ -26,16 +26,16 @@ class SVD:
             base_model_id, use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
         )
 
-    def image2video(self,
-                    image: List[Image],
-                    decode_chunk_size: Optional[int] = None,
-                    num_frames: int = 25,
-                    motion_bucket_id: int = 127,
-                    fps: int = 7,
-                    noise_aug_strength: float = 0.02,
-                    height: Optional[int] = None,
-                    width: Optional[int] = None,
-                    seed: Optional[int] = None) -> List[List[Image]]:
+    def __call__(self,
+                 image: List[Image],
+                 decode_chunk_size: Optional[int] = None,
+                 num_frames: int = 25,
+                 motion_bucket_id: int = 127,
+                 fps: int = 7,
+                 noise_aug_strength: float = 0.02,
+                 height: Optional[int] = None,
+                 width: Optional[int] = None,
+                 seed: Optional[int] = None) -> List[List[Image]]:
         """Generate video from image.
 
         :param image:

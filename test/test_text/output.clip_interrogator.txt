@@ -1,0 +1,4 @@
+CLIPInterrogator: sample_image_animal.png
+araffe standing on a rock with a sky background, lion icon, realistic cgi render, by Anne Stokes, studio lighting ; photorealistic, highly photographic render, cgi animation, orton effect, anonymous lion face, optical lens flare fx, cgi style, cgi render
+CLIPInterrogator: sample_image_human.png
+arafed woman wearing a white hat and scarf with a white scarf, mert and marcus, portrait sophie mudd, face closeup, close - up shot, wearing winged helmet, by Hedda Sterne, vogue editorial photo
