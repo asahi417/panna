@@ -1,30 +1,51 @@
+import os
 from panna import ControlNetSD3
 from diffusers.utils import load_image
-from panna.util import clear_cache
 
-prompt = 'Anime style illustration of a girl wearing a suit. A moon in sky. In the background we see a big rain approaching. text "InstantX" on image'
-n_prompt = 'NSFW, nude, naked, porn, ugly'
-control_image = load_image("https://huggingface.co/InstantX/SD3-Controlnet-Tile/resolve/main/tile.jpg")
-
-# test tile
-model = ControlNetSD3(condition_type="tile")
-output = model.text2image([prompt], negative_prompt=[n_prompt], image=[control_image], guidance_scale=0.5)
-model.export(output[0], "./test/test_image/test_controlnet_stable_diffusion_3.tile.png")
-del model
-clear_cache()
-
-# test pose
-model = ControlNetSD3(condition_type="pose")
-control_image = load_image("https://huggingface.co/InstantX/SD3-Controlnet-Pose/resolve/main/pose.jpg")
-output = model.text2image([prompt], negative_prompt=[n_prompt], image=[control_image], guidance_scale=0.5)
-model.export(output[0], "./test/test_image/test_controlnet_stable_diffusion_3.pose.png")
-del model
-clear_cache()
-
+output_path = "./test/test_image_controlnet/output"
+os.makedirs(output_path, exist_ok=True)
+prefix = "test_controlnet_sd2"
+image_animal = load_image("test/sample_image_animal.png")
+image_human = load_image("test/sample_image_human.png")
 # test canny
 model = ControlNetSD3(condition_type="canny")
-control_image = load_image("https://huggingface.co/InstantX/SD3-Controlnet-Canny/resolve/main/canny.jpg")
-output = model.text2image([prompt], negative_prompt=[n_prompt], image=[control_image], guidance_scale=0.5)
-model.export(output[0], "./test/test_image/test_controlnet_stable_diffusion_3.canny.png")
-del model
-clear_cache()
+output = model(
+    ["robotic, transformers, mechanical lion, a futuristic research complex, hard lighting"],
+    negative_prompt=['low quality, bad quality'],
+    image=[image_animal]
+)
+model.export(output[0], f"{output_path}/{prefix}.sample_image_animal.canny.png")
+output = model(
+    ["cyberpunk, anime style, cool, beauty, HQ"],
+    negative_prompt=['low quality, bad quality'],
+    image=[image_human]
+)
+model.export(output[0], f"{output_path}/{prefix}.sample_image_human.canny.png")
+# test depth
+model = ControlNetSD3(condition_type="pose")
+output = model(
+    ["robotic, transformers, mechanical lion, a futuristic research complex, hard lighting"],
+    negative_prompt=['low quality, bad quality'],
+    image=[image_animal]
+)
+model.export(output[0], f"{output_path}/{prefix}.sample_image_animal.pose.png")
+output = model(
+    ["cyberpunk, anime style, cool, beauty, HQ"],
+    negative_prompt=['low quality, bad quality'],
+    image=[image_human]
+)
+model.export(output[0], f"{output_path}/{prefix}.sample_image_human.pose.png")
+# test tile
+model = ControlNetSD3(condition_type="tile")
+output = model(
+    ["robotic, transformers, mechanical lion, a futuristic research complex, hard lighting"],
+    negative_prompt=['low quality, bad quality'],
+    image=[image_animal]
+)
+model.export(output[0], f"{output_path}/{prefix}.sample_image_animal.tile.png")
+output = model(
+    ["cyberpunk, anime style, cool, beauty, HQ"],
+    negative_prompt=['low quality, bad quality'],
+    image=[image_human]
+)
+model.export(output[0], f"{output_path}/{prefix}.sample_image_human.tile.png")
