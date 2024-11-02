@@ -15,7 +15,7 @@ def test(model, output_path, prefix):
         reverse_editing_direction=[True, False],
         seed=42
     )
-    model.export(output[0], f"{output_path}/{prefix}.{os.path.basename(sample_image)}.png")
+    model.export(output, f"{output_path}/{prefix}.{os.path.basename(sample_image)}.png")
 
     sample_image = "./test/sample_image_human.png"
     init_image = load_image(sample_image)
@@ -26,7 +26,7 @@ def test(model, output_path, prefix):
         reverse_editing_direction=[True, False],
         seed=42
     )
-    model.export(output[0], f"{output_path}/{prefix}.{os.path.basename(sample_image)}.png")
+    model.export(output, f"{output_path}/{prefix}.{os.path.basename(sample_image)}.png")
 
 
 test(LEditsPP(), "./test/test_image_ledits/output", "test_ledits")
