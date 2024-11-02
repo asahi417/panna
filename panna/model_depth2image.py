@@ -63,11 +63,10 @@ class Depth2Image:
             logger.info(f"[batch: {idx + 1}] generating...")
             start = idx * batch_size
             end = min((idx + 1) * batch_size, len(prompt))
-            print(torch.concat(depth_maps[start:end]).shape)
             output_list += self.base_model(
                 prompt=prompt[start:end],
                 image=image[start:end],
-                depth_map=torch.concat(depth_maps[start:end]),
+                depth_map=torch.concat(depth_maps[start:end]).unsqueeze(0),
                 negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
                 guidance_scale=guidance_scale,
                 num_inference_steps=num_inference_steps,
