@@ -4,6 +4,7 @@ import torch
 from diffusers import StableDiffusionDepth2ImgPipeline
 from PIL.Image import Image
 from .util import get_generator, clear_cache, get_logger
+from .model_depth_anything_v2 import DepthAnythingV2
 
 logger = get_logger(__name__)
 
@@ -21,17 +22,18 @@ class Depth2Image:
         self.base_model = StableDiffusionDepth2ImgPipeline.from_pretrained(
             base_model_id, use_safetensors=True, variant=variant, torch_dtype=torch_dtype, device_map=device_map, low_cpu_mem_usage=low_cpu_mem_usage
         )
+        self.depth_anything = DepthAnythingV2()
 
-    def text2image(self,
-                   image: List[Image],
-                   prompt: List[str],
-                   depth_maps: Optional[List[torch.Tensor]] = None,
-                   batch_size: Optional[int] = None,
-                   negative_prompt: Optional[List[str]] = None,
-                   guidance_scale: float = 7.5,
-                   num_inference_steps: int = 50,
-                   num_images_per_prompt: int = 1,
-                   seed: Optional[int] = None) -> List[Image]:
+    def __call__(self,
+                 image: List[Image],
+                 prompt: List[str],
+                 depth_maps: Optional[List[torch.Tensor]] = None,
+                 batch_size: Optional[int] = None,
+                 negative_prompt: Optional[List[str]] = None,
+                 guidance_scale: float = 7.5,
+                 num_inference_steps: int = 50,
+                 num_images_per_prompt: int = 1,
+                 seed: Optional[int] = None) -> List[Image]:
         """Generate image from text.
 
         :param image:
@@ -49,11 +51,14 @@ class Depth2Image:
         assert len(image) == len(prompt), f"{len(image)} != {len(prompt)}"
         if negative_prompt is not None:
             assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
-        if depth_maps is not None:
-            assert len(depth_maps) == len(prompt), f"{len(depth_maps)} != {len(prompt)}"
+        if depth_maps is None:
+            logger.info("run depth anything v2")
+            depth_maps = self.depth_anything(image, return_tensor=True)
+        assert len(depth_maps) == len(prompt), f"{len(depth_maps)} != {len(prompt)}"
         batch_size = len(prompt) if batch_size is None else batch_size
         idx = 0
         output_list = []
+        logger.info("run depth2image")
         while idx * batch_size < len(prompt):
             logger.info(f"[batch: {idx + 1}] generating...")
             start = idx * batch_size
@@ -61,7 +66,7 @@ class Depth2Image:
             output_list += self.base_model(
                 prompt=prompt[start:end],
                 image=image[start:end],
-                depth_map=None if depth_maps is None else torch.concat(depth_maps[start:end]),
+                depth_map=torch.concat(depth_maps[start:end]),
                 negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
                 guidance_scale=guidance_scale,
                 num_inference_steps=num_inference_steps,
