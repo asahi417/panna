@@ -38,11 +38,11 @@ class DepthAnythingV2:
         else:
             self.pipe = pipeline(task="depth-estimation", model=base_model_id)
 
-    def image2depth(self,
-                    image: List[Image],
-                    batch_size: Optional[int] = None,
-                    return_tensor: bool = False,
-                    reverse_depth: bool = False) -> List[Union[Image, torch.Tensor]]:
+    def __call__(self,
+                 image: List[Image],
+                 batch_size: Optional[int] = None,
+                 return_tensor: bool = False,
+                 reverse_depth: bool = False) -> List[Union[Image, torch.Tensor]]:
         """ Generate depth map from image.
 
         :param image:
