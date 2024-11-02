@@ -44,7 +44,7 @@ class ControlNetSD2:
                 "diffusers/controlnet-zoe-depth-sdxl-1.0", torch_dtype=torch_dtype, low_cpu_mem_usage=low_cpu_mem_usage
             )
             depth = DepthAnythingV2()
-            self.get_condition = lambda x: depth.image2depth([x])[0]
+            self.get_condition = lambda x: depth([x])[0]
         else:
             raise ValueError(f"unknown condition: {condition_type}")
         if torch.cuda.is_available():
