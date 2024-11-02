@@ -5,7 +5,8 @@ from .model_txt2img_image_stable_diffusion_xl import (
     SDXLBaseImg2Img,
     SDXLTurbo,
     SDXLTurboImg2Img,
-    RealVisXL
+    RealVisXL,
+    RealVisXLImg2Img
 )
 from .model_txt2img_image_stable_diffusion_3 import (
     SD3,

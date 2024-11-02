@@ -248,6 +248,7 @@ class RealVisXL(SDXL):
             low_cpu_mem_usage=True,
         )
 
+
 class RealVisXLImg2Img(SDXL):
 
     def __init__(self):
