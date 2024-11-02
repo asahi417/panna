@@ -1,5 +1,6 @@
 from typing import Optional, List
 from tqdm import tqdm
+import torch
 from PIL.Image import Image
 from panna import SVD, SDUpScaler, InstructIR
 from panna.util import get_logger
@@ -9,8 +10,22 @@ logger = get_logger(__name__)
 
 class PipelineSVDUpscale:
 
-    def __init__(self, upscaler: str = "diffusion"):
-        self.svd = SVD()
+    def __init__(self,
+                 upscaler: str = "diffusion",
+                 base_model_id: str = "stabilityai/stable-video-diffusion-img2vid-xt-1-1",
+                 variant: str = "fp16",
+                 torch_dtype: torch.dtype = torch.float16,
+                 device_map: Optional[str] = "balanced",
+                 low_cpu_mem_usage: bool = True,
+                 enable_model_cpu_offload: bool = False):
+        self.svd = SVD(
+            base_model_id=base_model_id,
+            variant=variant,
+            torch_dtype=torch_dtype,
+            device_map=device_map,
+            low_cpu_mem_usage=low_cpu_mem_usage,
+            enable_model_cpu_offload=enable_model_cpu_offload
+        )
         if upscaler == "diffusion":
             self.upscaler = SDUpScaler()
         elif upscaler == "instruct_ir":
@@ -29,7 +44,7 @@ class PipelineSVDUpscale:
                  noise_aug_strength: float = 0.02,
                  seed: Optional[int] = None) -> List[Image]:
         logger.info("run image2video")
-        frames = self.svd.image2video(
+        frames = self.svd(
             [image],
             decode_chunk_size=decode_chunk_size,
             num_frames=num_frames,
