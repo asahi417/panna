@@ -4,11 +4,11 @@ from diffusers.utils import load_image
 
 output_path = "./test/test_image_controlnet/output"
 os.makedirs(output_path, exist_ok=True)
-prefix = "test_controlnet_sd2"
+prefix = "test_controlnet_sd3"
 image_animal = load_image("test/sample_image_animal.png")
 image_human = load_image("test/sample_image_human.png")
 # test canny
-model = ControlNetSD3(condition_type="canny")
+model = ControlNetSD3(condition_type="canny", enable_model_cpu_offload=True, device_map=None)
 output = model(
     ["robotic, transformers, mechanical lion, a futuristic research complex, hard lighting"],
     negative_prompt=['low quality, bad quality'],
@@ -22,7 +22,7 @@ output = model(
 )
 model.export(output[0], f"{output_path}/{prefix}.sample_image_human.canny.png")
 # test depth
-model = ControlNetSD3(condition_type="pose")
+model = ControlNetSD3(condition_type="pose", enable_model_cpu_offload=True, device_map=None)
 output = model(
     ["robotic, transformers, mechanical lion, a futuristic research complex, hard lighting"],
     negative_prompt=['low quality, bad quality'],
@@ -36,7 +36,7 @@ output = model(
 )
 model.export(output[0], f"{output_path}/{prefix}.sample_image_human.pose.png")
 # test tile
-model = ControlNetSD3(condition_type="tile")
+model = ControlNetSD3(condition_type="tile", enable_model_cpu_offload=True, device_map=None)
 output = model(
     ["robotic, transformers, mechanical lion, a futuristic research complex, hard lighting"],
     negative_prompt=['low quality, bad quality'],

@@ -23,8 +23,9 @@ class ControlNetSD3:
                  condition_type: str = "canny",
                  variant: str = "fp16",
                  torch_dtype: torch.dtype = torch.float16,
-                 device_map: str = "balanced",
-                 low_cpu_mem_usage: bool = True):
+                 device_map: Optional[str] = "balanced",
+                 low_cpu_mem_usage: bool = True,
+                 enable_model_cpu_offload: bool = False):
         config = dict(use_safetensors=True, torch_dtype=torch_dtype, low_cpu_mem_usage=low_cpu_mem_usage)
         if condition_type == "canny":
             controlnet = SD3ControlNetModel.from_pretrained("InstantX/SD3-Controlnet-Canny", **config)
@@ -42,6 +43,8 @@ class ControlNetSD3:
         self.base_model = StableDiffusion3ControlNetPipeline.from_pretrained(
             base_model_id, controlnet=controlnet, variant=variant, device_map=device_map, **config
         )
+        if enable_model_cpu_offload:
+            self.base_model.enable_model_cpu_offload()
 
     def __call__(self,
                  prompt: List[str],
