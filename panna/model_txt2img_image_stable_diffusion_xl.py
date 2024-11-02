@@ -247,3 +247,19 @@ class RealVisXL(SDXL):
             device_map="balanced",
             low_cpu_mem_usage=True,
         )
+
+class RealVisXLImg2Img(SDXL):
+
+    def __init__(self):
+        super().__init__(
+            use_refiner=False,
+            base_model_id="SG161222/RealVisXL_V4.0",
+            guidance_scale=3.0,
+            num_inference_steps=20,
+            variant="fp16",
+            torch_dtype=torch.float16,
+            device_map="balanced",
+            low_cpu_mem_usage=True,
+            strength=0.5,
+            img2img=True
+        )
