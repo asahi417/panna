@@ -11,6 +11,8 @@ logger = get_logger(__name__)
 
 
 def tensor_to_image(predicted_depth: torch.Tensor, image: Image) -> Image:
+    print(predicted_depth.unsqueeze(1).shape)
+    print(image.size)
     prediction = torch.nn.functional.interpolate(
         predicted_depth.unsqueeze(1),
         size=image.size[::-1],
