@@ -14,7 +14,7 @@ def tensor_to_image(predicted_depth: torch.Tensor, image: Image) -> Image:
     print(predicted_depth.unsqueeze(1).shape)
     print(image.size)
     prediction = torch.nn.functional.interpolate(
-        predicted_depth.unsqueeze(1),
+        predicted_depth,
         size=image.size[::-1],
         mode="bicubic",
         align_corners=False,
