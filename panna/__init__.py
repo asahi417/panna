@@ -30,6 +30,7 @@ from .model_img2txt_clip_interrogator import CLIPInterrogator
 from .model_img2img_depth2image import Depth2Image
 from .model_img2img_controlnet_stable_diffusion_2 import ControlNetSD2
 from .model_img2img_controlnet_stable_diffusion_3 import ControlNetSD3
+from .model_img2img_ledits_pp import LEditsPP
 
 # depth
 from .model_img2img_depth_anything_v2 import DepthAnythingV2

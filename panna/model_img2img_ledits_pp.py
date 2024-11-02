@@ -29,7 +29,7 @@ preset_parameter = {
 }
 
 
-class PipelineLEditsPP:
+class LEditsPP:
 
     base_model_id: str
     base_model: LEditsPPPipelineStableDiffusionXL
@@ -49,7 +49,6 @@ class PipelineLEditsPP:
                  image: Image,
                  edit_prompt: List[str],
                  reverse_editing_direction: List[bool],
-                 output_path: Optional[str] = None,
                  edit_guidance_scale: Optional[List[float]] = None,
                  edit_threshold: Optional[List[float]] = None,
                  edit_warmup_steps: Optional[List[int]] = None,
@@ -80,7 +79,9 @@ class PipelineLEditsPP:
             edit_warmup_steps=edit_warmup_steps,
             generator=get_generator(seed)
         ).images[0]
-        if output_path:
-            image.save(output_path)
         clear_cache()
         return image
+
+    @staticmethod
+    def export(data: Image, output_path: str, file_format: str = "png") -> None:
+        data.save(output_path, file_format)
