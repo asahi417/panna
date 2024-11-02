@@ -4,7 +4,7 @@ import torch
 from diffusers import StableDiffusionDepth2ImgPipeline
 from PIL.Image import Image
 from .util import get_generator, clear_cache, get_logger
-from .model_depth_anything_v2 import DepthAnythingV2
+from .model_img2img_depth_anything_v2 import DepthAnythingV2
 
 logger = get_logger(__name__)
 

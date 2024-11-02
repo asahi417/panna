@@ -19,8 +19,8 @@ from .model_img2img_stable_diffusion_upscaler import SDUpScaler
 from .model_img2txt_clip_interrogator import CLIPInterrogator
 
 from .model_txt2vid_stable_video_diffusion import SVD
-from .model_depth_anything_v2 import DepthAnythingV2
-from .model_depth2image import Depth2Image
+from .model_img2img_depth_anything_v2 import DepthAnythingV2
+from .model_img2img_depth2image import Depth2Image
 from .model_img2img_controlnet_stable_diffusion_2 import ControlNetSD2
 from .model_img2img_controlnet_stable_diffusion_3 import ControlNetSD3
 from .model_realvis_xl import RealVisXL
