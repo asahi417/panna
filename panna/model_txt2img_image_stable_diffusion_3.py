@@ -1,5 +1,5 @@
 """Model class for stable diffusion3."""
-from typing import Optional, List
+from typing import Optional
 
 import torch
 from diffusers import StableDiffusion3Pipeline
@@ -38,53 +38,30 @@ class SD3:
         self.max_sequence_length = max_sequence_length
 
     def __call__(self,
-                 prompt: List[str],
-                 batch_size: Optional[int] = None,
-                 negative_prompt: Optional[List[str]] = None,
+                 prompt: str,
+                 negative_prompt: Optional[str] = None,
                  guidance_scale: Optional[float] = None,
                  num_inference_steps: Optional[int] = None,
                  num_images_per_prompt: int = 1,
                  height: Optional[int] = None,
                  width: Optional[int] = None,
-                 seed: Optional[int] = None,
-                 max_sequence_length: Optional[int] = None) -> List[Image]:
-        """Generate image from text.
-
-        :param prompt:
-        :param batch_size:
-        :param negative_prompt:
-        :param guidance_scale:
-        :param num_inference_steps:
-        :param num_images_per_prompt:
-        :param height:
-        :param width:
-        :param seed:
-        :return:
-        """
+                 seed: int = 42,
+                 max_sequence_length: Optional[int] = None) -> Image:
         guidance_scale = self.guidance_scale if guidance_scale is None else guidance_scale
         num_inference_steps = self.num_inference_steps if num_inference_steps is None else num_inference_steps
         max_sequence_length = self.max_sequence_length if max_sequence_length is None else max_sequence_length
-        if negative_prompt is not None:
-            assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
-        batch_size = len(prompt) if batch_size is None else batch_size
-        idx = 0
-        output_list = []
-        while idx * batch_size < len(prompt):
-            logger.info(f"[batch: {idx + 1}] generating...")
-            start = idx * batch_size
-            end = min((idx + 1) * batch_size, len(prompt))
-            output_list += self.base_model(
-                prompt=prompt[start:end],
-                negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
-                guidance_scale=guidance_scale,
-                num_images_per_prompt=num_images_per_prompt,
-                num_inference_steps=num_inference_steps,
-                height=height,
-                width=width,
-                generator=get_generator(seed)
-            ).images
-            idx += 1
-            clear_cache()
+        output_list = self.base_model(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            guidance_scale=guidance_scale,
+            num_images_per_prompt=num_images_per_prompt,
+            num_inference_steps=num_inference_steps,
+            height=height,
+            width=width,
+            max_sequence_length=max_sequence_length,
+            generator=get_generator(seed)
+        ).images
+        clear_cache()
         return output_list
 
     @staticmethod
@@ -169,55 +146,30 @@ class SD3BitsAndBytesModel:
         self.base_model.enable_model_cpu_offload()
 
     def __call__(self,
-                 prompt: List[str],
-                 batch_size: Optional[int] = None,
-                 negative_prompt: Optional[List[str]] = None,
+                 prompt: str,
+                 negative_prompt: Optional[str] = None,
                  num_inference_steps: Optional[int] = None,
                  guidance_scale: Optional[float] = None,
                  num_images_per_prompt: int = 1,
                  height: Optional[int] = None,
                  width: Optional[int] = None,
-                 seed: Optional[int] = None,
-                 max_sequence_length: Optional[int] = None) -> List[Image]:
-        """Generate image from text.
-
-        :param prompt:
-        :param batch_size:
-        :param negative_prompt:
-        :param guidance_scale:
-        :param num_inference_steps:
-        :param num_images_per_prompt:
-        :param height:
-        :param width:
-        :param seed:
-        :param max_sequence_length:
-        :return:
-        """
+                 seed: int = 42,
+                 max_sequence_length: Optional[int] = None) -> Image:
         guidance_scale = self.guidance_scale if guidance_scale is None else guidance_scale
         num_inference_steps = self.num_inference_steps if num_inference_steps is None else num_inference_steps
         max_sequence_length = self.max_sequence_length if max_sequence_length is None else max_sequence_length
-        if negative_prompt is not None:
-            assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
-        batch_size = len(prompt) if batch_size is None else batch_size
-        idx = 0
-        output_list = []
-        while idx * batch_size < len(prompt):
-            logger.info(f"[batch: {idx + 1}] generating...")
-            start = idx * batch_size
-            end = min((idx + 1) * batch_size, len(prompt))
-            output_list += self.base_model(
-                prompt=prompt[start:end],
-                negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
-                guidance_scale=guidance_scale,
-                num_images_per_prompt=num_images_per_prompt,
-                num_inference_steps=num_inference_steps,
-                height=height,
-                max_sequence_length=max_sequence_length,
-                width=width,
-                generator=get_generator(seed)
-            ).images
-            idx += 1
-            clear_cache()
+        output_list = self.base_model(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            guidance_scale=guidance_scale,
+            num_images_per_prompt=num_images_per_prompt,
+            num_inference_steps=num_inference_steps,
+            height=height,
+            max_sequence_length=max_sequence_length,
+            width=width,
+            generator=get_generator(seed)
+        ).images
+        clear_cache()
         return output_list
 
     @staticmethod

@@ -10,42 +10,42 @@ image_human = load_image("test/sample_image_human.png")
 # test canny
 model = ControlNetSD3(condition_type="canny", enable_model_cpu_offload=True, device_map=None)
 output = model(
-    ["robotic, transformers, mechanical lion, a futuristic research complex, hard lighting"],
-    negative_prompt=['low quality, bad quality'],
-    image=[image_animal]
+    "robotic, transformers, mechanical lion, a futuristic research complex, hard lighting",
+    negative_prompt='low quality, bad quality',
+    image=image_animal
 )
-model.export(output[0], f"{output_path}/{prefix}.sample_image_animal.canny.png")
+model.export(output, f"{output_path}/{prefix}.sample_image_animal.canny.png")
 output = model(
-    ["cyberpunk, anime style, cool, beauty, HQ"],
-    negative_prompt=['low quality, bad quality'],
-    image=[image_human]
+    "cyberpunk, anime style, cool, beauty, HQ",
+    negative_prompt='low quality, bad quality',
+    image=image_human
 )
-model.export(output[0], f"{output_path}/{prefix}.sample_image_human.canny.png")
+model.export(output, f"{output_path}/{prefix}.sample_image_human.canny.png")
 # test depth
 model = ControlNetSD3(condition_type="pose", enable_model_cpu_offload=True, device_map=None)
 output = model(
-    ["robotic, transformers, mechanical lion, a futuristic research complex, hard lighting"],
-    negative_prompt=['low quality, bad quality'],
-    image=[image_animal]
+    "robotic, transformers, mechanical lion, a futuristic research complex, hard lighting",
+    negative_prompt='low quality, bad quality',
+    image=image_animal
 )
-model.export(output[0], f"{output_path}/{prefix}.sample_image_animal.pose.png")
+model.export(output, f"{output_path}/{prefix}.sample_image_animal.pose.png")
 output = model(
-    ["cyberpunk, anime style, cool, beauty, HQ"],
-    negative_prompt=['low quality, bad quality'],
-    image=[image_human]
+    "cyberpunk, anime style, cool, beauty, HQ",
+    negative_prompt='low quality, bad quality',
+    image=image_human
 )
-model.export(output[0], f"{output_path}/{prefix}.sample_image_human.pose.png")
+model.export(output, f"{output_path}/{prefix}.sample_image_human.pose.png")
 # test tile
 model = ControlNetSD3(condition_type="tile", enable_model_cpu_offload=True, device_map=None)
 output = model(
-    ["robotic, transformers, mechanical lion, a futuristic research complex, hard lighting"],
-    negative_prompt=['low quality, bad quality'],
-    image=[image_animal]
+    "robotic, transformers, mechanical lion, a futuristic research complex, hard lighting",
+    negative_prompt='low quality, bad quality',
+    image=image_animal
 )
-model.export(output[0], f"{output_path}/{prefix}.sample_image_animal.tile.png")
+model.export(output, f"{output_path}/{prefix}.sample_image_animal.tile.png")
 output = model(
-    ["cyberpunk, anime style, cool, beauty, HQ"],
-    negative_prompt=['low quality, bad quality'],
-    image=[image_human]
+    "cyberpunk, anime style, cool, beauty, HQ",
+    negative_prompt='low quality, bad quality',
+    image=image_human
 )
-model.export(output[0], f"{output_path}/{prefix}.sample_image_human.tile.png")
+model.export(output, f"{output_path}/{prefix}.sample_image_human.tile.png")

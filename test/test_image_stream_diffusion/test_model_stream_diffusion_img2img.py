@@ -11,7 +11,7 @@ def test(output_path, prefix):
     model = StreamDiffusionImg2Img(prompt=prompt, seed=42)
     for i in sample_images:
         init_image = load_image(i)
-        output = model(image=init_image)
+        output = model(image=init_image, negative_prompt="")
         model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.png")
         output = model(image=init_image, negative_prompt=negative_prompt)
         model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.negative.png")

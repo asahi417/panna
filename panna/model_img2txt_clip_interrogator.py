@@ -1,5 +1,3 @@
-from typing import List
-from tqdm import tqdm
 import torch
 from clip_interrogator import Config, Interrogator
 from PIL.Image import Image
@@ -19,9 +17,7 @@ class CLIPInterrogator:
         config.blip_num_beams = 64
         self.ci = Interrogator(config)
 
-    def __call__(self, image: List[Image], best_max_flavors: int = 32):
-        captions = []
-        for i in tqdm(image):
-            captions.append(self.ci.interrogate(i.convert('RGB'), max_flavors=best_max_flavors))
-            clear_cache()
-        return captions
+    def __call__(self, image: Image, best_max_flavors: int = 32):
+        caption = self.ci.interrogate(image.convert('RGB'), max_flavors=best_max_flavors)
+        clear_cache()
+        return caption

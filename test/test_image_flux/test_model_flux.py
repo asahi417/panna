@@ -9,10 +9,10 @@ def test(model, output_path, prefix):
         "A face of female model, high quality, fashion, Paris, Vogue, Maison Margiela, 8k"
     ]
     for i, p in enumerate(prompts):
-        output = model([p], batch_size=1, seed=42)
-        model.export(output[0], f"{output_path}/{prefix}.{i}.png")
-        output = model([p], batch_size=1, seed=42, width=1024, height=720)
-        model.export(output[0], f"{output_path}/{prefix}.{i}.landscape.png")
+        output = model(p, seed=42)
+        model.export(output, f"{output_path}/{prefix}.{i}.png")
+        output = model(p, seed=42, width=1024, height=720)
+        model.export(output, f"{output_path}/{prefix}.{i}.landscape.png")
 
 
 test(

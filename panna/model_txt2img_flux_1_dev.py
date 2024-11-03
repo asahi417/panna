@@ -1,5 +1,5 @@
 """Model class for FLUX 1 dev."""
-from typing import Optional, List
+from typing import Optional
 import torch
 from diffusers import FluxPipeline
 from PIL.Image import Image
@@ -25,44 +25,23 @@ class Flux1Dev:
             self.base_model.enable_model_cpu_offload()
 
     def __call__(self,
-                 prompt: List[str],
-                 batch_size: Optional[int] = None,
+                 prompt: str,
                  guidance_scale: float = 3.5,
                  num_inference_steps: int = 28,
                  num_images_per_prompt: int = 1,
                  height: Optional[int] = None,
                  width: Optional[int] = None,
-                 seed: Optional[int] = None) -> List[Image]:
-        """Generate image from text.
-
-        :param prompt:
-        :param batch_size:
-        :param guidance_scale:
-        :param num_inference_steps:
-        :param num_images_per_prompt:
-        :param height:
-        :param width:
-        :param seed:
-        :return:
-        """
-        batch_size = len(prompt) if batch_size is None else batch_size
-        idx = 0
-        output_list = []
-        while idx * batch_size < len(prompt):
-            logger.info(f"[batch: {idx + 1}] generating...")
-            start = idx * batch_size
-            end = min((idx + 1) * batch_size, len(prompt))
-            output_list += self.base_model(
-                prompt=prompt[start:end],
-                guidance_scale=guidance_scale,
-                num_images_per_prompt=num_images_per_prompt,
-                num_inference_steps=num_inference_steps,
-                height=height,
-                width=width,
-                generator=get_generator(seed)
-            ).images
-            idx += 1
-            clear_cache()
+                 seed: int = 42) -> Image:
+        output_list = self.base_model(
+            prompt=prompt,
+            guidance_scale=guidance_scale,
+            num_images_per_prompt=num_images_per_prompt,
+            num_inference_steps=num_inference_steps,
+            height=height,
+            width=width,
+            generator=get_generator(seed)
+        ).images
+        clear_cache()
         return output_list
 
     @staticmethod

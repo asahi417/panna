@@ -1,5 +1,5 @@
 """Model class for stable diffusion2."""
-from typing import Optional, Dict, List, Any, Union
+from typing import Optional, List, Union
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from PIL.Image import Image
@@ -77,34 +77,17 @@ class SDXL:
                 raise ValueError(f"Wrong shape: {len(prompt)} != {len(negative_prompt)}")
 
     def __call__(self,
-                 prompt: List[str] = None,
-                 image: Optional[List[Image]] = None,
+                 prompt: Optional[str] = None,
+                 image: Optional[Image] = None,
                  strength: Optional[float] = None,
-                 batch_size: Optional[int] = None,
-                 negative_prompt: Optional[List[str]] = None,
+                 negative_prompt: Optional[str] = None,
                  guidance_scale: Optional[float] = None,
                  num_inference_steps: Optional[int] = None,
                  num_images_per_prompt: int = 1,
                  high_noise_frac: Optional[float] = None,
                  height: Optional[int] = None,
                  width: Optional[int] = None,
-                 seed: Optional[int] = None) -> List[Image]:
-        """Generate image from text.
-
-        :param prompt:
-        :param image:
-        :param strength:
-        :param batch_size:
-        :param negative_prompt:
-        :param guidance_scale:
-        :param num_inference_steps: Define how many steps and what % of steps to be run on each expert (80/20) here.
-        :param num_images_per_prompt:
-        :param high_noise_frac: Define how many steps and what % of steps to be run on refiner.
-        :param height:
-        :param width:
-        :param seed:
-        :return: List of images.
-        """
+                 seed: Optional[int] = None) -> Image:
         self.validate_input(prompt, image, negative_prompt)
         shared_config = dict(
             num_inference_steps=self.num_inference_steps if num_inference_steps is None else num_inference_steps,
@@ -117,46 +100,37 @@ class SDXL:
         if self.img2img:
             shared_config["strength"] = self.strength if strength is None else strength
             if shared_config["height"] is not None and shared_config["width"] is not None:
-                image = [resize_image(i, shared_config["width"], shared_config["height"]) for i in image]
+                image = resize_image(image, shared_config["width"], shared_config["height"])
         if self.refiner_model:
             shared_config["output_type"] = "latent"
             shared_config["denoising_end"] = self.high_noise_frac if high_noise_frac is None else high_noise_frac
-        batch_size = len(prompt) if batch_size is None else batch_size
-        idx = 0
-        output_list = []
-        while idx * batch_size < len(prompt):
-            logger.info(f"[batch: {idx + 1}] generating...")
-            start = idx * batch_size
-            end = min((idx + 1) * batch_size, len(prompt))
-            if self.img2img:
-                output = self.base_model(
-                    image=image[start:end],
-                    prompt=prompt[start:end],
-                    negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
-                    **shared_config
-                ).images
-            else:
-                output = self.base_model(
-                    prompt=prompt[start:end],
-                    negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
-                    **shared_config
-                ).images
-            if self.refiner_model:
-                logger.info(f"[batch: {idx + 1}] running refiner model...")
-                output_list += self.refiner_model(
-                    image=output,
-                    prompt=prompt[start:end],
-                    negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
-                    num_inference_steps=shared_config["num_inference_steps"],
-                    denoising_start=shared_config["denoising_end"],
-                    height=shared_config["height"],
-                    width=shared_config["width"],
-                    generator=shared_config["generator"]
-                ).images
-            else:
-                output_list += output
-            idx += 1
-            clear_cache()
+        if self.img2img:
+            output = self.base_model(
+                image=image,
+                prompt=prompt,
+                negative_prompt=negative_prompt,
+                **shared_config
+            ).images
+        else:
+            output = self.base_model(
+                prompt=prompt,
+                negative_prompt=negative_prompt,
+                **shared_config
+            ).images
+        if self.refiner_model:
+            output_list = self.refiner_model(
+                image=output,
+                prompt=prompt,
+                negative_prompt=negative_prompt,
+                num_inference_steps=shared_config["num_inference_steps"],
+                denoising_start=shared_config["denoising_end"],
+                height=shared_config["height"],
+                width=shared_config["width"],
+                generator=shared_config["generator"]
+            ).images
+        else:
+            output_list = output
+        clear_cache()
         return output_list
 
     @staticmethod

@@ -33,26 +33,23 @@ class InstructIR:
         image = image.astype(np.float32)
         return torch.tensor(image).permute(2, 0, 1).unsqueeze(0).to(self.device)
 
-    def __call__(self, image: List[Image.Image], prompt: Optional[List[str]] = None) -> List[Image.Image]:
+    def __call__(self, image: Image.Image, prompt: Optional[str] = None) -> Image.Image:
         """Generate high resolution image from low resolution image.
 
         :param image:
         :param prompt:
         :return:
         """
-        prompt = ["Correct the motion blur in this image so it is more clear"] * len(image) if prompt is None else prompt
-        assert len(prompt) == len(image), f"{len(prompt)} != {len(image)}"
-        output_list = []
-        for i in image:
-            with torch.no_grad():
-                y = self.preprocess(i)
-                lm_embd = self.language_model(prompt).to(self.device)
-                text_embd, deg_pred = self.lm_head(lm_embd)
-                x_hat = self.model(y, text_embd)
-                restored_img = x_hat.squeeze().permute(1, 2, 0).clamp_(0, 1).cpu().detach().numpy()
-                restored_img = np.clip(restored_img, 0.0, 1.)
-                restored_img = (restored_img * 255.0).round().astype(np.uint8)
-            output_list.append(Image.fromarray(restored_img))
+        prompt = "Correct the motion blur in this image so it is more clear" if prompt is None else prompt
+        with torch.no_grad():
+            y = self.preprocess(image)
+            lm_embd = self.language_model(prompt).to(self.device)
+            text_embd, deg_pred = self.lm_head(lm_embd)
+            x_hat = self.model(y, text_embd)
+            restored_img = x_hat.squeeze().permute(1, 2, 0).clamp_(0, 1).cpu().detach().numpy()
+            restored_img = np.clip(restored_img, 0.0, 1.)
+            restored_img = (restored_img * 255.0).round().astype(np.uint8)
+            output_list = Image.fromarray(restored_img)
             clear_cache()
         return output_list
 

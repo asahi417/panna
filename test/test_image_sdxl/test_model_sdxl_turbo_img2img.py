@@ -10,10 +10,10 @@ def test(model, output_path, prefix):
     negative_prompt = "low quality"
     for i in sample_images:
         init_image = load_image(i)
-        output = model(image=[init_image], prompt=[prompt], batch_size=1, seed=42)
-        model.export(output[0], f"{output_path}/{prefix}.{os.path.basename(i)}.png")
-        output = model(image=[init_image], prompt=[prompt], negative_prompt=[negative_prompt], batch_size=1, seed=42)
-        model.export(output[0], f"{output_path}/{prefix}.{os.path.basename(i)}.negative.png")
+        output = model(image=init_image, prompt=prompt, seed=42)
+        model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.png")
+        output = model(image=init_image, prompt=prompt, negative_prompt=negative_prompt, seed=42)
+        model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.negative.png")
 
 
 test(SDXLTurboImg2Img(), "./test/test_image_sdxl/output", "test_sdxl_turbo_img2img")

@@ -9,15 +9,15 @@ image_animal = load_image("test/sample_image_animal.png")
 image_human = load_image("test/sample_image_human.png")
 model = Depth2Image()
 output = model(
-    prompt=["cyberpunk, anime style, cool, beauty, HQ"],
-    negative_prompt=['low quality, bad quality'],
-    image=[image_human]
+    prompt="cyberpunk, anime style, cool, beauty, HQ",
+    negative_prompt='low quality, bad quality',
+    image=image_human
 )
-model.export(output[0], f"{output_path}/{prefix}.sample_image_human.png")
+model.export(output, f"{output_path}/{prefix}.sample_image_human.png")
 
 output = model(
-    prompt=["robotic, transformers, mechanical lion, a futuristic research complex, hard lighting"],
-    negative_prompt=['low quality, bad quality'],
-    image=[image_animal]
+    prompt="robotic, transformers, mechanical lion, a futuristic research complex, hard lighting",
+    negative_prompt='low quality, bad quality',
+    image=image_animal
 )
-model.export(output[0], f"{output_path}/{prefix}.sample_image_animal.png")
+model.export(output, f"{output_path}/{prefix}.sample_image_animal.png")
