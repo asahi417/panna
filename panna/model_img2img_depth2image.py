@@ -32,7 +32,7 @@ class Depth2Image:
                  guidance_scale: float = 7.5,
                  num_inference_steps: int = 50,
                  num_images_per_prompt: int = 1,
-                 seed: int = 42) -> List[Image]:
+                 seed: int = 42) -> Image:
         """Generate image from text.
 
         :param image:

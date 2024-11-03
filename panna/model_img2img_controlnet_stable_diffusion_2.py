@@ -81,7 +81,7 @@ class ControlNetSD2:
         logger.info("generate condition")
         condition = self.get_condition(image)
         logger.info("generate image")
-        output_list = self.base_model(w
+        output_list = self.base_model(
             prompt=prompt,
             image=condition,
             controlnet_conditioning_scale=controlnet_conditioning_scale,
