@@ -11,10 +11,10 @@ def test(output_path, prefix):
     model = StreamDiffusionImg2Img(prompt=prompt, seed=42)
     for i in sample_images:
         init_image = load_image(i)
-        output = model(image=init_image)
-        model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.png")
-        # output = model(image=init_image, negative_prompt=negative_prompt)
-        # model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.negative.png")
+        # output = model(image=init_image)
+        # model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.png")
+        output = model(image=init_image, negative_prompt=negative_prompt)
+        model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.negative.png")
 
 
 test("./test/test_image_stream_diffusion/output", "test_stream_diffusion_img2img")
