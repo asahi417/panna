@@ -42,7 +42,10 @@ setup(
         "controlnet_aux",
         "bitsandbytes",
         "streamdiffusion[tensorrt]",
-        "pywin32"
+        "pywin32",
+        "onnx_graphsurgeon",
+        "tensorrt",
+        "polygraphy"
     ],
     python_requires='>=3.8',
     entry_points={

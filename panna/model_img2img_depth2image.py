@@ -25,22 +25,20 @@ class Depth2Image:
         self.depth_anything = DepthAnythingV2()
 
     def __call__(self,
-                 image: List[Image],
-                 prompt: List[str],
-                 depth_maps: Optional[List[torch.Tensor]] = None,
-                 batch_size: Optional[int] = None,
-                 negative_prompt: Optional[List[str]] = None,
+                 image: Image,
+                 prompt: str,
+                 depth_maps: Optional[torch.Tensor] = None,
+                 negative_prompt: Optional[str] = None,
                  guidance_scale: float = 7.5,
                  num_inference_steps: int = 50,
                  num_images_per_prompt: int = 1,
-                 seed: Optional[int] = None) -> List[Image]:
+                 seed: int = 42) -> List[Image]:
         """Generate image from text.
 
         :param image:
         :param prompt:
         :param depth_maps: Depth prediction to be used as additional conditioning for the image generation process. If
             not defined, it automatically predicts the depth with self.depth_estimator.
-        :param batch_size:
         :param negative_prompt: eg. "bad, deformed, ugly, bad anatomy"
         :param guidance_scale:
         :param num_inference_steps: Define how many steps and what % of steps to be run on each expert (80/20) here.
@@ -48,33 +46,21 @@ class Depth2Image:
         :param seed:
         :return:
         """
-        assert len(image) == len(prompt), f"{len(image)} != {len(prompt)}"
-        if negative_prompt is not None:
-            assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
         if depth_maps is None:
             logger.info("run depth anything v2")
             depth_maps = self.depth_anything(image, return_tensor=True)
-        assert len(depth_maps) == len(prompt), f"{len(depth_maps)} != {len(prompt)}"
-        batch_size = len(prompt) if batch_size is None else batch_size
-        idx = 0
-        output_list = []
         logger.info("run depth2image")
-        while idx * batch_size < len(prompt):
-            logger.info(f"[batch: {idx + 1}] generating...")
-            start = idx * batch_size
-            end = min((idx + 1) * batch_size, len(prompt))
-            output_list += self.base_model(
-                prompt=prompt[start:end],
-                image=image[start:end],
-                depth_map=torch.concat(depth_maps[start:end]).unsqueeze(0),
-                negative_prompt=None if negative_prompt is None else negative_prompt[start:end],
-                guidance_scale=guidance_scale,
-                num_inference_steps=num_inference_steps,
-                num_images_per_prompt=num_images_per_prompt,
-                generator=get_generator(seed)
-            ).images
-            idx += 1
-            clear_cache()
+        output_list = self.base_model(
+            prompt=prompt,
+            image=image,
+            depth_map=depth_maps.unsqueeze(0),
+            negative_prompt=negative_prompt,
+            guidance_scale=guidance_scale,
+            num_inference_steps=num_inference_steps,
+            num_images_per_prompt=num_images_per_prompt,
+            generator=get_generator(seed)
+        ).images
+        clear_cache()
         return output_list
 
     @staticmethod

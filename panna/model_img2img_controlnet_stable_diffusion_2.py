@@ -54,23 +54,21 @@ class ControlNetSD2:
         )
 
     def __call__(self,
-                 prompt: List[str],
-                 image: List[Image],
+                 prompt: str,
+                 image: Image,
                  controlnet_conditioning_scale: float = 0.5,
-                 batch_size: Optional[int] = None,
-                 negative_prompt: Optional[List[str]] = None,
+                 negative_prompt: Optional[str] = None,
                  guidance_scale: float = 7.5,
                  num_inference_steps: int = 40,
                  num_images_per_prompt: int = 1,
                  height: Optional[int] = None,
                  width: Optional[int] = None,
-                 seed: Optional[int] = None) -> List[Image]:
+                 seed: int = 42) -> Image:
         """Generate image from text prompt with conditioning.
 
         :param prompt:
         :param image:
         :param controlnet_conditioning_scale:
-        :param batch_size:
         :param negative_prompt:
         :param guidance_scale:
         :param num_inference_steps:
@@ -80,35 +78,22 @@ class ControlNetSD2:
         :param seed:
         :return:
         """
-        assert len(prompt) == len(image), f"{len(prompt)} != {len(image)}"
-        if negative_prompt is not None:
-            assert len(negative_prompt) == len(prompt), f"{len(negative_prompt)} != {len(prompt)}"
-        batch_size = len(prompt) if batch_size is None else batch_size
-        idx = 0
-        output_list = []
         logger.info("generate condition")
-        condition = []
-        for x in image:
-            condition.append(self.get_condition(x))
+        condition = self.get_condition(image)
         logger.info("generate image")
-        while idx * batch_size < len(prompt):
-            logger.info(f"[batch: {idx + 1}] generating...")
-            start = idx * batch_size
-            end = min((idx + 1) * batch_size, len(prompt))
-            output_list += self.base_model(
-                prompt=prompt[start:end],
-                image=condition[start:end],
-                controlnet_conditioning_scale=controlnet_conditioning_scale,
-                negative_prompt=negative_prompt if negative_prompt is None else negative_prompt[start:end],
-                guidance_scale=guidance_scale,
-                num_images_per_prompt=num_images_per_prompt,
-                num_inference_steps=num_inference_steps,
-                height=height,
-                width=width,
-                generator=get_generator(seed)
-            ).images
-            idx += 1
-            clear_cache()
+        output_list = self.base_model(w
+            prompt=prompt,
+            image=condition,
+            controlnet_conditioning_scale=controlnet_conditioning_scale,
+            negative_prompt=negative_prompt,
+            guidance_scale=guidance_scale,
+            num_images_per_prompt=num_images_per_prompt,
+            num_inference_steps=num_inference_steps,
+            height=height,
+            width=width,
+            generator=get_generator(seed)
+        ).images
+        clear_cache()
         return output_list
 
     @staticmethod

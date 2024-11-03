@@ -23,7 +23,7 @@ class StreamDiffusion:
             t_index_list=[0, 16, 32, 45],
             frame_buffer_size=1,
             warmup=10,
-            acceleration="tensorrt",
+            acceleration="none",
             use_safety_checker=False,
             mode="txt2img",
             seed=seed,
@@ -60,7 +60,7 @@ class StreamDiffusionImg2Img:
             cfg_type="none",
             dtype=torch.float16,
             use_tiny_vae=True,
-            acceleration="tensorrt",
+            acceleration="none",
             use_safety_checker=False,
             mode="img2img",
             seed=seed
