@@ -18,6 +18,7 @@ from .model_txt2img_image_stable_diffusion_3 import (
     SD3LargeTurboBitsAndBytesModel
 )
 from .model_txt2img_flux_1_dev import Flux1Dev
+from .model_txt2img_stream_diffusion import StreamDiffusion, StreamDiffusionImg2Img
 
 # super resolution/image restoration models
 from .model_img2img_instruct_ir import InstructIR

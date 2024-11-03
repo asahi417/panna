@@ -661,3 +661,4 @@ class StreamDiffusionWrapper:
             self.nsfw_fallback_img = Image.new("RGB", (512, 512), (0, 0, 0))
 
         return stream
+
