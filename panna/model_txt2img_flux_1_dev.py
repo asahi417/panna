@@ -42,7 +42,7 @@ class Flux1Dev:
             generator=get_generator(seed)
         ).images
         clear_cache()
-        return output_list
+        return output_list[0]
 
     @staticmethod
     def export(data: Image, output_path: str, file_format: str = "png") -> None:

@@ -42,7 +42,7 @@ class SDUpScaler:
             raise ValueError(f"unknown reshape method: {reshape_method}")
         output_list = self.base_model(image=image, prompt=prompt).images
         clear_cache()
-        return output_list
+        return output_list[0]
 
     @staticmethod
     def export(data: Image, output_path: str, file_format: str = "png") -> None:
