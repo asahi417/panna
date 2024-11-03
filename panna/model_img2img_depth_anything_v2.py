@@ -39,14 +39,6 @@ class DepthAnythingV2:
                  image: Image,
                  return_tensor: bool = False,
                  reverse_depth: bool = False) -> Union[Image, torch.Tensor]:
-        """ Generate depth map from image.
-
-        :param image:
-        :param batch_size:
-        :param return_tensor:
-        :param reverse_depth:
-        :return: List of image. (batch, width, height)
-        """
         depth = self.pipe(image)
         clear_cache()
         if reverse_depth:

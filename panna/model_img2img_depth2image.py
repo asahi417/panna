@@ -33,19 +33,6 @@ class Depth2Image:
                  num_inference_steps: int = 50,
                  num_images_per_prompt: int = 1,
                  seed: int = 42) -> Image:
-        """Generate image from text.
-
-        :param image:
-        :param prompt:
-        :param depth_maps: Depth prediction to be used as additional conditioning for the image generation process. If
-            not defined, it automatically predicts the depth with self.depth_estimator.
-        :param negative_prompt: eg. "bad, deformed, ugly, bad anatomy"
-        :param guidance_scale:
-        :param num_inference_steps: Define how many steps and what % of steps to be run on each expert (80/20) here.
-        :param num_images_per_prompt:
-        :param seed:
-        :return:
-        """
         if depth_maps is None:
             logger.info("run depth anything v2")
             depth_maps = self.depth_anything(image, return_tensor=True)
@@ -59,7 +46,7 @@ class Depth2Image:
             num_inference_steps=num_inference_steps,
             num_images_per_prompt=num_images_per_prompt,
             generator=get_generator(seed)
-        ).images
+        ).images[0]
         clear_cache()
         return output_list
 

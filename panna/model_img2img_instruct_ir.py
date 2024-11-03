@@ -34,12 +34,6 @@ class InstructIR:
         return torch.tensor(image).permute(2, 0, 1).unsqueeze(0).to(self.device)
 
     def __call__(self, image: Image.Image, prompt: Optional[str] = None) -> Image.Image:
-        """Generate high resolution image from low resolution image.
-
-        :param image:
-        :param prompt:
-        :return:
-        """
         prompt = "Correct the motion blur in this image so it is more clear" if prompt is None else prompt
         with torch.no_grad():
             y = self.preprocess(image)

@@ -64,20 +64,6 @@ class ControlNetSD2:
                  height: Optional[int] = None,
                  width: Optional[int] = None,
                  seed: int = 42) -> Image:
-        """Generate image from text prompt with conditioning.
-
-        :param prompt:
-        :param image:
-        :param controlnet_conditioning_scale:
-        :param negative_prompt:
-        :param guidance_scale:
-        :param num_inference_steps:
-        :param num_images_per_prompt:
-        :param height:
-        :param width:
-        :param seed:
-        :return:
-        """
         logger.info("generate condition")
         condition = self.get_condition(image)
         logger.info("generate image")

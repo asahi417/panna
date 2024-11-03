@@ -29,14 +29,7 @@ class SDUpScaler:
                  prompt: Optional[str] = None,
                  reshape_method: Optional[str] = "downscale",
                  upscale_factor: int = 4) -> List[Image]:
-        """Generate high resolution image from low resolution image.
 
-        :param image:
-        :param prompt:
-        :param reshape_method:
-        :param upscale_factor:
-        :return:
-        """
 
         def downscale_image(x: Image) -> Image:
             return resize_image(x, width=int(x.width / upscale_factor), height=int(x.height / upscale_factor))
