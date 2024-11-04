@@ -1,7 +1,7 @@
 """Model class for controlnet.
 The best image resolution 1024 x 1024.
 """
-from typing import Optional, List, Callable
+from typing import Optional, Callable
 import torch
 from diffusers import StableDiffusion3ControlNetPipeline, SD3ControlNetModel
 from PIL.Image import Image

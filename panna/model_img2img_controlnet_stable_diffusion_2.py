@@ -1,5 +1,5 @@
 """Model class for controlnet."""
-from typing import Optional, List, Callable
+from typing import Optional, Callable
 import torch
 import numpy as np
 from cv2 import Canny

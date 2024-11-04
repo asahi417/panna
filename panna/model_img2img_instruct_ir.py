@@ -1,5 +1,5 @@
 """Model class for InstructIR. https://huggingface.co/spaces/marcosv/InstructIR"""
-from typing import List, Optional
+from typing import Optional
 import torch
 import numpy as np
 from PIL import Image

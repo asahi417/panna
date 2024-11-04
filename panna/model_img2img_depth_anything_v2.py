@@ -1,5 +1,5 @@
 """Model class for stable DepthAnythingV2."""
-from typing import Optional, List, Union
+from typing import Union
 import torch
 import numpy as np
 from diffusers import StableDiffusion3Pipeline

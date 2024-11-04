@@ -1,5 +1,5 @@
 """Model class for stable depth2image."""
-from typing import Optional, List
+from typing import Optional
 import torch
 from diffusers import StableDiffusionDepth2ImgPipeline
 from PIL.Image import Image

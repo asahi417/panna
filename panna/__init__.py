@@ -17,6 +17,7 @@ from .model_txt2img_image_stable_diffusion_3 import (
     SD3LargeBitsAndBytesModel,
     SD3LargeTurboBitsAndBytesModel
 )
+from .model_txt2img_image_stable_diffusion_2 import SD2Turbo, SD2TurboImg2Img
 from .model_txt2img_flux_1_dev import Flux1Dev
 from .model_txt2img_stream_diffusion import StreamDiffusion, StreamDiffusionImg2Img
 

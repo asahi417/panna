@@ -15,7 +15,6 @@ def test(output_path, prefix):
         # model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.png")
         output = model(image=init_image, negative_prompt=negative_prompt)
         model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.negative.png")
-        break
 
 
 test("./test/test_image_stream_diffusion/output", "test_stream_diffusion_img2img")
