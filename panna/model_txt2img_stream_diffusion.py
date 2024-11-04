@@ -56,7 +56,7 @@ class StreamDiffusionImg2Img:
             use_lcm_lora=False,
             warmup=10,
             vae_id="madebyollin/taesd",
-            use_denoising_batch=True,
+            use_denoising_batch=False,
             cfg_type="none",
             dtype=torch.float16,
             use_tiny_vae=True,
