@@ -8,7 +8,7 @@ def test(output_path, prefix):
     sample_images = ["./test/sample_image_animal.png", "./test/sample_image_human.png"]
     prompt = "geometric, modern, artificial, HQ, detail, fine-art"
     negative_prompt = "black and white, blurry, low resolution, pixelated,  pixel art, low quality, low fidelity"
-    model = StreamDiffusionImg2Img(prompt=prompt, seed=42, use_denoising_batch=False, do_add_noise=False)
+    model = StreamDiffusionImg2Img(prompt=prompt, seed=42, use_denoising_batch=True, do_add_noise=False)
     for i in sample_images:
         init_image = load_image(i)
         output = model(image=init_image)
