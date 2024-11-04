@@ -1,5 +1,5 @@
 import os
-from panna import StreamDiffusion
+from model_txt2img_stream_diffusion import StreamDiffusion
 
 
 def test(model, output_path, prefix):

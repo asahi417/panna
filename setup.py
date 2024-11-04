@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open('README.md', 'r', encoding="utf-8") as f:
     readme = f.read()
 
-version = '0.0.11'
+version = '0.1.0'
 setup(
     name='panna',
     packages=find_packages(exclude=["hf_space", "tests"]),
@@ -41,11 +41,6 @@ setup(
         "opencv-python",
         "controlnet_aux",
         "bitsandbytes",
-        "streamdiffusion[tensorrt]",
-        "pywin32",
-        "onnx_graphsurgeon",
-        "tensorrt",
-        "polygraphy"
     ],
     python_requires='>=3.8',
     entry_points={

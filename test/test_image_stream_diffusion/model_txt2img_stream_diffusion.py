@@ -3,8 +3,8 @@ from typing import Optional
 import torch
 from PIL.Image import Image
 
-from .util import get_logger
-from .modules_stream_diffusion.wrapper import StreamDiffusionWrapper
+from panna.util import get_logger
+from wrapper import StreamDiffusionWrapper
 
 logger = get_logger(__name__)
 default_negative_prompt = "black and white, blurry, low resolution, pixelated,  pixel art, low quality, low fidelity"

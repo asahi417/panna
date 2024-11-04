@@ -5,7 +5,7 @@ import torch
 from diffusers import StableVideoDiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 from PIL.Image import Image
-from .util import get_generator, clear_cache, get_logger, resize_image
+from panna.util import get_generator, clear_cache, get_logger, resize_image
 
 logger = get_logger(__name__)
 

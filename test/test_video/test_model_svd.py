@@ -1,5 +1,5 @@
 import os
-from panna import SVD
+from model_txt2vid_stable_video_diffusion import SVD
 from diffusers.utils import load_image
 
 os.makedirs("./test/test_video/output", exist_ok=True)

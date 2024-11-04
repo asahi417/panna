@@ -19,7 +19,6 @@ from .model_txt2img_image_stable_diffusion_3 import (
 )
 from .model_txt2img_image_stable_diffusion_2 import SD2Turbo, SD2TurboImg2Img
 from .model_txt2img_flux_1_dev import Flux1Dev
-from .model_txt2img_stream_diffusion import StreamDiffusion, StreamDiffusionImg2Img
 
 # super resolution/image restoration models
 from .model_img2img_instruct_ir import InstructIR
@@ -36,6 +35,3 @@ from .model_img2img_ledits_pp import LEditsPP
 
 # depth
 from .model_img2img_depth_anything_v2 import DepthAnythingV2
-
-# video
-from .model_txt2vid_stable_video_diffusion import SVD
