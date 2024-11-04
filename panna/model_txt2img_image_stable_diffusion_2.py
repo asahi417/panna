@@ -1,4 +1,4 @@
-"""Model class for stable diffusion3."""
+"""Model class for stable diffusion2."""
 from typing import Optional
 
 import torch

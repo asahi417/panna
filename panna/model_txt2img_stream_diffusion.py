@@ -44,7 +44,9 @@ class StreamDiffusionImg2Img:
                  negative_prompt: str = "",
                  seed: Optional[int] = None,
                  num_inference_steps: int = 50,
-                 guidance_scale: float = 1.2):
+                 guidance_scale: float = 1.2,
+                 use_denoising_batch=True,
+                 do_add_noise=True):
         self.prompt = prompt
         self.negative_prompt = negative_prompt
         self.num_inference_steps = num_inference_steps
@@ -56,7 +58,8 @@ class StreamDiffusionImg2Img:
             use_lcm_lora=False,
             warmup=10,
             vae_id="madebyollin/taesd",
-            use_denoising_batch=False,
+            use_denoising_batch=use_denoising_batch,
+            do_add_noise=do_add_noise,
             cfg_type="none",
             dtype=torch.float16,
             use_tiny_vae=True,
