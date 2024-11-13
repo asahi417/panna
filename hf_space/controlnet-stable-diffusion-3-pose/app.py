@@ -14,15 +14,15 @@ for n in range(1, 10):
 
 @spaces.GPU()
 def infer(init_image, prompt, negative_prompt, seed, guidance_scale, controlnet_conditioning_scale, num_inference_steps):
-    return model.text2image(
-        image=[init_image],
-        prompt=[prompt],
-        negative_prompt=[negative_prompt],
+    return model(
+        image=init_image,
+        prompt=prompt,
+        negative_prompt=negative_prompt,
         guidance_scale=guidance_scale,
         controlnet_conditioning_scale=controlnet_conditioning_scale,
         num_inference_steps=num_inference_steps,
         seed=seed
-    )[0]
+    )
 
 
 with gr.Blocks() as demo:

@@ -1,12 +1,9 @@
 import gradio as gr
 import spaces
-from panna import SD2
+from panna import SDXLTurbo
 
 
-model = SD2(
-    base_model_id="stabilityai/stable-diffusion-xl-base-1.0",
-    refiner_model_id="stabilityai/stable-diffusion-xl-refiner-1.0"
-)
+model = SDXLTurbo()
 title = ("# Stable Diffusion 2 XL ([base model](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0), [refiner model](https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0))\n"
          "The demo is part of [panna](https://github.com/asahi417/panna) project.")
 examples = [
@@ -23,15 +20,15 @@ css = """
 
 @spaces.GPU
 def infer(prompt, negative_prompt, seed, width, height, guidance_scale, num_inference_steps):
-    return model.text2image(
-        prompt=[prompt],
-        negative_prompt=[negative_prompt],
+    return model(
+        prompt=prompt,
+        negative_prompt=negative_prompt,
         guidance_scale=guidance_scale,
         num_inference_steps=num_inference_steps,
         width=width,
         height=height,
         seed=seed
-    )[0]
+    )
 
 
 with gr.Blocks(css=css) as demo:

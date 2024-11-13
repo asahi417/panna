@@ -21,14 +21,14 @@ css = """
 
 @spaces.GPU
 def infer(prompt, seed, width, height, guidance_scale, num_inference_steps):
-    return model.text2image(
-        prompt=[prompt],
+    return model(
+        prompt=prompt,
         guidance_scale=guidance_scale,
         num_inference_steps=num_inference_steps,
         width=width,
         height=height,
         seed=seed
-    )[0]
+    )
 
 
 with gr.Blocks(css=css) as demo:

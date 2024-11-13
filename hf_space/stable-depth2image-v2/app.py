@@ -1,9 +1,9 @@
 import gradio as gr
 from diffusers.utils import load_image
 import spaces
-from panna.pipeline import PipelineDepth2ImageV2
+from panna import Depth2Image
 
-model = PipelineDepth2ImageV2()
+model = Depth2Image()
 title = ("# [Depth2Image](https://huggingface.co/stabilityai/stable-diffusion-2-depth) with [DepthAnythingV2](https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf)\n"
          "Depth2Image with depth map predicted by DepthAnything V2. The demo is part of [panna](https://github.com/asahi417/panna) project.")
 example_files = []

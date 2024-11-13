@@ -38,9 +38,11 @@ setup(
         "protobuf",
         "clip-interrogator",
         "accelerate",
-        "opencv-python",
         "controlnet_aux",
         "bitsandbytes",
+        "opencv-python",
+        "gradio==5.1.0",
+        "gradio-webrtc"
     ],
     python_requires='>=3.8',
     entry_points={

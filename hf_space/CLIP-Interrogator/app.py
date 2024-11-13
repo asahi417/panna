@@ -14,7 +14,7 @@ css = """
 @spaces.GPU
 def infer(image, best_max_flavors):
     image = image.convert('RGB')
-    return model.image2text([image], best_max_flavors=best_max_flavors)[0]
+    return model(image, best_max_flavors=best_max_flavors)
 
 
 with gr.Blocks(css=css) as demo:

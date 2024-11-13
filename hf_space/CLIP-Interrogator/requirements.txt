@@ -5,4 +5,4 @@ torch
 torchvision
 spaces
 clip-interrogator
-panna>=0.0.4
+panna>=0.1.0

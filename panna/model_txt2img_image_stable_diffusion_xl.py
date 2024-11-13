@@ -58,26 +58,8 @@ class SDXL:
         if use_refiner:
             self.refiner_model = DiffusionPipeline.from_pretrained(refiner_model_id, text_encoder_2=self.base_model.text_encoder_2, vae=self.base_model.vae, **config)
 
-    def validate_input(self,
-                       prompt: Optional[List[str]] = None,
-                       image: Optional[List[Image]] = None,
-                       negative_prompt: Optional[List[str]] = None) -> None:
-        if prompt is None:
-            raise ValueError("No prompt provided.")
-        if self.img2img:
-            if image is None:
-                raise ValueError("No image provided for img2img generation.")
-            if len(image) != len(prompt):
-                raise ValueError(f"Wrong shape: {len(image)} != {len(prompt)}")
-        else:
-            if image is not None:
-                raise ValueError("Text2img cannot take image input.")
-        if negative_prompt is not None:
-            if len(prompt) != len(negative_prompt):
-                raise ValueError(f"Wrong shape: {len(prompt)} != {len(negative_prompt)}")
-
     def __call__(self,
-                 prompt: Optional[str] = None,
+                 prompt: str,
                  image: Optional[Image] = None,
                  strength: Optional[float] = None,
                  negative_prompt: Optional[str] = None,
@@ -88,7 +70,10 @@ class SDXL:
                  height: Optional[int] = None,
                  width: Optional[int] = None,
                  seed: Optional[int] = None) -> Image:
-        self.validate_input(prompt, image, negative_prompt)
+        if self.img2img:
+            if image is None:
+                raise ValueError("No image provided for img2img generation.")
+
         shared_config = dict(
             num_inference_steps=self.num_inference_steps if num_inference_steps is None else num_inference_steps,
             num_images_per_prompt=num_images_per_prompt,
