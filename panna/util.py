@@ -11,7 +11,7 @@ from torch import cuda
 from diffusers.utils import load_image
 
 
-def image2hex(image: Union[str, Image]) -> (str, Tuple[int]):
+def image2hex(image: Union[str, Image.Image]) -> (str, Tuple[int]):
     if isinstance(image, str):
         image = load_image(image)
     image_array = np.array(image)
@@ -21,7 +21,7 @@ def image2hex(image: Union[str, Image]) -> (str, Tuple[int]):
     return image_bytes.hex(), image_shape
 
 
-def hex2image(image_hex: str, image_shape: Tuple[int, int, int]) -> Image:
+def hex2image(image_hex: str, image_shape: Tuple[int, int, int]) -> Image.Image:
     image_bytes = bytes.fromhex(image_hex)
     image_array = np.frombuffer(image_bytes, dtype=np.uint8).reshape(*image_shape)
     return Image.fromarray(image_array)

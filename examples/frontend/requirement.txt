@@ -1,0 +1,3 @@
+opencv-python
+gradio==5.1.0
+gradio-webrtc
