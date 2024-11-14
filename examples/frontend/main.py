@@ -1,64 +1,64 @@
-# Python program to open the
-# camera in Tkinter
-# Import the libraries,
-# tkinter, cv2, Image and ImageTk
+import os
 
-from tkinter import *
+import requests
 import cv2
-from PIL import Image, ImageTk
-
-# Define a video capture object
-vid = cv2.VideoCapture(0)
-
-# Declare the width and height in variables
-width, height = 800, 600
-
-# Set the width and height
-vid.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-vid.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-
-# Create a GUI app
-app = Tk()
-
-# Bind the app with Escape keyboard to
-# quit app whenever pressed
-app.bind('<Escape>', lambda e: app.quit())
-
-# Create a label and display it on app
-label_widget = Label(app)
-label_widget.pack()
-
-# Create a function to open camera and
-# display it in the label_widget on app
+import numpy as np
+from PIL import Image
+from panna.util import resize_image
+from panna.util import image2hex, hex2image
 
 
-def open_camera():
-
-	# Capture the video frame by frame
-	_, frame = vid.read()
-
-	# Convert image from one color space to other
-	opencv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-
-	# Capture the latest frame and transform to image
-	captured_image = Image.fromarray(opencv_image)
-
-	# Convert captured image to photoimage
-	photo_image = ImageTk.PhotoImage(image=captured_image)
-
-	# Displaying photoimage in the label
-	label_widget.photo_image = photo_image
-
-	# Configure image in the label
-	label_widget.configure(image=photo_image)
-
-	# Repeat the same process after every 10 seconds
-	label_widget.after(10, open_camera)
+# set endpoint
+endpoint = os.getenv("ENDPOINT", None)
+if endpoint is None:
+	raise ValueError("Endpoint not set.")
+# set prompt
+prompt = os.getenv("PROMPT", "geometric, modern, artificial, HQ, detail, fine-art")
+negative_prompt = os.getenv("N_PROMPT", "low quality")
+width = os.getenv("WIDTH", 512)
+height = os.getenv("HEIGHT", 512)
 
 
-# Create a button to open the camera in GUI app
-button1 = Button(app, text="Open Camera", command=open_camera)
-button1.pack()
+def call(sample_image: np.ndarray):
+	# resize original input
+	sample_image = resize_image(Image.fromarray(sample_image), width=width, height=height)
+	# request model inference
+	image_hex, shape = image2hex(sample_image)
+	data = {
+		"image_hex": image_hex,
+		"prompt": prompt,
+		"negative_prompt": negative_prompt,
+		"width": shape[0],
+		"height": shape[1],
+		"depth": shape[2],
+		"seed": 42
+	}
+	# batch translation: the response body contains `audio`, which is string of byte sequence
+	with requests.post(f"{endpoint}/generation", json=data) as r:
+		assert r.status_code == 200, r.status_code
+		response = r.json()
+		image_array = hex2image(
+			response["image_hex"],
+			image_shape=(response["width"], response["height"], response["depth"]),
+			return_array=True
+		)
+		return image_array
 
-# Create an infinite loop for displaying app on screen
-app.mainloop()
+
+# set window
+cv2.namedWindow("original")
+cv2.namedWindow("generated")
+vc = cv2.VideoCapture(0)
+flag = True
+while flag:
+	flag, frame = vc.read()
+	cv2.imshow("original", frame)
+	generated_frame = call(frame)
+	cv2.imshow("generated", generated_frame)
+	key = cv2.waitKey(1)  # ms
+	if key == 27:  # exit on ESC
+		break
+
+vc.release()
+cv2.destroyWindow("original")
+cv2.destroyWindow("generated")

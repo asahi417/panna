@@ -33,7 +33,7 @@ class SDXL:
                  strength: float = 0.5,
                  variant: str = "fp16",
                  torch_dtype: torch.dtype = torch.float16,
-                 device_map: str = "balanced",
+                 device_map: Optional[str] = "balanced",
                  img2img: bool = False,
                  low_cpu_mem_usage: bool = True):
         config = dict(
@@ -115,7 +115,7 @@ class SDXL:
             ).images
         else:
             output_list = output
-        clear_cache()
+        # clear_cache()
         return output_list[0]
 
     @staticmethod

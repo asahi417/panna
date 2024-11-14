@@ -21,9 +21,15 @@ def image2hex(image: Union[str, Image.Image]) -> (str, Tuple[int]):
     return image_bytes.hex(), image_shape
 
 
-def hex2image(image_hex: str, image_shape: Tuple[int, int, int]) -> Image.Image:
+def hex2image(
+        image_hex: str,
+        image_shape: Tuple[int, int, int],
+        return_array: bool = False
+) -> Union[Image.Image, np.ndarray]:
     image_bytes = bytes.fromhex(image_hex)
     image_array = np.frombuffer(image_bytes, dtype=np.uint8).reshape(*image_shape)
+    if return_array:
+        return image_array
     return Image.fromarray(image_array)
 
 

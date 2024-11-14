@@ -2,6 +2,8 @@ import os
 import logging
 import traceback
 from typing import Optional
+
+import torch
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,8 +14,21 @@ from panna.util import hex2image, image2hex, get_logger
 logger = get_logger(__name__)
 model_name = os.environ.get('MODEL_NAME', 'sdxl_turbo_img2img')
 if model_name == "sdxl_turbo_img2img":
-    from panna import SDXLTurboImg2Img
-    model = SDXLTurboImg2Img()
+    from panna import SDXL
+    model = SDXL(
+        use_refiner=False,
+        base_model_id="stabilityai/sdxl-turbo",
+        height=512,
+        width=512,
+        guidance_scale=0.0,
+        num_inference_steps=2,
+        strength=0.5,
+        variant="fp16",
+        torch_dtype=torch.float16,
+        device_map=None,
+        low_cpu_mem_usage=False,
+        img2img=True,
+    )
 else:
     raise ValueError(f"Unknown model: {model_name}")
 

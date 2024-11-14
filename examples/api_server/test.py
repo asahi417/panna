@@ -20,6 +20,7 @@ data = {
     "seed": 42
 }
 
+
 # batch translation: the response body contains `audio`, which is string of byte sequence
 with requests.post(f"{url}/generation", json=data) as r:
     assert r.status_code == 200, r.status_code
