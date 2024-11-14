@@ -28,6 +28,7 @@ if model_name == "sdxl_turbo_img2img":
         device_map=None,
         low_cpu_mem_usage=False,
         img2img=True,
+        device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
     )
 else:
     raise ValueError(f"Unknown model: {model_name}")

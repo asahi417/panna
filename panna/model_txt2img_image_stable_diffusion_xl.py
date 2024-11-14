@@ -35,7 +35,8 @@ class SDXL:
                  torch_dtype: torch.dtype = torch.float16,
                  device_map: Optional[str] = "balanced",
                  img2img: bool = False,
-                 low_cpu_mem_usage: bool = True):
+                 low_cpu_mem_usage: bool = True,
+                 device: Optional[torch.device] = None):
         config = dict(
             use_safetensors=True,
             variant=variant,
@@ -57,6 +58,11 @@ class SDXL:
         self.refiner_model = None
         if use_refiner:
             self.refiner_model = DiffusionPipeline.from_pretrained(refiner_model_id, text_encoder_2=self.base_model.text_encoder_2, vae=self.base_model.vae, **config)
+        if device:
+            self.base_model = self.base_model.to(device)
+            if self.refiner_model is not None:
+                self.refiner_model = self.refiner_model.to(device)
+
 
     def __call__(self,
                  prompt: str,
