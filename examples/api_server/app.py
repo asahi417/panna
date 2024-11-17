@@ -67,7 +67,7 @@ class Item(BaseModel):
 
 
 def inference(item: Item):
-    image = hex2image(item.image_hex, (item.width, item.height, item.depth))
+    image = hex2image(image_hex=item.image_hex, image_shape=(item.width, item.height, item.depth))
     generated_image = model(image=image, prompt=item.prompt, negative_prompt=item.negative_prompt, seed=item.seed)
     image_hex, shape = image2hex(generated_image)
     generated_images[item.id] = {
@@ -77,6 +77,7 @@ def inference(item: Item):
         "height": shape[1],
         "depth": shape[2],
     }
+    print(generated_images)
 
 
 @app.post("/generation")

@@ -2,6 +2,7 @@ import os
 import logging
 import traceback
 from typing import Optional
+from threading import Thread
 
 import torch
 from pydantic import BaseModel
@@ -10,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from panna.util import hex2image, image2hex, get_logger
+
 
 logger = get_logger(__name__)
 model_name = os.environ.get('MODEL_NAME', 'sdxl_turbo_img2img')
@@ -36,6 +38,7 @@ else:
 # Run app
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+generated_images = {}
 
 
 @app.get("/model_name")
@@ -43,8 +46,18 @@ async def model_name():
     return JSONResponse(content={"model_name": model_name})
 
 
+@app.get("/pop_image")
+async def pop_image():
+    if len(generated_images) == 0:
+        return JSONResponse(content={"id": ""})
+    key = sorted(generated_images.keys())[0]
+    image = generated_images.pop(key)
+    return JSONResponse(content=image)
+
+
 class Item(BaseModel):
-    image_hex: str
+    id: int
+    image_bytes: bytes
     width: int
     height: int
     depth: int
@@ -53,23 +66,25 @@ class Item(BaseModel):
     negative_prompt: Optional[str]
 
 
+def inference(item: Item):
+    image = hex2image(image_bytes=item.image_bytes, image_shape=(item.width, item.height, item.depth))
+    generated_image = model(image=image, prompt=item.prompt, negative_prompt=item.negative_prompt, seed=item.seed)
+    image_bytes, shape = image2hex(generated_image, return_bytes=True)
+    generated_images[item.id] = {
+        "id": item.id,
+        "image_bytes": image_bytes,
+        "width": shape[0],
+        "height": shape[1],
+        "depth": shape[2],
+    }
+
+
 @app.post("/generation")
 async def generation(item: Item):
     try:
-        image = hex2image(item.image_hex, (item.width, item.height, item.depth))
-        generated_image = model(
-            image=image,
-            prompt=item.prompt,
-            negative_prompt=item.negative_prompt,
-            seed=item.seed
-        )
-        image_hex, shape = image2hex(generated_image)
-        return JSONResponse(content={
-            "image_hex": image_hex,
-            "width": shape[0],
-            "height": shape[1],
-            "depth": shape[2],
-        })
+        thread = Thread(target=inference, args=[item])
+        thread.start()
+        return JSONResponse(content={"id": item.id})
     except Exception:
         logging.exception('Error')
         raise HTTPException(status_code=404, detail=traceback.print_exc())

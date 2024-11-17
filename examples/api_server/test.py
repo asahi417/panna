@@ -32,10 +32,10 @@ while True:
         assert r.status_code == 200, r.status_code
         response = r.json()
         print(response)
-        if response["image_hex"] != image_hex:
-        #
-# image = hex2image(
-#     response["image_hex"],
-#     image_shape=(response["width"], response["height"], response["depth"])
-# )
-# image.save("test_image.jpg")
+        if response["id"] != "":
+            image = hex2image(
+                response["image_hex"],
+                image_shape=(response["width"], response["height"], response["depth"])
+            )
+            image.save("test_image.jpg")
+            break
