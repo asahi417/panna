@@ -11,22 +11,27 @@ from torch import cuda
 from diffusers.utils import load_image
 
 
-def image2hex(image: Union[str, Image.Image]) -> (str, Tuple[int]):
+def image2hex(image: Union[str, Image.Image], return_bytes: bool = False) -> (Union[bytes, str], Tuple[int]):
     if isinstance(image, str):
         image = load_image(image)
     image_array = np.array(image)
     assert image_array.dtype == np.uint8, image_array.dtype
     image_shape = image_array.shape
     image_bytes = image_array.tobytes()
+    if return_bytes:
+        return image_bytes, image_shape
     return image_bytes.hex(), image_shape
 
 
 def hex2image(
-        image_hex: str,
         image_shape: Tuple[int, int, int],
+        image_hex: Optional[str] = None,
+        image_bytes: Optional[bytes] = None,
         return_array: bool = False
 ) -> Union[Image.Image, np.ndarray]:
-    image_bytes = bytes.fromhex(image_hex)
+    assert image_hex or image_bytes
+    if not image_bytes:
+        image_bytes = bytes.fromhex(image_hex)
     image_array = np.frombuffer(image_bytes, dtype=np.uint8).reshape(*image_shape)
     if return_array:
         return image_array

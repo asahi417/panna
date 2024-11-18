@@ -77,7 +77,6 @@ def inference(item: Item):
         "height": shape[1],
         "depth": shape[2],
     }
-    print(generated_images)
 
 
 @app.post("/generation")
