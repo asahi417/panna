@@ -1,12 +1,12 @@
 import os
-from typing import Optional
+from typing import Optional, Union
 
 import requests
 import cv2
 import numpy as np
 from PIL import Image
 from panna.util import resize_image, get_logger
-from panna.util import image2hex, hex2image
+from panna.util import bytes2image, image2bytes
 
 
 # set logger
@@ -35,19 +35,18 @@ width = os.getenv("WIDTH", 512)
 height = os.getenv("HEIGHT", 512)
 
 
-def post_image(input_image: np.ndarray, image_id: int):
+def post_image(input_image: Union[Image.Image, np.ndarray], image_id: int):
 	# resize original input
-	input_image = resize_image(Image.fromarray(input_image), width=width, height=height)
+	if type(input_image) is np.ndarray:
+		input_image = Image.fromarray(input_image)
+	input_image = resize_image(input_image, width=width, height=height)
 	# request model inference
-	image_hex, shape = image2hex(input_image)
+	image_hex = image2bytes(input_image)
 	input_data_queue.append({
 		"id": image_id,
 		"image_hex": image_hex,
 		"prompt": prompt,
 		"negative_prompt": negative_prompt,
-		"width": shape[0],
-		"height": shape[1],
-		"depth": shape[2],
 		"seed": 42
 	})
 	urls = [e for e in endpoint if url2count[e] < max_concurrent_job[e]]

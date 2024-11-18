@@ -40,6 +40,7 @@ setup(
         "accelerate",
         "controlnet_aux",
         "bitsandbytes",
+        "DeepCache"
     ],
     python_requires='>=3.8',
     entry_points={

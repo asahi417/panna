@@ -1,5 +1,5 @@
 """Model class for stable diffusion2."""
-from typing import Optional, List, Union
+from typing import Optional, Dict, Union
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from PIL.Image import Image
@@ -20,6 +20,7 @@ class SDXL:
     base_model_id: str
     base_model: Union[StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline]
     refiner_model: Optional[StableDiffusionXLPipeline]
+    cached_prompt: Dict[str, Union[str, torch.Tensor]]
 
     def __init__(self,
                  use_refiner: bool = True,
@@ -36,7 +37,8 @@ class SDXL:
                  device_map: Optional[str] = "balanced",
                  img2img: bool = False,
                  low_cpu_mem_usage: bool = True,
-                 device: Optional[torch.device] = None):
+                 device: Optional[torch.device] = None,
+                 deep_cache: bool = False):
         config = dict(
             use_safetensors=True,
             variant=variant,
@@ -55,6 +57,11 @@ class SDXL:
             self.base_model = StableDiffusionXLImg2ImgPipeline.from_pretrained(base_model_id, **config)
         else:
             self.base_model = StableDiffusionXLPipeline.from_pretrained(base_model_id, **config)
+        if deep_cache:
+            from DeepCache import DeepCacheSDHelper
+            helper = DeepCacheSDHelper(pipe=self.base_model)
+            helper.set_params(cache_interval=3, cache_branch_id=0)
+            helper.enable()
         self.refiner_model = None
         if use_refiner:
             self.refiner_model = DiffusionPipeline.from_pretrained(refiner_model_id, text_encoder_2=self.base_model.text_encoder_2, vae=self.base_model.vae, **config)
@@ -62,6 +69,7 @@ class SDXL:
             self.base_model = self.base_model.to(device)
             if self.refiner_model is not None:
                 self.refiner_model = self.refiner_model.to(device)
+        self.cached_prompt = {}
 
     def __call__(self,
                  prompt: str,
@@ -94,19 +102,23 @@ class SDXL:
         if self.refiner_model:
             shared_config["output_type"] = "latent"
             shared_config["denoising_end"] = self.high_noise_frac if high_noise_frac is None else high_noise_frac
+        if (len(self.cached_prompt) == 0 or
+                self.cached_prompt["prompt"] != prompt or self.cached_prompt["negative_prompt"] != negative_prompt):
+            encode_prompt = self.base_model.encode_prompt(prompt=prompt, negative_prompt=negative_prompt)
+            self.cached_prompt["prompt"] = prompt
+            self.cached_prompt["negative_prompt"] = negative_prompt
+            self.cached_prompt["prompt_embeds"] = encode_prompt[0]
+            self.cached_prompt["negative_prompt_embeds"] = encode_prompt[1]
+            self.cached_prompt["pooled_prompt_embeds"] = encode_prompt[2]
+            self.cached_prompt["negative_pooled_prompt_embeds"] = encode_prompt[3]
+        shared_config["prompt_embeds"] = self.cached_prompt["prompt_embeds"]
+        shared_config["negative_prompt_embeds"] = self.cached_prompt["negative_prompt_embeds"]
+        shared_config["pooled_prompt_embeds"] = self.cached_prompt["pooled_prompt_embeds"]
+        shared_config["negative_pooled_prompt_embeds"] = self.cached_prompt["negative_pooled_prompt_embeds"]
         if self.img2img:
-            output = self.base_model(
-                image=image,
-                prompt=prompt,
-                negative_prompt=negative_prompt,
-                **shared_config
-            ).images
+            output = self.base_model(image=image, **shared_config).images
         else:
-            output = self.base_model(
-                prompt=prompt,
-                negative_prompt=negative_prompt,
-                **shared_config
-            ).images
+            output = self.base_model(**shared_config).images
         if self.refiner_model:
             output_list = self.refiner_model(
                 image=output,
