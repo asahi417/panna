@@ -3,6 +3,7 @@ import logging
 import traceback
 from typing import Optional
 from threading import Thread
+from time import time
 
 import torch
 from pydantic import BaseModel
@@ -66,9 +67,11 @@ class Item(BaseModel):
 
 def inference(item: Item):
     image = bytes2image(item.image_hex)
+    start = time()
     generated_image = model(image=image, prompt=item.prompt, negative_prompt=item.negative_prompt, seed=item.seed)
+    elapsed = time() - start
     image_hex = image2bytes(generated_image)
-    generated_images[item.id] = {"id": item.id, "image_hex": image_hex}
+    generated_images[item.id] = {"id": item.id, "image_hex": image_hex, "time": elapsed}
 
 
 @app.post("/generation")
