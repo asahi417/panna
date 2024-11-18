@@ -63,7 +63,6 @@ class SDXL:
             if self.refiner_model is not None:
                 self.refiner_model = self.refiner_model.to(device)
 
-
     def __call__(self,
                  prompt: str,
                  image: Optional[Image] = None,
@@ -121,7 +120,6 @@ class SDXL:
             ).images
         else:
             output_list = output
-        # clear_cache()
         return output_list[0]
 
     @staticmethod

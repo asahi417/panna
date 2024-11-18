@@ -1,5 +1,5 @@
 import requests
-from panna.util import image2hex, hex2image
+from panna.util import bytes2image, image2bytes
 
 # specify the endpoint you want to test
 url = "http://0.0.0.0:4444"
@@ -8,15 +8,12 @@ prompt = "geometric, modern, artificial, HQ, detail, fine-art"
 negative_prompt = "low quality"
 
 # request model inference
-image_hex, shape = image2hex(sample_image)
+image_hex = image2bytes(sample_image)
 data = {
     "id": 0,
     "image_hex": image_hex,
     "prompt": prompt,
     "negative_prompt": negative_prompt,
-    "width": shape[0],
-    "height": shape[1],
-    "depth": shape[2],
     "seed": 42
 }
 
@@ -33,9 +30,6 @@ while True:
         response = r.json()
         print(response)
         if response["id"] != "":
-            image = hex2image(
-                image_hex=response["image_hex"],
-                image_shape=(response["width"], response["height"], response["depth"])
-            )
+            image = bytes2image(response["image_hex"])
             image.save("test_image.jpg")
             break

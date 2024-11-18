@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from panna.util import hex2image, image2hex, get_logger
+from panna.util import bytes2image, image2bytes, get_logger
 
 
 logger = get_logger(__name__)
@@ -58,25 +58,16 @@ async def pop_image():
 class Item(BaseModel):
     id: int
     image_hex: str
-    width: int
-    height: int
-    depth: int
     prompt: str
     seed: int
     negative_prompt: Optional[str]
 
 
 def inference(item: Item):
-    image = hex2image(image_hex=item.image_hex, image_shape=(item.width, item.height, item.depth))
+    image = bytes2image(item.image_hex)
     generated_image = model(image=image, prompt=item.prompt, negative_prompt=item.negative_prompt, seed=item.seed)
-    image_hex, shape = image2hex(generated_image)
-    generated_images[item.id] = {
-        "id": item.id,
-        "image_hex": image_hex,
-        "width": shape[0],
-        "height": shape[1],
-        "depth": shape[2],
-    }
+    image_hex = image2bytes(generated_image)
+    generated_images[item.id] = {"id": item.id, "image_hex": image_hex}
 
 
 @app.post("/generation")

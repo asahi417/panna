@@ -67,8 +67,8 @@ class Item(BaseModel):
 
 
 def inference(item: Item):
-    image = hex2image(image_bytes=item.image_bytes, image_shape=(item.width, item.height, item.depth))
-    generated_image = model(image=image, prompt=item.prompt, negative_prompt=item.negative_prompt, seed=item.seed)
+    image_pil = hex2image(image_bytes=item.image_bytes, image_shape=(item.width, item.height, item.depth))
+    generated_image = model(image=image_pil, prompt=item.prompt, negative_prompt=item.negative_prompt, seed=item.seed)
     image_bytes, shape = image2hex(generated_image, return_bytes=True)
     generated_images[item.id] = {
         "id": item.id,

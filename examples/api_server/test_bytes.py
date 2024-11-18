@@ -1,15 +1,23 @@
 import requests
 from panna.util import image2hex, hex2image
-
-import io
 import base64
 from PIL import Image
+from io import BytesIO
+import cv2
+
+
+img = cv2.imdecode(im, cv2.IMREAD_COLOR)
+
+
 sample_image = "sample_image_human.png"
-img = Image.open(sample_image)
-output = io.BytesIO()
-img.save(output, format="png")
-image_as_string = base64.b64encode(output.getvalue())
-image_as_string.hex()
+im = Image.open(sample_image)
+
+# Create in-memory JPEG
+buffer = BytesIO()
+im.save(buffer, format="JPEG")
+# Check first few bytes
+bytes_image = buffer.getvalue()
+encoded_img = base64.b64encode(bytes_image)
 
 #encrypting/decrypting
 
