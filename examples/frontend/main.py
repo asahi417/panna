@@ -28,6 +28,7 @@ max_concurrent_job = {e: m for e, m in zip(endpoint, max_concurrent_job)}
 url2count = {e: 0 for e in endpoint}
 id2url = {}
 input_data_queue = []
+logger.info(f"{max_concurrent_job}")
 # set prompt
 prompt = os.getenv("P_PROMPT", "geometric, modern, artificial, HQ, detail, fine-art")
 negative_prompt = os.getenv("N_PROMPT", "low quality")

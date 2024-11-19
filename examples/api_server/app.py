@@ -43,9 +43,9 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 generated_images = {}
 
 
-@app.get("/model_name")
-async def model_name():
-    return JSONResponse(content={"model_name": model_name})
+@app.get("/get_queue")
+async def get_queue():
+    return JSONResponse(content={"n_queue": len(generated_images)})
 
 
 @app.get("/pop_image")
@@ -74,7 +74,7 @@ def inference(item: Item):
     generated_images[item.id] = {"id": item.id, "image_hex": image_hex, "time": elapsed}
 
 
-@app.post("/generation")
+@app.post("/post_image")
 async def generation(item: Item):
     try:
         thread = Thread(target=inference, args=[item])
