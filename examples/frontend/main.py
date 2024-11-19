@@ -29,7 +29,7 @@ url2count = {e: 0 for e in endpoint}
 id2url = {}
 input_data_queue = []
 # set prompt
-prompt = os.getenv("PROMPT", "geometric, modern, artificial, HQ, detail, fine-art")
+prompt = os.getenv("P_PROMPT", "geometric, modern, artificial, HQ, detail, fine-art")
 negative_prompt = os.getenv("N_PROMPT", "low quality")
 width = os.getenv("WIDTH", 512)
 height = os.getenv("HEIGHT", 512)
@@ -60,21 +60,18 @@ def post_image(input_image: Union[Image.Image, np.ndarray], image_id: int):
 	id2url[image_id] = url
 
 
-def pop_image() -> Optional[np.ndarray]:
+def pop_image() -> Optional[Image.Image]:
 	key = sorted(id2url.keys())[0]
 	url = id2url[key]
-	print("call")
+	logger.info(f"call: {url}")
+
 	with requests.get(f"{url}/pop_image") as r:
 		assert r.status_code == 200, r.status_code
 		response = r.json()
 		if response["id"] == "":
 			return None
-		print("convert")
-		image = hex2image(
-			image_hex=response["image_hex"],
-			image_shape=(response["width"], response["height"], response["depth"]),
-			return_array=True
-		)
+	logger.info("convert")
+	image = bytes2image(response["image_hex"])
 	url2count[url] -= 1
 	return image
 
@@ -89,15 +86,16 @@ flag, frame = vc.read()
 prev_generation = frame
 while flag:
 	frame_index += 1
-	print(frame_index)
+	logger.info(frame_index)
 	flag, frame = vc.read()
 	cv2.imshow("original", frame)
-	print("post")
+	logger.info("post")
 	post_image(input_image=frame, image_id=frame_index)
-	print("pop")
-	generated_frame = pop_image()
-	print("show")
-	if generated_frame is not None:
+	logger.info("pop")
+	generated_frame_pil = pop_image()
+	logger.info("show")
+	if generated_frame_pil is not None:
+		generated_frame = np.array(generated_frame_pil)
 		cv2.imshow("generated", generated_frame)
 		prev_generation = generated_frame
 	else:

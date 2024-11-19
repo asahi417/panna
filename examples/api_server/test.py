@@ -3,6 +3,7 @@ from panna.util import bytes2image, image2bytes
 
 # specify the endpoint you want to test
 url = "http://0.0.0.0:4444"
+url = "https://tbdavs4mlxmu0k-4444.proxy.runpod.net"
 sample_image = "sample_image_human.png"
 prompt = "geometric, modern, artificial, HQ, detail, fine-art"
 negative_prompt = "low quality"

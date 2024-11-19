@@ -3,7 +3,7 @@ from typing import Optional, Dict, Union
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from PIL.Image import Image
-from .util import get_generator, clear_cache, get_logger, resize_image
+from .util import get_generator, get_logger, resize_image
 
 logger = get_logger(__name__)
 
@@ -104,6 +104,7 @@ class SDXL:
             shared_config["denoising_end"] = self.high_noise_frac if high_noise_frac is None else high_noise_frac
         if (len(self.cached_prompt) == 0 or
                 self.cached_prompt["prompt"] != prompt or self.cached_prompt["negative_prompt"] != negative_prompt):
+            logger.info("generating text embedding")
             encode_prompt = self.base_model.encode_prompt(prompt=prompt, negative_prompt=negative_prompt)
             self.cached_prompt["prompt"] = prompt
             self.cached_prompt["negative_prompt"] = negative_prompt
@@ -115,11 +116,13 @@ class SDXL:
         shared_config["negative_prompt_embeds"] = self.cached_prompt["negative_prompt_embeds"]
         shared_config["pooled_prompt_embeds"] = self.cached_prompt["pooled_prompt_embeds"]
         shared_config["negative_pooled_prompt_embeds"] = self.cached_prompt["negative_pooled_prompt_embeds"]
+        logger.info("generating image")
         if self.img2img:
             output = self.base_model(image=image, **shared_config).images
         else:
             output = self.base_model(**shared_config).images
         if self.refiner_model:
+            logger.info("generating refined image")
             output_list = self.refiner_model(
                 image=output,
                 prompt=prompt,
