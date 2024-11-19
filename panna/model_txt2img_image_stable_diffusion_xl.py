@@ -123,22 +123,15 @@ class SDXL:
             # output = self.base_model(image=image, **shared_config).images
             logger.info("generating latent image embedding")
             image = self.base_model.image_processor.preprocess(image)
-            print("config")
-            num_inference_steps = shared_config["num_inference_steps"]
             timesteps, num_inference_steps = retrieve_timesteps(
-                self.base_model.scheduler, num_inference_steps, self.base_model._execution_device
+                self.base_model.scheduler, shared_config["num_inference_steps"], self.base_model._execution_device
             )
-            print(num_inference_steps, timesteps)
-            timesteps, num_inference_steps = self.base_model.get_timesteps(
+            timesteps, _ = self.base_model.get_timesteps(
                 num_inference_steps, strength, self.base_model._execution_device,
             )
-            print(num_inference_steps, timesteps)
-            latent_timestep = timesteps[:1].repeat(num_images_per_prompt)
-            print("latent_timestep", latent_timestep)
-            print(self.cached_prompt["prompt_embeds"].dtype)
             latents = self.base_model.prepare_latents(
                 image=image,
-                timestep=latent_timestep,
+                timestep=timesteps[:1].repeat(num_images_per_prompt),
                 batch_size=1,
                 num_images_per_prompt=num_images_per_prompt,
                 dtype=self.cached_prompt["prompt_embeds"].dtype,
