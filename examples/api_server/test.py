@@ -19,17 +19,9 @@ data = {
 
 
 # batch translation: the response body contains `audio`, which is string of byte sequence
-with requests.post(f"{url}/generation", json=data) as r:
+with requests.post(f"{url}/generate_image", json=data) as r:
     assert r.status_code == 200, r.status_code
     response = r.json()
     print(response)
-
-while True:
-    with requests.get(f"{url}/pop_image") as r:
-        assert r.status_code == 200, r.status_code
-        response = r.json()
-        print(response)
-        if response["id"] != "":
-            image = bytes2image(response["image_hex"])
-            image.save("test_image.jpg")
-            break
+    image = bytes2image(response["image_hex"])
+    image.save("test_image.jpg")

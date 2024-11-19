@@ -67,6 +67,8 @@ def get_logger(name: str) -> logging.Logger:
 
 
 def resize_image(image: Image.Image, width: int, height: int) -> Image.Image:
+    if image.size == (width, height):
+        return image
     # Calculate aspect ratios
     target_aspect = width / height  # Aspect ratio of the desired size
     image_aspect = image.width / image.height  # Aspect ratio of the original image

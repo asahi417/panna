@@ -6,8 +6,8 @@ import requests
 import cv2
 import numpy as np
 from PIL import Image
-from panna.util import resize_image, get_logger
-from panna.util import bytes2image, image2bytes
+from panna.util import get_logger
+from panna.util import bytes2image, image2bytes, resize_image
 
 
 # set logger
@@ -38,6 +38,7 @@ height = int(os.getenv("HEIGHT", 512))
 
 def generate_image(input_image: np.ndarray, image_id: int) -> None:
 	input_image = resize_image(Image.fromarray(input_image), width=width, height=height)
+	print(input_image.size)
 	image_hex = image2bytes(input_image)
 	input_data_queue[image_id] = {
 		"id": image_id, "image_hex": image_hex, "prompt": prompt, "negative_prompt": negative_prompt, "seed": 42
@@ -63,6 +64,10 @@ def generate_image(input_image: np.ndarray, image_id: int) -> None:
 cv2.namedWindow("original")
 cv2.namedWindow("generated")
 vc = cv2.VideoCapture(0)
+vc.set(cv2.CAP_PROP_FPS, 60)
+vc.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+vc.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
 # start main loop
 frame_index = 0
 flag, frame = vc.read()
@@ -70,7 +75,7 @@ prev_generation = frame
 while flag:
 	frame_index += 1
 	flag, frame = vc.read()
-	logger.info(f"[new frame]\n\t- image_id {frame_index}\n\t- input queue {len(input_data_queue)}\n\t - shape: {frame.shape}")
+	logger.info(f"[new frame]\n\t- image_id {frame_index}\n\t- input queue {len(input_data_queue)}\n\t- shape: {frame.shape}")
 	cv2.imshow("original", frame)
 	Thread(target=generate_image, args=[frame, frame_index]).start()
 	if len(output_data_queue) > 0:
@@ -81,7 +86,7 @@ while flag:
 		prev_generation = generated_frame
 	else:
 		cv2.imshow("generated", prev_generation)
-	wait_key = cv2.waitKey(100)  # sample frequency (ms)
+	wait_key = cv2.waitKey(1)  # sample frequency (ms)
 	# sleep(0.1)
 	if wait_key == 27:  # exit on ESC
 		break
