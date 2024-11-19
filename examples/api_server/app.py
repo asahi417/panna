@@ -15,8 +15,8 @@ from panna.util import bytes2image, image2bytes, get_logger
 
 logger = get_logger(__name__)
 model_name = os.environ.get('MODEL_NAME', 'sdxl_turbo_img2img')
-width = os.getenv("WIDTH", 512)
-height = os.getenv("HEIGHT", 512)
+width = int(os.getenv("WIDTH", 512))
+height = int(os.getenv("HEIGHT", 512))
 if model_name == "sdxl_turbo_img2img":
     from panna import SDXL
     model = SDXL(

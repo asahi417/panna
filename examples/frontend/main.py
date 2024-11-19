@@ -32,8 +32,8 @@ output_data_queue = {}
 # set prompt
 prompt = os.getenv("P_PROMPT", "geometric, modern, artificial, HQ, detail, fine-art")
 negative_prompt = os.getenv("N_PROMPT", "low quality")
-width = os.getenv("WIDTH", 512)
-height = os.getenv("HEIGHT", 512)
+width = int(os.getenv("WIDTH", 512))
+height = int(os.getenv("HEIGHT", 512))
 
 
 def generate_image(input_image: np.ndarray, image_id: int) -> None:
@@ -70,7 +70,7 @@ prev_generation = frame
 while flag:
 	frame_index += 1
 	flag, frame = vc.read()
-	logger.info(f"[new frame]\n\t- image_id {frame_index}\n\t- input queue {len(input_data_queue)}")
+	logger.info(f"[new frame]\n\t- image_id {frame_index}\n\t- input queue {len(input_data_queue)}\n\t - shape: {frame.shape}")
 	cv2.imshow("original", frame)
 	Thread(target=generate_image, args=[frame, frame_index]).start()
 	if len(output_data_queue) > 0:
