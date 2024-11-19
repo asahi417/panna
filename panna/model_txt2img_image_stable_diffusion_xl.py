@@ -118,7 +118,6 @@ class SDXL:
         shared_config["negative_prompt_embeds"] = self.cached_prompt["negative_prompt_embeds"]
         shared_config["pooled_prompt_embeds"] = self.cached_prompt["pooled_prompt_embeds"]
         shared_config["negative_pooled_prompt_embeds"] = self.cached_prompt["negative_pooled_prompt_embeds"]
-        logger.info("generating image")
         if self.img2img:
             # output = self.base_model(image=image, **shared_config).images
             logger.info("generating latent image embedding")
@@ -139,8 +138,10 @@ class SDXL:
                 generator=shared_config["generator"],
                 add_noise=True
             )
-            output = self.base_model(latents=latents, **shared_config).images
+            logger.info("generating image")
+            output = self.base_model(image=image, latents=latents, **shared_config).images
         else:
+            logger.info("generating image")
             output = self.base_model(**shared_config).images
         if self.refiner_model:
             logger.info("generating refined image")
