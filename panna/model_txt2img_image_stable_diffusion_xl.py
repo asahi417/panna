@@ -2,6 +2,7 @@
 from typing import Optional, Dict, Union
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
+from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl_img2img import retrieve_timesteps
 from PIL.Image import Image
 from .util import get_generator, get_logger, resize_image
 
@@ -122,13 +123,19 @@ class SDXL:
             # output = self.base_model(image=image, **shared_config).images
             logger.info("generating latent image embedding")
             image = self.base_model.image_processor.preprocess(image)
-            timesteps, num_inference_steps = self.base_model.retrieve_timesteps(
+            print("config")
+            print(num_inference_steps)
+            timesteps, num_inference_steps = retrieve_timesteps(
                 self.base_model.scheduler, num_inference_steps, self.base_model._execution_device
             )
+            print(num_inference_steps, timesteps)
             timesteps, num_inference_steps = self.base_model.get_timesteps(
                 num_inference_steps, strength, self.base_model._execution_device,
             )
+            print(num_inference_steps, timesteps)
             latent_timestep = timesteps[:1].repeat(num_images_per_prompt)
+            print("latent_timestep", latent_timestep)
+            print(self.cached_prompt["prompt_embeds"].dtype)
             latents = self.base_model.prepare_latents(
                 image=image,
                 timestamp=latent_timestep,
