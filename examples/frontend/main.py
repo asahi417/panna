@@ -71,7 +71,6 @@ vc.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 # start main loop
 frame_index = 0
 flag, frame = vc.read()
-prev_generation = frame
 while flag:
 	frame_index += 1
 	flag, frame = vc.read()
@@ -84,8 +83,6 @@ while flag:
 		generated_frame = np.array(generated_frame_pil)
 		cv2.imshow("generated", generated_frame)
 		prev_generation = generated_frame
-	else:
-		cv2.imshow("generated", prev_generation)
 	wait_key = cv2.waitKey(1)  # sample frequency (ms)
 	# sleep(0.1)
 	if wait_key == 27:  # exit on ESC
