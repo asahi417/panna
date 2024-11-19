@@ -1,5 +1,5 @@
 """Model class for stable diffusion2."""
-from typing import Optional, Dict, Union
+from typing import Optional, Dict, Union, List
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl_img2img import retrieve_timesteps
@@ -21,7 +21,9 @@ class SDXL:
     base_model_id: str
     base_model: Union[StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline]
     refiner_model: Optional[StableDiffusionXLPipeline]
-    cached_prompt: Dict[str, Union[str, torch.Tensor]]
+    latent_smoothing_factor: Optional[float]
+    cached_latent_image: Optional[torch.Tensor]
+    cached_latent_prompt: Optional[Dict[str, Union[str, torch.Tensor]]]
 
     def __init__(self,
                  use_refiner: bool = True,
@@ -40,7 +42,7 @@ class SDXL:
                  low_cpu_mem_usage: bool = True,
                  device: Optional[torch.device] = None,
                  deep_cache: bool = False,
-                 moving_average_window: Optional[int] = None):
+                 latent_smoothing_factor: Optional[float] = None):
         config = dict(
             use_safetensors=True,
             variant=variant,
@@ -71,7 +73,9 @@ class SDXL:
             self.base_model = self.base_model.to(device)
             if self.refiner_model is not None:
                 self.refiner_model = self.refiner_model.to(device)
-        self.cached_prompt = {}
+        self.latent_smoothing_factor = latent_smoothing_factor
+        self.cached_latent_image = None
+        self.cached_latent_prompt = None
 
     def __call__(self,
                  prompt: str,
@@ -104,42 +108,40 @@ class SDXL:
         if self.refiner_model:
             shared_config["output_type"] = "latent"
             shared_config["denoising_end"] = self.high_noise_frac if high_noise_frac is None else high_noise_frac
-        if (len(self.cached_prompt) == 0 or
-                self.cached_prompt["prompt"] != prompt or self.cached_prompt["negative_prompt"] != negative_prompt):
+        if (self.cached_latent_prompt is None or
+                self.cached_latent_prompt["prompt"] != prompt or self.cached_latent_prompt["negative_prompt"] != negative_prompt):
             logger.info("generating latent text embedding")
             encode_prompt = self.base_model.encode_prompt(prompt=prompt, negative_prompt=negative_prompt)
-            self.cached_prompt["prompt"] = prompt
-            self.cached_prompt["negative_prompt"] = negative_prompt
-            self.cached_prompt["prompt_embeds"] = encode_prompt[0]
-            self.cached_prompt["negative_prompt_embeds"] = encode_prompt[1]
-            self.cached_prompt["pooled_prompt_embeds"] = encode_prompt[2]
-            self.cached_prompt["negative_pooled_prompt_embeds"] = encode_prompt[3]
-        shared_config["prompt_embeds"] = self.cached_prompt["prompt_embeds"]
-        shared_config["negative_prompt_embeds"] = self.cached_prompt["negative_prompt_embeds"]
-        shared_config["pooled_prompt_embeds"] = self.cached_prompt["pooled_prompt_embeds"]
-        shared_config["negative_pooled_prompt_embeds"] = self.cached_prompt["negative_pooled_prompt_embeds"]
+            self.cached_latent_prompt = {
+                "prompt": prompt,
+                "negative_prompt": negative_prompt,
+                "prompt_embeds": encode_prompt[0],
+                "negative_prompt_embeds": encode_prompt[1],
+                "pooled_prompt_embeds": encode_prompt[2],
+                "negative_pooled_prompt_embeds": encode_prompt[3]
+            }
+        shared_config["prompt_embeds"] = self.cached_latent_prompt["prompt_embeds"]
+        shared_config["negative_prompt_embeds"] = self.cached_latent_prompt["negative_prompt_embeds"]
+        shared_config["pooled_prompt_embeds"] = self.cached_latent_prompt["pooled_prompt_embeds"]
+        shared_config["negative_pooled_prompt_embeds"] = self.cached_latent_prompt["negative_pooled_prompt_embeds"]
         if self.img2img:
             # output = self.base_model(image=image, **shared_config).images
             logger.info("generating latent image embedding")
+            device = self.base_model._execution_device
             image = self.base_model.image_processor.preprocess(image)
-            timesteps, num_inference_steps = retrieve_timesteps(
-                self.base_model.scheduler, shared_config["num_inference_steps"], self.base_model._execution_device
-            )
-            timesteps, _ = self.base_model.get_timesteps(
-                num_inference_steps, strength, self.base_model._execution_device,
-            )
+            ts, nis = retrieve_timesteps(self.base_model.scheduler, shared_config["num_inference_steps"], device)
+            ts, _ = self.base_model.get_timesteps(nis, strength, device)
             latents = self.base_model.prepare_latents(
-                image=image,
-                timestep=timesteps[:1].repeat(num_images_per_prompt),
-                batch_size=1,
-                num_images_per_prompt=num_images_per_prompt,
-                dtype=self.cached_prompt["prompt_embeds"].dtype,
-                device=self.base_model._execution_device,
-                generator=shared_config["generator"],
-                add_noise=True
+                image=image, timestep=ts[:1].repeat(num_images_per_prompt), batch_size=1,
+                num_images_per_prompt=num_images_per_prompt, dtype=self.cached_latent_prompt["prompt_embeds"].dtype,
+                device=device, generator=shared_config["generator"], add_noise=True
             )
+            if self.cached_latent_image is not None and self.latent_smoothing_factor is not None:
+                # TODO: multiple call might make it chaos? Like the latent cache from different call?
+                latents = latents * (1 - self.latent_smoothing_factor) + self.cached_latent_image * self.latent_smoothing_factor
             logger.info("generating image")
             output = self.base_model(image=image, latents=latents, **shared_config).images
+            self.cached_latent_image = latents
         else:
             logger.info("generating image")
             output = self.base_model(**shared_config).images
