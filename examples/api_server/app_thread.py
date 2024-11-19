@@ -2,6 +2,7 @@ import os
 import logging
 import traceback
 from typing import Optional
+from threading import Thread
 from time import time
 
 import torch
@@ -39,6 +40,21 @@ else:
 # Run app
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+generated_images = {}
+
+
+@app.get("/get_queue")
+async def get_queue():
+    return JSONResponse(content={"n_queue": len(generated_images)})
+
+
+@app.get("/pop_image")
+async def pop_image():
+    if len(generated_images) == 0:
+        return JSONResponse(content={"id": ""})
+    key = sorted(generated_images.keys())[0]
+    image = generated_images.pop(key)
+    return JSONResponse(content=image)
 
 
 class Item(BaseModel):
@@ -55,14 +71,15 @@ def inference(item: Item):
     generated_image = model(image=image, prompt=item.prompt, negative_prompt=item.negative_prompt, seed=item.seed)
     elapsed = time() - start
     image_hex = image2bytes(generated_image)
-    return {"id": item.id, "image_hex": image_hex, "time": elapsed}
+    generated_images[item.id] = {"id": item.id, "image_hex": image_hex, "time": elapsed}
 
 
-@app.post("/generate_image")
+@app.post("/post_image")
 async def generation(item: Item):
     try:
-        content = inference(item)
-        return JSONResponse(content=content)
+        thread = Thread(target=inference, args=[item])
+        thread.start()
+        return JSONResponse(content={"id": item.id})
     except Exception:
         logging.exception('Error')
         raise HTTPException(status_code=404, detail=traceback.print_exc())
