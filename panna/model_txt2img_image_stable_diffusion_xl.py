@@ -38,7 +38,8 @@ class SDXL:
                  img2img: bool = False,
                  low_cpu_mem_usage: bool = True,
                  device: Optional[torch.device] = None,
-                 deep_cache: bool = False):
+                 deep_cache: bool = False,
+                 moving_average_window: Optional[int] = None):
         config = dict(
             use_safetensors=True,
             variant=variant,
@@ -104,7 +105,7 @@ class SDXL:
             shared_config["denoising_end"] = self.high_noise_frac if high_noise_frac is None else high_noise_frac
         if (len(self.cached_prompt) == 0 or
                 self.cached_prompt["prompt"] != prompt or self.cached_prompt["negative_prompt"] != negative_prompt):
-            logger.info("generating text embedding")
+            logger.info("generating latent text embedding")
             encode_prompt = self.base_model.encode_prompt(prompt=prompt, negative_prompt=negative_prompt)
             self.cached_prompt["prompt"] = prompt
             self.cached_prompt["negative_prompt"] = negative_prompt
@@ -118,7 +119,27 @@ class SDXL:
         shared_config["negative_pooled_prompt_embeds"] = self.cached_prompt["negative_pooled_prompt_embeds"]
         logger.info("generating image")
         if self.img2img:
-            output = self.base_model(image=image, **shared_config).images
+            # output = self.base_model(image=image, **shared_config).images
+            logger.info("generating latent image embedding")
+            image = self.base_model.image_processor.preprocess(image)
+            timesteps, num_inference_steps = self.base_model.retrieve_timesteps(
+                self.base_model.scheduler, num_inference_steps, self.base_model._execution_device
+            )
+            timesteps, num_inference_steps = self.base_model.get_timesteps(
+                num_inference_steps, strength, self.base_model._execution_device,
+            )
+            latent_timestep = timesteps[:1].repeat(num_images_per_prompt)
+            latents = self.base_model.prepare_latents(
+                image=image,
+                timestamp=latent_timestep,
+                batch_size=1,
+                num_images_per_prompt=num_images_per_prompt,
+                dtype=self.cached_prompt["prompt_embeds"].dtype,
+                device=self.base_model._execution_device,
+                generator=shared_config["generator"],
+                add_noise=True
+            )
+            output = self.base_model(latents=latents, **shared_config).images
         else:
             output = self.base_model(**shared_config).images
         if self.refiner_model:

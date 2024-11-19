@@ -48,7 +48,8 @@ class Item(BaseModel):
     image_hex: str
     prompt: str
     seed: int
-    negative_prompt: Optional[str]
+    negative_prompt: Optional[str] = None
+    strength: float = 0.5
 
 
 @app.post("/generate_image")
@@ -56,7 +57,13 @@ async def generation(item: Item):
     try:
         image = bytes2image(item.image_hex)
         start = time()
-        generated_image = model(image=image, prompt=item.prompt, negative_prompt=item.negative_prompt, seed=item.seed)
+        generated_image = model(
+            image=image,
+            prompt=item.prompt,
+            negative_prompt=item.negative_prompt,
+            seed=item.seed,
+            strength=item.strength
+        )
         elapsed = time() - start
         image_hex = image2bytes(generated_image)
         return JSONResponse(content={"id": item.id, "image_hex": image_hex, "time": elapsed})

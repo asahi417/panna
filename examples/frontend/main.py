@@ -36,9 +36,7 @@ width = int(os.getenv("WIDTH", 512))
 height = int(os.getenv("HEIGHT", 512))
 
 
-def generate_image(input_image: np.ndarray, image_id: int) -> None:
-	input_image = resize_image(Image.fromarray(input_image), width=width, height=height)
-	print(input_image.size)
+def generate_image(input_image: Image.Image, image_id: int) -> None:
 	image_hex = image2bytes(input_image)
 	input_data_queue[image_id] = {
 		"id": image_id, "image_hex": image_hex, "prompt": prompt, "negative_prompt": negative_prompt, "seed": 42
@@ -53,11 +51,12 @@ def generate_image(input_image: np.ndarray, image_id: int) -> None:
 		with requests.post(f"{url}/generate_image", json=data) as r:
 			assert r.status_code == 200, r.status_code
 			response = r.json()
-		logger.info(f"[generate_image][id={image_id}] complete (time: {response['time']})")
-		output_data_queue[image_id] = bytes2image(response["image_hex"])
+		image = bytes2image(response["image_hex"])
+		logger.info(f"[generate_image][id={image_id}] complete (time: {response['time']}, size: {image.size})")
+		output_data_queue[image_id] = image
 		url2count[url] -= 1
 	else:
-		logger.info(f"[generate_image] endpoint full ({url2count})")
+		logger.info(f"[generate_image] endpoint full")
 
 
 # set window
@@ -74,17 +73,17 @@ flag, frame = vc.read()
 while flag:
 	frame_index += 1
 	flag, frame = vc.read()
-	logger.info(f"[new frame]\n\t- image_id {frame_index}\n\t- input queue {len(input_data_queue)}\n\t- shape: {frame.shape}")
-	cv2.imshow("original", frame)
-	Thread(target=generate_image, args=[frame, frame_index]).start()
+	frame_pil = resize_image(frame, width=width, height=height)
+	logger.info(f"[new frame]\n\t- image_id {frame_index}\n\t- queue {len(input_data_queue)}\n\t- size: {frame.size}")
+	cv2.imshow("original", np.array(frame_pil))
+	Thread(target=generate_image, args=[frame_pil, frame_index]).start()
 	if len(output_data_queue) > 0:
 		frame_index = sorted(output_data_queue.keys())[0]
 		generated_frame_pil = output_data_queue.pop(frame_index)
-		generated_frame = np.array(generated_frame_pil)
-		cv2.imshow("generated", generated_frame)
-		prev_generation = generated_frame
+		cv2.imshow("generated", np.array(generated_frame_pil))
+	else:
+		logger.info("no image to show")
 	wait_key = cv2.waitKey(1)  # sample frequency (ms)
-	# sleep(0.1)
 	if wait_key == 27:  # exit on ESC
 		break
 

@@ -30,7 +30,6 @@ class SDUpScaler:
                  reshape_method: Optional[str] = "downscale",
                  upscale_factor: int = 4) -> List[Image]:
 
-
         def downscale_image(x: Image) -> Image:
             return resize_image(x, width=int(x.width / upscale_factor), height=int(x.height / upscale_factor))
 

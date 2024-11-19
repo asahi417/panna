@@ -66,7 +66,14 @@ def get_logger(name: str) -> logging.Logger:
     return logger
 
 
-def resize_image(image: Image.Image, width: int, height: int) -> Image.Image:
+def resize_image(
+        image: Union[Image.Image, np.ndarray],
+        width: int,
+        height: int,
+        return_array: bool = False
+) -> Union[Image.Image, np.ndarray]:
+    if isinstance(image, np.ndarray):
+        image = Image.fromarray(image)
     if image.size == (width, height):
         return image
     # Calculate aspect ratios
@@ -81,4 +88,7 @@ def resize_image(image: Image.Image, width: int, height: int) -> Image.Image:
         resized_image = image.resize((width, new_height), Image.LANCZOS)
         # Calculate coordinates for cropping
         left, top, right, bottom = 0, (new_height - height) / 2, width, (new_height + height) / 2
-    return resized_image.crop((left, top, right, bottom))
+    resized_image = resized_image.crop((left, top, right, bottom))
+    if return_array:
+        return np.array(resized_image)
+    return resized_image
