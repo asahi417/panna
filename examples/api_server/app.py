@@ -15,13 +15,15 @@ from panna.util import bytes2image, image2bytes, get_logger
 
 logger = get_logger(__name__)
 model_name = os.environ.get('MODEL_NAME', 'sdxl_turbo_img2img')
+width = os.getenv("WIDTH", 512)
+height = os.getenv("HEIGHT", 512)
 if model_name == "sdxl_turbo_img2img":
     from panna import SDXL
     model = SDXL(
         use_refiner=False,
         base_model_id="stabilityai/sdxl-turbo",
-        height=512,
-        width=512,
+        height=height,
+        width=width,
         guidance_scale=0.0,
         num_inference_steps=2,
         strength=0.5,
@@ -49,20 +51,15 @@ class Item(BaseModel):
     negative_prompt: Optional[str]
 
 
-def inference(item: Item):
-    image = bytes2image(item.image_hex)
-    start = time()
-    generated_image = model(image=image, prompt=item.prompt, negative_prompt=item.negative_prompt, seed=item.seed)
-    elapsed = time() - start
-    image_hex = image2bytes(generated_image)
-    return {"id": item.id, "image_hex": image_hex, "time": elapsed}
-
-
 @app.post("/generate_image")
 async def generation(item: Item):
     try:
-        content = inference(item)
-        return JSONResponse(content=content)
+        image = bytes2image(item.image_hex)
+        start = time()
+        generated_image = model(image=image, prompt=item.prompt, negative_prompt=item.negative_prompt, seed=item.seed)
+        elapsed = time() - start
+        image_hex = image2bytes(generated_image)
+        return JSONResponse(content={"id": item.id, "image_hex": image_hex, "time": elapsed})
     except Exception:
         logging.exception('Error')
         raise HTTPException(status_code=404, detail=traceback.print_exc())
