@@ -124,7 +124,7 @@ class SDXL:
             logger.info("generating latent image embedding")
             image = self.base_model.image_processor.preprocess(image)
             print("config")
-            print(num_inference_steps)
+            num_inference_steps = shared_config["num_inference_steps"]
             timesteps, num_inference_steps = retrieve_timesteps(
                 self.base_model.scheduler, num_inference_steps, self.base_model._execution_device
             )
