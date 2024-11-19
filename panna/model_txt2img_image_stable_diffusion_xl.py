@@ -138,7 +138,7 @@ class SDXL:
             print(self.cached_prompt["prompt_embeds"].dtype)
             latents = self.base_model.prepare_latents(
                 image=image,
-                timestamp=latent_timestep,
+                timestep=latent_timestep,
                 batch_size=1,
                 num_images_per_prompt=num_images_per_prompt,
                 dtype=self.cached_prompt["prompt_embeds"].dtype,
