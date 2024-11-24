@@ -1,6 +1,7 @@
 import os
 import logging
 import traceback
+import dataclasses
 from typing import Optional
 from time import time
 
@@ -43,15 +44,18 @@ if model_name == "sdxl_turbo_img2img":
     )
 else:
     raise ValueError(f"Unknown model: {model_name}")
-# generation config
-default_prompt = "surrealistic, creative, inspiring, geometric, blooming, paint by Salvador Dali, HQ"
-default_negative_prompt = "low quality, blur, mustache"
-default_seed = 42
-default_noise_scale_latent_image = None
-default_noise_scale_latent_prompt = None
 # launch app
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
+
+# @dataclasses.dataclass
+class GenerationConfig:
+    prompt: str = "surrealistic, creative, inspiring, geometric, blooming, paint by Salvador Dali, HQ"
+    negative_prompt: str = "low quality, blur, mustache"
+    seed: int = 42
+    noise_scale_latent_image: float = 0.0
+    noise_scale_latent_prompt: float = 0.0
 
 
 def _update_config(
@@ -62,20 +66,15 @@ def _update_config(
         noise_scale_latent_prompt: Optional[float] = None,
 ):
     if prompt:
-        global default_prompt
-        default_prompt = prompt
+        GenerationConfig.prompt = prompt
     if negative_prompt:
-        global default_negative_prompt
-        default_negative_prompt = negative_prompt
+        GenerationConfig.negative_prompt = negative_prompt
     if seed:
-        global default_seed
-        default_seed = seed
+        GenerationConfig.seed = seed
     if noise_scale_latent_image:
-        global default_noise_scale_latent_image
-        default_noise_scale_latent_image = noise_scale_latent_image
+        GenerationConfig.noise_scale_latent_image = noise_scale_latent_image
     if noise_scale_latent_prompt:
-        global default_noise_scale_latent_prompt
-        default_noise_scale_latent_prompt = noise_scale_latent_prompt
+        GenerationConfig.noise_scale_latent_prompt = noise_scale_latent_prompt
 
 
 class ItemUpdateConfig(BaseModel):
@@ -97,11 +96,11 @@ async def update_config(item: ItemUpdateConfig):
             noise_scale_latent_prompt=item.noise_scale_latent_prompt
         )
         return JSONResponse(content={
-            "prompt": default_prompt,
-            "negative_prompt": default_negative_prompt,
-            "seed": default_seed,
-            "noise_scale_latent_image": default_noise_scale_latent_image,
-            "noise_scale_latent_prompt": default_noise_scale_latent_prompt,
+            "prompt": GenerationConfig.prompt,
+            "negative_prompt": GenerationConfig.negative_prompt,
+            "seed": GenerationConfig.seed,
+            "noise_scale_latent_image": GenerationConfig.noise_scale_latent_image,
+            "noise_scale_latent_prompt": GenerationConfig.noise_scale_latent_prompt,
         })
     except Exception:
         logging.exception('Error')
@@ -128,11 +127,11 @@ async def generate_image(item: ItemGenerateImage):
         with torch.no_grad():
             generated_image = model(
                 image=image,
-                prompt=default_prompt,
-                negative_prompt=default_negative_prompt,
-                seed=default_seed,
-                noise_scale_latent_image=default_noise_scale_latent_image,
-                noise_scale_latent_prompt=default_noise_scale_latent_prompt
+                prompt=GenerationConfig.prompt,
+                negative_prompt=GenerationConfig.negative_prompt,
+                seed=GenerationConfig.seed,
+                noise_scale_latent_image=GenerationConfig.noise_scale_latent_image,
+                noise_scale_latent_prompt=GenerationConfig.noise_scale_latent_prompt
             )
         elapsed = time() - start
         image_hex = image2bytes(generated_image)
@@ -140,11 +139,11 @@ async def generate_image(item: ItemGenerateImage):
             "id": item.id,
             "image_hex": image_hex,
             "time": elapsed,
-            "prompt": default_prompt,
-            "negative_prompt": default_negative_prompt,
-            "seed": default_seed,
-            "noise_scale_latent_image": default_noise_scale_latent_image,
-            "noise_scale_latent_prompt": default_noise_scale_latent_prompt,
+            "prompt": GenerationConfig.prompt,
+            "negative_prompt": GenerationConfig.negative_prompt,
+            "seed": GenerationConfig.seed,
+            "noise_scale_latent_image": GenerationConfig.noise_scale_latent_image,
+            "noise_scale_latent_prompt": GenerationConfig.noise_scale_latent_prompt,
         })
     except Exception:
         logging.exception('Error')
