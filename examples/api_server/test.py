@@ -10,11 +10,6 @@ prompt = "geometric, modern, artificial, HQ, detail, surreal"
 image_hex = image2bytes(sample_image)
 
 # generate image
-# data = {"prompt": prompt}
-# with requests.post(f"{url}/update_config", json=data) as r:
-#     assert r.status_code == 200, r.status_code
-#     pprint(r.json())
-
 with requests.post(f"{url}/generate_image", json={
     "id": 0,
     "image_hex": image_hex,
@@ -28,8 +23,10 @@ with requests.post(f"{url}/generate_image", json={
     pprint(response)
 
 # update config
-data = {"noise_scale_latent_image": 0.4, "noise_scale_latent_prompt": 0.0}
-with requests.post(f"{url}/update_config", json=data) as r:
+with requests.post(f"{url}/update_config", json={
+    "noise_scale_latent_image": 0.4,
+    "noise_scale_latent_prompt": 0.0
+}) as r:
     assert r.status_code == 200, r.status_code
     pprint(r.json())
 with requests.post(f"{url}/generate_image", json={"id": 0, "image_hex": image_hex}) as r:
@@ -39,8 +36,10 @@ with requests.post(f"{url}/generate_image", json={"id": 0, "image_hex": image_he
     pprint(response)
 
 # update config
-data = {"noise_scale_latent_image": 0.0, "noise_scale_latent_prompt": 2}
-with requests.post(f"{url}/update_config", json=data) as r:
+with requests.post(f"{url}/update_config", json={
+    "noise_scale_latent_image": 0.0,
+    "noise_scale_latent_prompt": 2
+}) as r:
     assert r.status_code == 200, r.status_code
     pprint(r.json())
 with requests.post(f"{url}/generate_image", json={"id": 0, "image_hex": image_hex}) as r:
@@ -50,8 +49,10 @@ with requests.post(f"{url}/generate_image", json={"id": 0, "image_hex": image_he
     pprint(response)
 
 # update config
-data = {"noise_scale_latent_image": 0.4, "noise_scale_latent_prompt": 2}
-with requests.post(f"{url}/update_config", json=data) as r:
+with requests.post(f"{url}/update_config", json={
+    "noise_scale_latent_image": 0.4,
+    "noise_scale_latent_prompt": 2
+}) as r:
     assert r.status_code == 200, r.status_code
     pprint(r.json())
 with requests.post(f"{url}/generate_image", json={"id": 0, "image_hex": image_hex}) as r:

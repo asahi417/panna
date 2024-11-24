@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from PIL.Image import blend
 
 from panna.util import bytes2image, image2bytes, get_logger
 
@@ -54,6 +55,7 @@ class GenerationConfig:
     seed: int = 42
     noise_scale_latent_image: float = 0.0
     noise_scale_latent_prompt: float = 0.0
+    alpha: float = 0.0
 
 
 def _update_config(
@@ -62,6 +64,7 @@ def _update_config(
         seed: Optional[int] = None,
         noise_scale_latent_image: Optional[float] = None,
         noise_scale_latent_prompt: Optional[float] = None,
+        alpha: Optional[float] = None
 ):
     if prompt is not None:
         GenerationConfig.prompt = prompt
@@ -73,6 +76,9 @@ def _update_config(
         GenerationConfig.noise_scale_latent_image = noise_scale_latent_image
     if noise_scale_latent_prompt is not None:
         GenerationConfig.noise_scale_latent_prompt = noise_scale_latent_prompt
+    if alpha is not None:
+        assert 0.0 <= alpha < 1.0, alpha
+        GenerationConfig.alpha = alpha
 
 
 class ItemUpdateConfig(BaseModel):
@@ -81,6 +87,7 @@ class ItemUpdateConfig(BaseModel):
     negative_prompt: Optional[str] = None
     noise_scale_latent_image: Optional[float] = None
     noise_scale_latent_prompt: Optional[float] = None
+    alpha: Optional[float] = None
 
 
 @app.post("/update_config")
@@ -91,7 +98,8 @@ async def update_config(item: ItemUpdateConfig):
             negative_prompt=item.negative_prompt,
             seed=item.seed,
             noise_scale_latent_image=item.noise_scale_latent_image,
-            noise_scale_latent_prompt=item.noise_scale_latent_prompt
+            noise_scale_latent_prompt=item.noise_scale_latent_prompt,
+            alpha=item.alpha
         )
         return JSONResponse(content={
             "prompt": GenerationConfig.prompt,
@@ -118,7 +126,8 @@ async def generate_image(item: ItemGenerateImage):
             negative_prompt=item.negative_prompt,
             seed=item.seed,
             noise_scale_latent_image=item.noise_scale_latent_image,
-            noise_scale_latent_prompt=item.noise_scale_latent_prompt
+            noise_scale_latent_prompt=item.noise_scale_latent_prompt,
+            alpha=item.alpha
         )
         image = bytes2image(item.image_hex)
         start = time()
@@ -129,8 +138,10 @@ async def generate_image(item: ItemGenerateImage):
                 negative_prompt=GenerationConfig.negative_prompt,
                 seed=GenerationConfig.seed,
                 noise_scale_latent_image=GenerationConfig.noise_scale_latent_image,
-                noise_scale_latent_prompt=GenerationConfig.noise_scale_latent_prompt
+                noise_scale_latent_prompt=GenerationConfig.noise_scale_latent_prompt,
             )
+        if GenerationConfig.alpha > 0:
+            generated_image = blend(generated_image, image, GenerationConfig.alpha)
         elapsed = time() - start
         image_hex = image2bytes(generated_image)
         return JSONResponse(content={
@@ -142,6 +153,7 @@ async def generate_image(item: ItemGenerateImage):
             "seed": GenerationConfig.seed,
             "noise_scale_latent_image": GenerationConfig.noise_scale_latent_image,
             "noise_scale_latent_prompt": GenerationConfig.noise_scale_latent_prompt,
+            "alpha": GenerationConfig.alpha
         })
     except Exception:
         logging.exception('Error')
