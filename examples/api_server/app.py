@@ -65,15 +65,15 @@ def _update_config(
         noise_scale_latent_image: Optional[float] = None,
         noise_scale_latent_prompt: Optional[float] = None,
 ):
-    if prompt:
+    if prompt is not None:
         GenerationConfig.prompt = prompt
-    if negative_prompt:
+    if negative_prompt is not None:
         GenerationConfig.negative_prompt = negative_prompt
-    if seed:
+    if seed is not None:
         GenerationConfig.seed = seed
-    if noise_scale_latent_image:
+    if noise_scale_latent_image is not None:
         GenerationConfig.noise_scale_latent_image = noise_scale_latent_image
-    if noise_scale_latent_prompt:
+    if noise_scale_latent_prompt is not None:
         GenerationConfig.noise_scale_latent_prompt = noise_scale_latent_prompt
 
 
