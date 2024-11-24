@@ -1,15 +1,26 @@
 import random
 import gc
 import logging
-from typing import Union, Optional, Tuple
+from typing import Union, Optional
 from io import BytesIO
 
 import numpy as np
 from PIL import Image
 
-from torch import Generator
-from torch import cuda
+from torch import cuda, Generator, Tensor, linalg, randn
 from diffusers.utils import load_image
+
+
+def add_noise(waveform: Tensor, noise_scale: float, seed: int) -> Tensor:
+    noise = randn(*waveform.shape, dtype=waveform.dtype, generator=get_generator(seed)).to(waveform.device)
+    energy_signal = linalg.vector_norm(waveform) ** 2
+    energy_noise = linalg.vector_norm(noise) ** 2
+    if energy_signal == float("inf"):
+        scaled_noise = noise_scale * noise
+    else:
+        scale = energy_signal/energy_noise * noise_scale
+        scaled_noise = scale.unsqueeze(-1) * noise
+    return waveform + scaled_noise
 
 
 def image2bytes(image: Union[str, Image.Image]) -> str:
@@ -24,24 +35,6 @@ def image2bytes(image: Union[str, Image.Image]) -> str:
 def bytes2image(image_hex: str) -> Image.Image:
     image_bytes = bytes.fromhex(image_hex)
     return Image.open(BytesIO(image_bytes))
-
-
-# def image2hex(image: Union[str, Image.Image]) -> (str, Tuple[int]):
-#     if isinstance(image, str):
-#         image = load_image(image)
-#     image_array = np.array(image)
-#     assert image_array.dtype == np.uint8, image_array.dtype
-#     image_shape = image_array.shape
-#     image_bytes = image_array.tobytes()
-#     return image_bytes.hex(), image_shape
-#
-#
-# def hex2image(image_hex: str, image_shape: Tuple[int, int, int], return_array: bool = False) -> Union[Image.Image, np.ndarray]:
-#     image_bytes = bytes.fromhex(image_hex)
-#     image_array = np.frombuffer(image_bytes, dtype=np.uint8).reshape(*image_shape)
-#     if return_array:
-#         return image_array
-#     return Image.fromarray(image_array)
 
 
 def get_generator(seed: Optional[int] = None) -> Generator:

@@ -34,6 +34,8 @@ prompt = os.getenv("P_PROMPT", "geometric, modern, artificial, HQ, detail, fine-
 negative_prompt = os.getenv("N_PROMPT", "low quality")
 width = int(os.getenv("WIDTH", 512))
 height = int(os.getenv("HEIGHT", 512))
+fps = int(os.getenv("FPS", 60))
+wait_sec = int(os.getenv("WAIT_M_SEC", 160))
 
 
 def generate_image(input_image: Image.Image, image_id: int) -> None:
@@ -62,14 +64,16 @@ def generate_image(input_image: Image.Image, image_id: int) -> None:
 # set window
 cv2.namedWindow("original")
 cv2.namedWindow("generated")
+cv2.namedWindow("blended")
 vc = cv2.VideoCapture(0)
-vc.set(cv2.CAP_PROP_FPS, 60)
+vc.set(cv2.CAP_PROP_FPS, fps)
 vc.set(cv2.CAP_PROP_FRAME_WIDTH, width)
 vc.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
 # start main loop
 frame_index = 0
 flag, frame = vc.read()
+generated_frame_pil = None
 while flag:
 	frame_index += 1
 	flag, frame = vc.read()
@@ -78,12 +82,17 @@ while flag:
 	cv2.imshow("original", np.array(frame_pil))
 	Thread(target=generate_image, args=[frame_pil, frame_index]).start()
 	if len(output_data_queue) > 0:
-		frame_index = sorted(output_data_queue.keys())[0]
-		generated_frame_pil = output_data_queue.pop(frame_index)
+		latest_frame_index = sorted(output_data_queue.keys())[0]
+		generated_frame_pil = output_data_queue.pop(latest_frame_index)
 		cv2.imshow("generated", np.array(generated_frame_pil))
 	else:
-		logger.info("no image to show")
-	wait_key = cv2.waitKey(1)  # sample frequency (ms)
+		if generated_frame_pil is not None:
+			cv2.imshow("generated", np.array(generated_frame_pil))
+			# blend_frame = ((np.array(generated_frame_pil) + np.array(frame_pil))/2).astype(np.uint8)
+			# cv2.imshow("blended", blend_frame)
+		else:
+			logger.info("no image to show")
+	wait_key = cv2.waitKey(wait_sec)  # mil-sec
 	if wait_key == 27:  # exit on ESC
 		break
 

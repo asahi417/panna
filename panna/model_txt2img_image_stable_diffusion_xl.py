@@ -4,7 +4,7 @@ import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl_img2img import retrieve_timesteps
 from PIL.Image import Image
-from .util import get_generator, get_logger, resize_image
+from .util import get_generator, get_logger, resize_image, add_noise
 
 logger = get_logger(__name__)
 
@@ -21,8 +21,6 @@ class SDXL:
     base_model_id: str
     base_model: Union[StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline]
     refiner_model: Optional[StableDiffusionXLPipeline]
-    latent_smoothing_factor: Optional[float]
-    cached_latent_image: Optional[torch.Tensor]
     cached_latent_prompt: Optional[Dict[str, Union[str, torch.Tensor]]]
 
     def __init__(self,
@@ -41,8 +39,7 @@ class SDXL:
                  img2img: bool = False,
                  low_cpu_mem_usage: bool = True,
                  device: Optional[torch.device] = None,
-                 deep_cache: bool = False,
-                 latent_smoothing_factor: Optional[float] = None):
+                 deep_cache: bool = False):
         config = dict(
             use_safetensors=True,
             variant=variant,
@@ -73,8 +70,6 @@ class SDXL:
             self.base_model = self.base_model.to(device)
             if self.refiner_model is not None:
                 self.refiner_model = self.refiner_model.to(device)
-        self.latent_smoothing_factor = latent_smoothing_factor
-        self.cached_latent_image = None
         self.cached_latent_prompt = None
 
     def __call__(self,
@@ -88,7 +83,9 @@ class SDXL:
                  high_noise_frac: Optional[float] = None,
                  height: Optional[int] = None,
                  width: Optional[int] = None,
-                 seed: Optional[int] = None) -> Image:
+                 seed: Optional[int] = None,
+                 noise_scale_latent_image: Optional[float] = None,
+                 noise_scale_latent_prompt: Optional[float] = None) -> Image:
         if self.img2img:
             if image is None:
                 raise ValueError("No image provided for img2img generation.")
@@ -124,24 +121,24 @@ class SDXL:
         shared_config["negative_prompt_embeds"] = self.cached_latent_prompt["negative_prompt_embeds"]
         shared_config["pooled_prompt_embeds"] = self.cached_latent_prompt["pooled_prompt_embeds"]
         shared_config["negative_pooled_prompt_embeds"] = self.cached_latent_prompt["negative_pooled_prompt_embeds"]
+        if noise_scale_latent_prompt:
+            shared_config["prompt_embeds"] = add_noise(shared_config["prompt_embeds"], noise_scale_latent_prompt, seed=seed)
+            shared_config["pooled_prompt_embeds"] = add_noise(shared_config["pooled_prompt_embeds"], noise_scale_latent_prompt, seed=seed)
         if self.img2img:
-            # output = self.base_model(image=image, **shared_config).images
             logger.info("generating latent image embedding")
             device = self.base_model._execution_device
             image = self.base_model.image_processor.preprocess(image)
             ts, nis = retrieve_timesteps(self.base_model.scheduler, shared_config["num_inference_steps"], device)
-            ts, _ = self.base_model.get_timesteps(nis, strength, device)
+            ts, _ = self.base_model.get_timesteps(nis, shared_config["strength"], device)
             latents = self.base_model.prepare_latents(
                 image=image, timestep=ts[:1].repeat(num_images_per_prompt), batch_size=1,
                 num_images_per_prompt=num_images_per_prompt, dtype=self.cached_latent_prompt["prompt_embeds"].dtype,
                 device=device, generator=shared_config["generator"], add_noise=True
             )
-            if self.cached_latent_image is not None and self.latent_smoothing_factor is not None:
-                # TODO: multiple call might make it chaos? Like the latent cache from different call?
-                latents = latents * (1 - self.latent_smoothing_factor) + self.cached_latent_image * self.latent_smoothing_factor
+            if noise_scale_latent_image:
+                latents = add_noise(latents, noise_scale_latent_image, seed=seed)
             logger.info("generating image")
             output = self.base_model(image=image, latents=latents, **shared_config).images
-            self.cached_latent_image = latents
         else:
             logger.info("generating image")
             output = self.base_model(**shared_config).images

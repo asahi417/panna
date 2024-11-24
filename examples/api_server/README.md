@@ -11,3 +11,8 @@ pip install -r requirement.txt
 uvicorn app:app --host 0.0.0.0 --port 4444
 ```
 Access API viewer http://0.0.0.0:4444/docs.
+
+### Run on Mac MPS
+```shell
+uvicorn app_mps:app --host 0.0.0.0 --port 4444
+```

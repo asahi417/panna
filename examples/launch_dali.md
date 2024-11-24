@@ -13,9 +13,11 @@ cd frontend
 export ENDPOINT="https://tbdavs4mlxmu0k-4000.proxy.runpod.net/,https://tbdavs4mlxmu0k-4444.proxy.runpod.net/"
 export P_PROMPT="surrealistic, creative, inspiring, geometric, blooming, paint by Salvador Dali, HQ"
 export N_PROMPT="low quality, blur, mustache"
-export MAX_CONCURRENT_JOB=5
+export MAX_CONCURRENT_JOB=8
 export HEIGHT=512
 export WIDTH=512
+export FPS=120
+export WAIT_M_SEC=160
 python main.py
 ```
 
@@ -29,5 +31,7 @@ export N_PROMPT="low quality, blur, mustache"
 export MAX_CONCURRENT_JOB=4
 export HEIGHT=512
 export WIDTH=512
+export FPS=120
+export WAIT_M_SEC=160
 python main.py
 ```
