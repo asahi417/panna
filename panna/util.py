@@ -12,6 +12,8 @@ from diffusers.utils import load_image
 
 
 def add_noise(waveform: Tensor, noise_scale: float, seed: int) -> Tensor:
+    if noise_scale == 0:
+        return waveform
     noise = randn(*waveform.shape, dtype=waveform.dtype, generator=get_generator(seed)).to(waveform.device)
     energy_signal = linalg.vector_norm(waveform) ** 2
     energy_noise = linalg.vector_norm(noise) ** 2
