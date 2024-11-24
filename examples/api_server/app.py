@@ -1,7 +1,6 @@
 import os
 import logging
 import traceback
-import dataclasses
 from typing import Optional
 from time import time
 
@@ -49,10 +48,9 @@ app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 
-# @dataclasses.dataclass
 class GenerationConfig:
     prompt: str = "surrealistic, creative, inspiring, geometric, blooming, paint by Salvador Dali, HQ"
-    negative_prompt: str = "low quality, blur, mustache"
+    negative_prompt: str = "low quality, blur"
     seed: int = 42
     noise_scale_latent_image: float = 0.0
     noise_scale_latent_prompt: float = 0.0
