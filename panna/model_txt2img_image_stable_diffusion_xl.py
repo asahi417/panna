@@ -3,7 +3,7 @@ from typing import Optional, Dict, Union, List
 import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl_img2img import retrieve_timesteps
-from PIL.Image import Image
+from PIL.Image import Image, blend
 from .util import get_generator, get_logger, resize_image, add_noise
 
 logger = get_logger(__name__)
@@ -85,7 +85,8 @@ class SDXL:
                  width: Optional[int] = None,
                  seed: Optional[int] = None,
                  noise_scale_latent_image: Optional[float] = None,
-                 noise_scale_latent_prompt: Optional[float] = None) -> Image:
+                 noise_scale_latent_prompt: Optional[float] = None,
+                 alpha: Optional[float] = None) -> Image:
         if self.img2img:
             if image is None:
                 raise ValueError("No image provided for img2img generation.")
@@ -127,18 +128,18 @@ class SDXL:
         if self.img2img:
             logger.info("generating latent image embedding")
             device = self.base_model._execution_device
-            image = self.base_model.image_processor.preprocess(image)
+            image_tensor = self.base_model.image_processor.preprocess(image)
             ts, nis = retrieve_timesteps(self.base_model.scheduler, shared_config["num_inference_steps"], device)
             ts, _ = self.base_model.get_timesteps(nis, shared_config["strength"], device)
             latents = self.base_model.prepare_latents(
-                image=image, timestep=ts[:1].repeat(num_images_per_prompt), batch_size=1,
+                image=image_tensor, timestep=ts[:1].repeat(num_images_per_prompt), batch_size=1,
                 num_images_per_prompt=num_images_per_prompt, dtype=self.cached_latent_prompt["prompt_embeds"].dtype,
                 device=device, generator=shared_config["generator"], add_noise=True
             )
             if noise_scale_latent_image:
                 latents = add_noise(latents, noise_scale_latent_image, seed=seed)
             logger.info("generating image")
-            output = self.base_model(image=image, latents=latents, **shared_config).images
+            output = self.base_model(image=image_tensor, latents=latents, **shared_config).images
         else:
             logger.info("generating image")
             output = self.base_model(**shared_config).images
@@ -156,7 +157,11 @@ class SDXL:
             ).images
         else:
             output_list = output
-        return output_list[0]
+        output_image = output_list[0]
+        if alpha is not None and alpha != 0:
+            print(output_image.size, image.size)
+            output_image = blend(output_image, image, alpha=alpha)
+        return output_image
 
     @staticmethod
     def export(data: Image, output_path: str, file_format: str = "png") -> None:

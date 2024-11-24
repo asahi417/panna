@@ -139,9 +139,8 @@ async def generate_image(item: ItemGenerateImage):
                 seed=GenerationConfig.seed,
                 noise_scale_latent_image=GenerationConfig.noise_scale_latent_image,
                 noise_scale_latent_prompt=GenerationConfig.noise_scale_latent_prompt,
+                alpha=GenerationConfig.alpha
             )
-        if GenerationConfig.alpha > 0:
-            generated_image = blend(generated_image, image, GenerationConfig.alpha)
         elapsed = time() - start
         image_hex = image2bytes(generated_image)
         return JSONResponse(content={

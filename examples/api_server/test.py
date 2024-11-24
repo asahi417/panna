@@ -60,3 +60,17 @@ with requests.post(f"{url}/generate_image", json={"id": 0, "image_hex": image_he
     response = r.json()
     bytes2image(response.pop("image_hex")).save("test_image.noise_scale_latent_image.noise_scale_latent_prompt.jpg")
     pprint(response)
+
+# update config
+with requests.post(f"{url}/update_config", json={
+    "noise_scale_latent_image": 0,
+    "noise_scale_latent_prompt": 0,
+    "alpha": 0.5
+}) as r:
+    assert r.status_code == 200, r.status_code
+    pprint(r.json())
+with requests.post(f"{url}/generate_image", json={"id": 0, "image_hex": image_hex}) as r:
+    assert r.status_code == 200, r.status_code
+    response = r.json()
+    bytes2image(response.pop("image_hex")).save("test_image.alpha.jpg")
+    pprint(response)
