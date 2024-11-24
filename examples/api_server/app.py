@@ -18,6 +18,11 @@ logger = get_logger(__name__)
 model_name = os.environ.get('MODEL_NAME', 'sdxl_turbo_img2img')
 width = int(os.getenv("WIDTH", 512))
 height = int(os.getenv("HEIGHT", 512))
+device = "cpu"
+if torch.cuda.is_available():
+    device = "cuda"
+elif torch.mps.device_count() >= 1:
+    device = "mps"
 if model_name == "sdxl_turbo_img2img":
     from panna import SDXL
     model = SDXL(
@@ -33,7 +38,7 @@ if model_name == "sdxl_turbo_img2img":
         device_map=None,
         low_cpu_mem_usage=False,
         img2img=True,
-        device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+        device=torch.device(device),
         deep_cache=True
     )
 else:
@@ -131,7 +136,16 @@ async def generate_image(item: ItemGenerateImage):
             )
         elapsed = time() - start
         image_hex = image2bytes(generated_image)
-        return JSONResponse(content={"id": item.id, "image_hex": image_hex, "time": elapsed})
+        return JSONResponse(content={
+            "id": item.id,
+            "image_hex": image_hex,
+            "time": elapsed,
+            "prompt": default_prompt,
+            "negative_prompt": default_negative_prompt,
+            "seed": default_seed,
+            "noise_scale_latent_image": default_noise_scale_latent_image,
+            "noise_scale_latent_prompt": default_noise_scale_latent_prompt,
+        })
     except Exception:
         logging.exception('Error')
         raise HTTPException(status_code=404, detail=traceback.print_exc())
