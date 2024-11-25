@@ -13,6 +13,7 @@ from panna.util import bytes2image, image2bytes, resize_image
 # set logger
 logger = get_logger(__name__)
 # set endpoint
+max_queue = int(os.getenv("MAX_QUEUE", 1))
 endpoint = os.getenv("ENDPOINT", None)
 if endpoint is None:
 	raise ValueError("Endpoint not set.")
@@ -37,9 +38,15 @@ wait_sec = int(os.getenv("WAIT_M_SEC", 160))
 
 
 def generate_image(input_image: Image.Image, image_id: int) -> None:
-	image_hex = image2bytes(input_image)
-	input_data_queue[image_id] = {"id": image_id, "image_hex": image_hex, "image_pil": input_image}
+	if len(input_data_queue) < max_queue:
+		image_hex = image2bytes(input_image)
+		input_data_queue[image_id] = {"id": image_id, "image_hex": image_hex, "image_pil": input_image}
 	urls = sorted([(e, url2count[e]) for e in endpoint if url2count[e] < max_concurrent_job[e]], key=lambda x: x[1])
+
+	# TODO: reset when the queue exceeds max que
+	# if len(input_data_queue) >= max_queue:
+	# 	do something
+
 	if len(urls) != 0:
 		image_id = sorted(input_data_queue.keys())[0]
 		data = input_data_queue.pop(image_id)
