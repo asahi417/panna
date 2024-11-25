@@ -18,10 +18,10 @@ python interface_config.py
 ```shell
 cd frontend
 export ENDPOINT="https://tbdavs4mlxmu0k-4000.proxy.runpod.net/,https://tbdavs4mlxmu0k-4444.proxy.runpod.net/"
-export MAX_CONCURRENT_JOB=8
+export MAX_CONCURRENT_JOB=12
 export HEIGHT=512
 export WIDTH=512
 export FPS=120
-export WAIT_M_SEC=160
+export WAIT_M_SEC=120
 python interface_graphic.py
 ```

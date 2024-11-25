@@ -58,7 +58,7 @@ class GenerationConfig:
     alpha: float = 0.0
 
 
-async def _update_config(
+def _update_config(
         prompt: Optional[str] = None,
         negative_prompt: Optional[str] = None,
         seed: Optional[int] = None,
