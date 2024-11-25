@@ -10,3 +10,4 @@ __pycache__
 *.nfs000*
 .eggs
 test/*/output
+.gradio
