@@ -30,8 +30,6 @@ url2count = {e: 0 for e in endpoint}
 input_data_queue = {}
 output_data_queue = {}
 # set prompt
-prompt = os.getenv("P_PROMPT", "geometric, modern, artificial, HQ, detail, fine-art")
-negative_prompt = os.getenv("N_PROMPT", "low quality")
 width = int(os.getenv("WIDTH", 512))
 height = int(os.getenv("HEIGHT", 512))
 fps = int(os.getenv("FPS", 60))
@@ -40,14 +38,13 @@ wait_sec = int(os.getenv("WAIT_M_SEC", 160))
 
 def generate_image(input_image: Image.Image, image_id: int) -> None:
 	image_hex = image2bytes(input_image)
-	input_data_queue[image_id] = {
-		"id": image_id, "image_hex": image_hex, "prompt": prompt, "negative_prompt": negative_prompt, "seed": 42
-	}
-	urls = [e for e in endpoint if url2count[e] < max_concurrent_job[e]]
+	input_data_queue[image_id] = {"id": image_id, "image_hex": image_hex, "image_pil": input_image}
+	urls = sorted([(e, url2count[e]) for e in endpoint if url2count[e] < max_concurrent_job[e]], key=lambda x: x[1])
 	if len(urls) != 0:
 		image_id = sorted(input_data_queue.keys())[0]
 		data = input_data_queue.pop(image_id)
-		url = urls[0]
+		input_image_pil = data.pop("image_pil")
+		url = urls[0][0]
 		url2count[url] += 1
 		logger.info(f"[generate_image][id={image_id}] generate_image to {url}")
 		with requests.post(f"{url}/generate_image", json=data) as r:
@@ -55,16 +52,15 @@ def generate_image(input_image: Image.Image, image_id: int) -> None:
 			response = r.json()
 		image = bytes2image(response["image_hex"])
 		logger.info(f"[generate_image][id={image_id}] complete (time: {response['time']}, size: {image.size})")
-		output_data_queue[image_id] = image
+		output_data_queue[image_id] = [image, input_image_pil]
 		url2count[url] -= 1
 	else:
 		logger.info(f"[generate_image] endpoint full")
 
-
 # set window
 cv2.namedWindow("original")
+cv2.namedWindow("original_aligned")
 cv2.namedWindow("generated")
-cv2.namedWindow("blended")
 vc = cv2.VideoCapture(0)
 vc.set(cv2.CAP_PROP_FPS, fps)
 vc.set(cv2.CAP_PROP_FRAME_WIDTH, width)
@@ -73,7 +69,6 @@ vc.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 # start main loop
 frame_index = 0
 flag, frame = vc.read()
-generated_frame_pil = None
 while flag:
 	frame_index += 1
 	flag, frame = vc.read()
@@ -83,15 +78,11 @@ while flag:
 	Thread(target=generate_image, args=[frame_pil, frame_index]).start()
 	if len(output_data_queue) > 0:
 		latest_frame_index = sorted(output_data_queue.keys())[0]
-		generated_frame_pil = output_data_queue.pop(latest_frame_index)
+		generated_frame_pil, original_frame_pil = output_data_queue.pop(latest_frame_index)
 		cv2.imshow("generated", np.array(generated_frame_pil))
+		cv2.imshow("original_aligned", np.array(original_frame_pil))
 	else:
-		if generated_frame_pil is not None:
-			cv2.imshow("generated", np.array(generated_frame_pil))
-			# blend_frame = ((np.array(generated_frame_pil) + np.array(frame_pil))/2).astype(np.uint8)
-			# cv2.imshow("blended", blend_frame)
-		else:
-			logger.info("no image to show")
+		logger.info("no image to show")
 	wait_key = cv2.waitKey(wait_sec)  # mil-sec
 	if wait_key == 27:  # exit on ESC
 		break

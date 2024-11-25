@@ -1,6 +1,6 @@
 import os
 import requests
-from typing import Dict, Any
+from typing import Dict, Union
 import gradio as gr
 
 
@@ -10,9 +10,25 @@ if endpoint is None:
 endpoint = endpoint.split(",")
 
 
-def validate_dict(d_1: Dict[str, Any], d_2: Dict[str, Any]) -> None:
+def validate_dict(d_1: Dict[str, Union[int, float, str]], d_2: Dict[str, Union[int, float, str]]) -> None:
     for k in d_1.keys():
         assert d_1[k] == d_2[k], f"{k} has different values: {d_1[k]}, {d_2[k]}"
+
+
+def get_config() -> Dict[str, Union[int, float, str]]:
+    config = None
+    for e in endpoint:
+        print(e)
+        with requests.get(f"{e}/get_config") as r:
+            assert r.status_code == 200, r.status_code
+            tmp_config = r.json()
+            if config is not None:
+                validate_dict(config, tmp_config)
+            config = tmp_config
+    return config
+
+
+default_config = get_config()
 
 
 def update_config(
@@ -21,7 +37,7 @@ def update_config(
         noise_scale_latent_image,
         noise_scale_latent_prompt,
         alpha
-) -> Dict[str, Any]:
+) -> Dict[str, Union[int, float, str]]:
     config = None
     for e in endpoint:
         with requests.post(
@@ -38,78 +54,65 @@ def update_config(
             tmp_config = r.json()
             if config is not None:
                 validate_dict(config, tmp_config)
-                config = tmp_config
+            config = tmp_config
     return config
 
 
-def get_config() -> Dict[str, Any]:
-    config = None
-    for e in endpoint:
-        with requests.get(e) as r:
-            assert r.status_code == 200, r.status_code
-            tmp_config = r.json()
-            if config is not None:
-                validate_dict(config, tmp_config)
-                config = tmp_config
-    return config
-
-
-default = get_config()
-# with gr.Blocks(css="#col-container {margin: 0 auto; max-width: 580px;}") as demo:
 with gr.Blocks() as demo:
-    # with gr.Column():
-    with gr.Column(elem_id="col-container"):
-        gr.Markdown("# Tuning Interface for Img2Img Generation")
-        prompt = gr.Text(
+    with gr.Column():
+        gr.Markdown("# Tuning Img2Img Generation")
+        component_prompt = gr.Text(
             label="Prompt",
             max_lines=2,
             placeholder="Enter your prompt.",
-            value=default["prompt"]
+            value=default_config["prompt"]
         )
-        negative_prompt = gr.Text(
+        component_negative_prompt = gr.Text(
             label="Negative Prompt",
             max_lines=2,
             placeholder="Enter your negative prompt.",
-            value=default["negative_prompt"]
+            value=default_config["negative_prompt"]
         )
-        noise_scale_latent_image = gr.Slider(
+        component_noise_scale_latent_image = gr.Slider(
             label="Noise Scale (Image)",
             minimum=0.0,
-            maximum=1.0,
+            maximum=2.0,
             step=0.01,
-            value=float(default["noise_scale_latent_image"])
+            value=float(default_config["noise_scale_latent_image"])
         )
-        noise_scale_latent_prompt = gr.Slider(
+        component_noise_scale_latent_prompt = gr.Slider(
             label="Noise Scale (Prompt)",
             minimum=0.0,
-            maximum=1.0,
+            maximum=10.0,
             step=0.01,
-            value=float(default["noise_scale_latent_prompt"])
+            value=float(default_config["noise_scale_latent_prompt"])
         )
-        alpha = gr.Slider(
+        component_alpha = gr.Slider(
             label="Alpha",
             minimum=0.0,
             maximum=1.0,
             step=0.01,
-            value=float(default["alpha"])
+            value=float(default_config["alpha"])
         )
-        seed = gr.Slider(
+        component_seed = gr.Slider(
             label="Seed",
             minimum=0,
             maximum=1_000_000,
             step=1,
-            value=int(default["seed"])
+            value=int(default_config["seed"])
         )
-        with gr.Row():
-
-            num_inference_steps = gr.Slider(label="Inference steps", minimum=1, maximum=50, step=1, value=28)
         run_button = gr.Button("Run", scale=0)
-        result = gr.Image(label="Result", show_label=False)
-        gr.Examples(examples=examples, inputs=[prompt])
-    gr.on(
-        triggers=[run_button.click, prompt.submit],
-        fn=infer,
-        inputs=[prompt, seed, width, height, guidance_scale, num_inference_steps],
-        outputs=[result]
-    )
+        result = gr.JSON(label="Configuration")
+        gr.on(
+            triggers=[run_button.click],
+            fn=update_config,
+            inputs=[
+                component_prompt,
+                component_negative_prompt,
+                component_noise_scale_latent_image,
+                component_noise_scale_latent_prompt,
+                component_alpha
+            ],
+            outputs=[result]
+        )
 demo.launch(server_name="0.0.0.0")
