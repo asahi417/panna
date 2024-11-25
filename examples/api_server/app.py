@@ -107,6 +107,7 @@ async def update_config(item: ItemUpdateConfig):
             "seed": GenerationConfig.seed,
             "noise_scale_latent_image": GenerationConfig.noise_scale_latent_image,
             "noise_scale_latent_prompt": GenerationConfig.noise_scale_latent_prompt,
+            "alpha": GenerationConfig.alpha
         })
     except Exception:
         logging.exception('Error')
@@ -122,6 +123,7 @@ async def get_config():
             "seed": GenerationConfig.seed,
             "noise_scale_latent_image": GenerationConfig.noise_scale_latent_image,
             "noise_scale_latent_prompt": GenerationConfig.noise_scale_latent_prompt,
+            "alpha": GenerationConfig.alpha
         })
     except Exception:
         logging.exception('Error')
