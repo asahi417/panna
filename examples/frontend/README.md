@@ -10,5 +10,5 @@ pip install -r requirement.txt
 export ENDPOINT="0.0.0.0:4444"
 export P_PROMPT="creative, inspiring, geometric, blooming, surrealistic, HQ"
 export N_PROMPT="low quality, blur"
-python main.py
+python interface_graphic.py
 ```

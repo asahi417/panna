@@ -16,5 +16,5 @@ export N_PROMPT="low quality, blur, mustache"
 export MAX_CONCURRENT_JOB=10
 export HEIGHT=1024
 export WIDTH=512
-python main.py
+python interface_graphic.py
 ```

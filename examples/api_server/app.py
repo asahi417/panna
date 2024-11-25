@@ -113,6 +113,21 @@ async def update_config(item: ItemUpdateConfig):
         raise HTTPException(status_code=404, detail=traceback.print_exc())
 
 
+@app.get("/get_config")
+async def get_config():
+    try:
+        return JSONResponse(content={
+            "prompt": GenerationConfig.prompt,
+            "negative_prompt": GenerationConfig.negative_prompt,
+            "seed": GenerationConfig.seed,
+            "noise_scale_latent_image": GenerationConfig.noise_scale_latent_image,
+            "noise_scale_latent_prompt": GenerationConfig.noise_scale_latent_prompt,
+        })
+    except Exception:
+        logging.exception('Error')
+        raise HTTPException(status_code=404, detail=traceback.print_exc())
+
+
 class ItemGenerateImage(ItemUpdateConfig):
     id: int
     image_hex: str

@@ -18,7 +18,7 @@ export HEIGHT=512
 export WIDTH=512
 export FPS=120
 export WAIT_M_SEC=160
-python main.py
+python interface_graphic.py
 ```
 
 
@@ -33,5 +33,5 @@ export HEIGHT=512
 export WIDTH=512
 export FPS=120
 export WAIT_M_SEC=160
-python main.py
+python interface_graphic.py
 ```
