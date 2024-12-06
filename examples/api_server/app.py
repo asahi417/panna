@@ -24,6 +24,7 @@ if torch.cuda.is_available():
     device = "cuda"
 elif torch.mps.device_count() >= 1:
     device = "mps"
+logger.info(f"device: {device}")
 if model_name == "sdxl_turbo_img2img":
     from panna import SDXL
     model = SDXL(
