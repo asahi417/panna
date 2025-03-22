@@ -1,6 +1,7 @@
 import os
 from diffusers.utils import load_image
-from panna import SDXLTurboImg2Img
+import panna
+from panna.util import get_device
 
 
 def test(model, output_path, prefix):
@@ -16,4 +17,12 @@ def test(model, output_path, prefix):
         model.export(output, f"{output_path}/{prefix}.{os.path.basename(i)}.negative.png")
 
 
-test(SDXLTurboImg2Img(), "./test/test_image_sdxl/output", "test_sdxl_turbo_img2img")
+# testing cpu
+if get_device().type == "cpu":
+    test(
+        panna.SDXLTurboImg2Img(),
+        "./test/test_image_sdxl/output_cpu", "test_sdxl_turbo_img2img"
+    )
+else:
+    raise NotImplementedError()
+

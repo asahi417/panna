@@ -9,7 +9,6 @@ from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from PIL.Image import blend
 
 from panna.util import bytes2image, image2bytes, get_logger
 
@@ -22,7 +21,7 @@ height = int(os.getenv("HEIGHT", 512))
 device = "cpu"
 if torch.cuda.is_available():
     device = "cuda"
-elif torch.mps.device_count() >= 1:
+elif torch.backends.mps.is_available():
     device = "mps"
 logger.info(f"device: {device}")
 if model_name == "sdxl_turbo_img2img":

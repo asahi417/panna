@@ -1,5 +1,4 @@
 import os
-from panna.util import hex2image, image2hex
 from panna.util import bytes2image, image2bytes
 
 os.makedirs("test/test_util/output", exist_ok=True)

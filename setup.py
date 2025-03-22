@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open('README.md', 'r', encoding="utf-8") as f:
     readme = f.read()
 
-version = '0.1.1'
+version = '1.0.0'
 setup(
     name='panna',
     packages=find_packages(exclude=["hf_space", "tests"]),
@@ -17,19 +17,20 @@ setup(
     author='Asahi Ushio',
     author_email='asahi1992ushio@gmail.com',
     classifiers=[
-        'Development Status :: 4 - Beta',       # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
-        'Intended Audience :: Developers',      # Define that your audience are developers
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering',
-        'License :: OSI Approved :: MIT License',   # Again, pick a license
-        'Programming Language :: Python :: 3',      #Specify which pyhton versions that you want to support
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3',
     ],
     include_package_data=True,
     test_suite='tests',
     install_requires=[
-        "torch>=2.0",
+        "numpy<2.0.0",
+        "torch==2.5.0",
         "datasets",
-        "transformers",
+        "transformers<4.49.0",
         "diffusers>=0.19.0",
         "invisible_watermark",
         "accelerate",

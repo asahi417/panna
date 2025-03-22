@@ -4,11 +4,20 @@ import logging
 from typing import Union, Optional
 from io import BytesIO
 
+import torch
 import numpy as np
 from PIL import Image
 
 from torch import cuda, Generator, Tensor, linalg, randn
 from diffusers.utils import load_image
+
+
+def get_device() -> torch.device:
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
 
 
 def add_noise(waveform: Tensor, noise_scale: float, seed: int) -> Tensor:

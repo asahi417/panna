@@ -4,7 +4,7 @@ import torch
 from diffusers import DiffusionPipeline, StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
 from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl_img2img import retrieve_timesteps
 from PIL.Image import Image, blend
-from .util import get_generator, get_logger, resize_image, add_noise
+from panna.util import get_generator, get_logger, resize_image, add_noise, get_device
 
 logger = get_logger(__name__)
 
@@ -33,20 +33,22 @@ class SDXL:
                  num_inference_steps: int = 40,
                  high_noise_frac: float = 0.8,
                  strength: float = 0.5,
-                 variant: str = "fp16",
-                 torch_dtype: torch.dtype = torch.float16,
-                 device_map: Optional[str] = "balanced",
+                 variant: Optional[str] = None,
+                 torch_dtype: Optional[torch.dtype] = None,
+                 device_map: Optional[str] = None,
                  img2img: bool = False,
-                 low_cpu_mem_usage: bool = True,
+                 low_cpu_mem_usage: Optional[bool] = None,
                  device: Optional[torch.device] = None,
                  deep_cache: bool = False):
-        config = dict(
-            use_safetensors=True,
-            variant=variant,
-            torch_dtype=torch_dtype,
-            device_map=device_map,
-            low_cpu_mem_usage=low_cpu_mem_usage
-        )
+        config = {"use_safetensors": True}
+        if low_cpu_mem_usage is not None:
+            config['low_cpu_mem_usage'] = low_cpu_mem_usage
+        if variant is not None:
+            config['variant'] = variant
+        if torch_dtype is not None:
+            config['torch_dtype'] = torch_dtype
+        if device_map is not None:
+            config['device_map'] = device_map
         self.height = height
         self.width = width
         self.guidance_scale = guidance_scale
@@ -65,7 +67,12 @@ class SDXL:
             helper.enable()
         self.refiner_model = None
         if use_refiner:
-            self.refiner_model = DiffusionPipeline.from_pretrained(refiner_model_id, text_encoder_2=self.base_model.text_encoder_2, vae=self.base_model.vae, **config)
+            self.refiner_model = DiffusionPipeline.from_pretrained(
+                refiner_model_id,
+                text_encoder_2=self.base_model.text_encoder_2,
+                vae=self.base_model.vae,
+                **config
+            )
         if device:
             self.base_model = self.base_model.to(device)
             if self.refiner_model is not None:
@@ -106,8 +113,11 @@ class SDXL:
         if self.refiner_model:
             shared_config["output_type"] = "latent"
             shared_config["denoising_end"] = self.high_noise_frac if high_noise_frac is None else high_noise_frac
-        if (self.cached_latent_prompt is None or
-                self.cached_latent_prompt["prompt"] != prompt or self.cached_latent_prompt["negative_prompt"] != negative_prompt):
+        if (
+                self.cached_latent_prompt is None or
+                self.cached_latent_prompt["prompt"] != prompt or
+                self.cached_latent_prompt["negative_prompt"] != negative_prompt
+        ):
             logger.info("generating latent text embedding")
             encode_prompt = self.base_model.encode_prompt(prompt=prompt, negative_prompt=negative_prompt)
             self.cached_latent_prompt = {
@@ -124,17 +134,26 @@ class SDXL:
         shared_config["negative_pooled_prompt_embeds"] = self.cached_latent_prompt["negative_pooled_prompt_embeds"]
         if noise_scale_latent_prompt:
             shared_config["prompt_embeds"] = add_noise(shared_config["prompt_embeds"], noise_scale_latent_prompt, seed=seed)
-            shared_config["pooled_prompt_embeds"] = add_noise(shared_config["pooled_prompt_embeds"], noise_scale_latent_prompt, seed=seed)
+            shared_config["pooled_prompt_embeds"] = add_noise(
+                shared_config["pooled_prompt_embeds"], noise_scale_latent_prompt,
+                seed=seed
+            )
         if self.img2img:
             logger.info("generating latent image embedding")
             device = self.base_model._execution_device
             image_tensor = self.base_model.image_processor.preprocess(image)
             ts, nis = retrieve_timesteps(self.base_model.scheduler, shared_config["num_inference_steps"], device)
             ts, _ = self.base_model.get_timesteps(nis, shared_config["strength"], device)
+            # TODO: Reuse latent for the static image input usecase.
             latents = self.base_model.prepare_latents(
-                image=image_tensor, timestep=ts[:1].repeat(num_images_per_prompt), batch_size=1,
-                num_images_per_prompt=num_images_per_prompt, dtype=self.cached_latent_prompt["prompt_embeds"].dtype,
-                device=device, generator=shared_config["generator"], add_noise=True
+                image=image_tensor,
+                timestep=ts[:1].repeat(num_images_per_prompt),
+                batch_size=1,
+                num_images_per_prompt=num_images_per_prompt,
+                dtype=self.cached_latent_prompt["prompt_embeds"].dtype,
+                device=device,
+                generator=shared_config["generator"],
+                add_noise=True
             )
             if noise_scale_latent_image:
                 latents = add_noise(latents, noise_scale_latent_image, seed=seed)
@@ -159,7 +178,6 @@ class SDXL:
             output_list = output
         output_image = output_list[0]
         if alpha is not None and alpha != 0:
-            print(output_image.size, image.size)
             output_image = blend(output_image, image, alpha=alpha)
         return output_image
 
@@ -170,59 +188,110 @@ class SDXL:
 
 class SDXLTurbo(SDXL):
 
-    def __init__(self):
-        super().__init__(
+    def __init__(self,
+                 device_map_balanced: bool = True,
+                 low_cpu_mem_usage: bool = True):
+        device = get_device()
+        config = dict(
             use_refiner=False,
             base_model_id="stabilityai/sdxl-turbo",
             guidance_scale=0.0,
             num_inference_steps=1,
-            variant="fp16",
-            torch_dtype=torch.float16,
-            device_map="balanced",
-            low_cpu_mem_usage=True
         )
+        if device.type in ["cuda", "mps"] and device_map_balanced:
+            super().__init__(
+                variant="fp16",
+                torch_dtype=torch.float16,
+                device_map="balanced",
+                low_cpu_mem_usage=low_cpu_mem_usage,
+                **config
+            )
+        elif device.type in ["cuda", "mps"]:
+            super().__init__(
+                variant="fp16",
+                torch_dtype=torch.float16,
+                device=device,
+                low_cpu_mem_usage=low_cpu_mem_usage,
+                **config
+            )
+        else:
+            super().__init__(device=device, **config)
 
 
 class SDXLTurboImg2Img(SDXL):
 
-    def __init__(self):
-        super().__init__(
+    def __init__(self,
+                 device_map_balanced: bool = True,
+                 low_cpu_mem_usage: bool = True):
+        device = get_device()
+        config = dict(
             use_refiner=False,
             base_model_id="stabilityai/sdxl-turbo",
-            height=512,
-            width=512,
             guidance_scale=0.0,
-            num_inference_steps=2,
-            strength=0.5,
-            variant="fp16",
-            torch_dtype=torch.float16,
-            device_map="balanced",
-            low_cpu_mem_usage=True,
-            img2img=True,
+            num_inference_steps=1,
+            img2img=True
         )
+        if device.type in ["cuda", "mps"] and device_map_balanced:
+            super().__init__(
+                variant="fp16",
+                torch_dtype=torch.float16,
+                device_map="balanced",
+                low_cpu_mem_usage=low_cpu_mem_usage,
+                **config
+            )
+        elif device.type in ["cuda", "mps"]:
+            super().__init__(
+                variant="fp16",
+                torch_dtype=torch.float16,
+                device=device,
+                low_cpu_mem_usage=low_cpu_mem_usage,
+                **config
+            )
+        else:
+            super().__init__(device=device, **config)
 
 
 class SDXLBase(SDXL):
 
-    def __init__(self):
-        super().__init__(
+    def __init__(self,
+                 device_map_balanced: bool = True,
+                 low_cpu_mem_usage: bool = True):
+        device = get_device()
+        config = dict(
             use_refiner=True,
             base_model_id="stabilityai/stable-diffusion-xl-base-1.0",
             refiner_model_id="stabilityai/stable-diffusion-xl-refiner-1.0",
             guidance_scale=5.0,
             num_inference_steps=40,
             high_noise_frac=0.8,
-            variant="fp16",
-            torch_dtype=torch.float16,
-            device_map="balanced",
-            low_cpu_mem_usage=True
         )
+        if device.type in ["cuda", "mps"] and device_map_balanced:
+            super().__init__(
+                variant="fp16",
+                torch_dtype=torch.float16,
+                device_map="balanced",
+                low_cpu_mem_usage=low_cpu_mem_usage,
+                **config
+            )
+        elif device.type in ["cuda", "mps"]:
+            super().__init__(
+                variant="fp16",
+                torch_dtype=torch.float16,
+                device=device,
+                low_cpu_mem_usage=low_cpu_mem_usage,
+                **config
+            )
+        else:
+            super().__init__(device=device, **config)
 
 
 class SDXLBaseImg2Img(SDXL):
 
-    def __init__(self):
-        super().__init__(
+    def __init__(self,
+                 device_map_balanced: bool = True,
+                 low_cpu_mem_usage: bool = True):
+        device = get_device()
+        config = dict(
             use_refiner=True,
             base_model_id="stabilityai/stable-diffusion-xl-base-1.0",
             refiner_model_id="stabilityai/stable-diffusion-xl-refiner-1.0",
@@ -230,41 +299,23 @@ class SDXLBaseImg2Img(SDXL):
             num_inference_steps=80,
             high_noise_frac=0.8,
             strength=0.5,
-            variant="fp16",
-            torch_dtype=torch.float16,
-            device_map="balanced",
-            low_cpu_mem_usage=True,
             img2img=True
         )
-
-
-class RealVisXL(SDXL):
-
-    def __init__(self):
-        super().__init__(
-            use_refiner=False,
-            base_model_id="SG161222/RealVisXL_V4.0",
-            guidance_scale=3.0,
-            num_inference_steps=20,
-            variant="fp16",
-            torch_dtype=torch.float16,
-            device_map="balanced",
-            low_cpu_mem_usage=True,
-        )
-
-
-class RealVisXLImg2Img(SDXL):
-
-    def __init__(self):
-        super().__init__(
-            use_refiner=False,
-            base_model_id="SG161222/RealVisXL_V4.0",
-            guidance_scale=3.0,
-            num_inference_steps=20,
-            variant="fp16",
-            torch_dtype=torch.float16,
-            device_map="balanced",
-            low_cpu_mem_usage=True,
-            strength=0.5,
-            img2img=True
-        )
+        if device.type in ["cuda", "mps"] and device_map_balanced:
+            super().__init__(
+                variant="fp16",
+                torch_dtype=torch.float16,
+                device_map="balanced",
+                low_cpu_mem_usage=low_cpu_mem_usage,
+                **config
+            )
+        elif device.type in ["cuda", "mps"]:
+            super().__init__(
+                variant="fp16",
+                torch_dtype=torch.float16,
+                device=device,
+                low_cpu_mem_usage=low_cpu_mem_usage,
+                **config
+            )
+        else:
+            super().__init__(device=device, **config)
