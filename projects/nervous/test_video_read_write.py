@@ -1,8 +1,9 @@
 from panna.util import get_frames, save_frames
 
+sample = "/Users/asahi/Downloads/763574630.249415.mp4"
 if __name__ == '__main__':
     frames, fps, size = get_frames(
-        "sample.mp4",
+        sample,
         start_sec=7,
         end_sec=13,
         fps=5,

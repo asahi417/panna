@@ -11,4 +11,4 @@ __pycache__
 .eggs
 test/*/output
 .gradio
-sample.mp4
+*.mp4

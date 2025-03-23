@@ -60,13 +60,12 @@ python main.py \
 
 ```shell
 python main.py \
--v sample.mp4 \
--f 5 \
--s 0 \
--e 5 \
--o sample_exmaple_1.mp4 \
+-v "/Users/asahi/Downloads/763574630.249415.mp4" \
+-f 10 \
+-s 7 \
+-e 14 \
+-o sample_exmaple_2.mp4 \
 --sd 0.2 \
---prompt1 "flower blooming, reflection, HQ, super realistic, geometric, artistic, creative, inspiring" \
---prompt2 "flower, dark, depression, winter, aesthetic" \
---prompt3 "flower blooming, nature, peaceful, beautiful, summer, landscape"
+--prompt1 "Aesthetic, inspiring, summer, shining, suns, beach, positive, happy, energetic, hot." \
+--prompt2 "Aesthetic, inspiring, Winter, snow, dark, depressive, cold, dying."
 ```
