@@ -22,9 +22,9 @@ def test(model, output_path, prefix):
 with torch.no_grad():
     if get_device().type == "cpu":
         test(
-            panna.SDXLTurbo(),
-            "./test/test_image_sdxl/output_cpu",
-            "test_sdxl_turbo"
+            panna.SD3LargeTurbo4Bit(),
+            "./test/test_image_sd3/output_cpu",
+            "test_sd3large_turbo_4bit"
         )
     else:
         raise NotImplementedError()

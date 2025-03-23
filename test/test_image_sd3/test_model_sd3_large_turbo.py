@@ -1,5 +1,9 @@
+from time import time
 import os
-from panna import SD3LargeTurbo
+
+import torch
+import panna
+from panna.util import get_device
 
 
 def test(model, output_path, prefix):
@@ -8,18 +12,19 @@ def test(model, output_path, prefix):
         "A majestic lion jumping from a big stone at night",
         "A face of female model, high quality, fashion, Paris, Vogue, Maison Margiela, 8k"
     ]
-    prompts_neg = [
-        "photo realistic",
-        "low quality",
-    ]
-
-    for i, (p, p_n) in enumerate(zip(prompts, prompts_neg)):
-        output = model(p, seed=42)
+    for i, p in enumerate(prompts):
+        start = time()
+        output = model(p, negative_prompt="low quality", seed=42)
+        print(f"***process time: {time() - start}***")
         model.export(output, f"{output_path}/{prefix}.{i}.png")
-        output = model(p, negative_prompt=p_n, seed=42)
-        model.export(output, f"{output_path}/{prefix}.{i}.negative.png")
-        output = model(p, negative_prompt=p_n, seed=42, width=1024, height=720)
-        model.export(output, f"{output_path}/{prefix}.{i}.negative.landscape.png")
 
 
-test(SD3LargeTurbo(), "./test/test_image_sd3/output", "test_sd3_large_turbo")
+with torch.no_grad():
+    if get_device().type == "cpu":
+        test(
+            panna.SD3LargeTurbo(),
+            "./test/test_image_sd3/output_cpu",
+            "test_sd3large_turbo"
+        )
+    else:
+        raise NotImplementedError()

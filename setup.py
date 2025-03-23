@@ -37,13 +37,12 @@ setup(
         "safetensors",
         "sentencepiece",
         "protobuf",
-        "clip-interrogator",
         "accelerate",
-        "controlnet_aux",
         "bitsandbytes",
-        "DeepCache"
+        "DeepCache",
+        "opencv-python"
     ],
-    python_requires='>=3.8',
+    python_requires='>=3.8,<=3.12',
     entry_points={
         'console_scripts': [],
     }
