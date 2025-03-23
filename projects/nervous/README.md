@@ -20,7 +20,7 @@ cd projects/nervous
 The [main.py](./projects/nervous/main.py) is the main script.
 
 ```
-usage: main.py [-h] [-v VIDEO] [-f FPS] [-s START] [-e END] [-o OUTPUT] [--sd SD] [--prompt1 PROMPT1] [--prompt2 PROMPT2] [--prompt3 PROMPT3] [--prompt4 PROMPT4]
+usage: main.py [-h] -v VIDEO [-f FPS] [-s START] -e END -o OUTPUT [--sd SD] --prompt1 PROMPT1 [--prompt2 PROMPT2] [--prompt3 PROMPT3] [--prompt4 PROMPT4]
 
 I am NERVOUS!
 
@@ -38,10 +38,26 @@ options:
   --prompt1 PROMPT1     The 1st prompt.
   --prompt2 PROMPT2     The 2nd prompt.
   --prompt3 PROMPT3     The 3rd prompt.
-  --prompt4 PROMPT4     The 1st prompt.
+  --prompt4 PROMPT4     The 4th prompt.
 ```
 
 ### Examples
+
+- Seasons
+```shell
+python main.py \
+-v sample.mp4 \
+-f 5 \
+-s 0 \
+-e 2 \
+-o sample_seasons.mp4 \
+--sd 0.2 \
+--prompt1 "Summer, shining, suns, beach, positive, happy, energetic, hot." \
+--prompt2 "Winter, snow, dark, depressive, cold, dying."
+```
+
+- Misc
+
 ```shell
 python main.py \
 -v sample.mp4 \

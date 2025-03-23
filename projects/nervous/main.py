@@ -7,11 +7,6 @@ from panna import SDXLTurboImg2Img
 from panna.util import get_logger, get_frames, save_frames
 
 logger = get_logger(__name__)
-prompt_banks = (
-    "surrealistic, creative, inspiring, geometric, blooming, paint by Salvador Dali, HQ",
-    "Henri Matisse, fauvism, HQ, oil painting on canvas",
-    "flower blooming, reflection, HQ, super realistic, geometric, artistic, creative, inspiring"
-)
 
 
 def merge_embeddings(
@@ -49,16 +44,16 @@ def merge_embeddings(
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='I am NERVOUS!')
-    parser.add_argument('-v', '--video', type=str, default="sample.mp4", help='Path to the input video.')
+    parser.add_argument('-v', '--video', type=str, required=True, help='Path to the input video.')
     parser.add_argument('-f', '--fps', type=int, default=5, help='FPS of the output video.')
-    parser.add_argument('-s', '--start', type=float, default=7, help='Start of the video.')
-    parser.add_argument('-e', '--end', type=float, default=13, help='End of the video.')
-    parser.add_argument('-o', '--output', type=str, default="sample_output.mp4", help='Path to the output video.')
+    parser.add_argument('-s', '--start', type=float, default=0, help='Start of the video.')
+    parser.add_argument('-e', '--end', type=float, required=True, help='End of the video.')
+    parser.add_argument('-o', '--output', type=str, required=True, help='Path to the output video.')
     parser.add_argument('--sd', type=float, default=0.25, help='SD when merging prompt embeddings.')
-    parser.add_argument('--prompt1', type=str, default=prompt_banks[0], help='The 1st prompt.')
-    parser.add_argument('--prompt2', type=str, default=prompt_banks[1], help='The 2nd prompt.')
-    parser.add_argument('--prompt3', type=str, default=prompt_banks[2], help='The 3rd prompt.')
-    parser.add_argument('--prompt4', type=str, help='The 1st prompt.')
+    parser.add_argument('--prompt1', type=str, required=True, help='The 1st prompt.')
+    parser.add_argument('--prompt2', type=str, help='The 2nd prompt.')
+    parser.add_argument('--prompt3', type=str, help='The 3rd prompt.')
+    parser.add_argument('--prompt4', type=str, help='The 4th prompt.')
     args = parser.parse_args()
 
     logger.info("load model")
