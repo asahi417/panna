@@ -1,6 +1,5 @@
-git+https://github.com/huggingface/diffusers.git
 git+https://github.com/rwightman/pytorch-image-models.git
+git+https://github.com/huggingface/diffusers.git
 accelerate
 sentencepiece
-panna>=0.0.9
-
+panna>=1.0.1

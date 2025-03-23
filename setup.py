@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open('README.md', 'r', encoding="utf-8") as f:
     readme = f.read()
 
-version = '1.0.0'
+version = '1.0.1'
 setup(
     name='panna',
     packages=find_packages(exclude=["hf_space", "tests"]),
@@ -41,7 +41,7 @@ setup(
         "bitsandbytes",
         "DeepCache",
         "opencv-python",
-        "timm==1.0.13"  # instruct_ir
+        "timm<=1.0.15"  # instruct_ir
     ],
     python_requires='>=3.8,<=3.12',
     entry_points={

@@ -1,5 +1,0 @@
-git+https://github.com/huggingface/diffusers.git
-git+https://github.com/rwightman/pytorch-image-models.git
-accelerate
-sentencepiece
-panna>=0.0.11
