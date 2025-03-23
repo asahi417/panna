@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 from huggingface_hub import hf_hub_download
 
-from .util import clear_cache, get_logger
+from panna.util import clear_cache, get_logger
 
 logger = get_logger(__name__)
 
@@ -262,7 +262,7 @@ class InstructIR:
             restored_img = (restored_img * 255.0).round().astype(np.uint8)
             output_list = Image.fromarray(restored_img)
             clear_cache()
-        return output_list[0]
+        return output_list
 
     @staticmethod
     def export(data: Image, output_path: str, file_format: str = "png") -> None:

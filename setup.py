@@ -40,7 +40,8 @@ setup(
         "accelerate",
         "bitsandbytes",
         "DeepCache",
-        "opencv-python"
+        "opencv-python",
+        "timm==1.0.13"  # instruct_ir
     ],
     python_requires='>=3.8,<=3.12',
     entry_points={
