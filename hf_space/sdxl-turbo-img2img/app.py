@@ -2,8 +2,7 @@ import gradio as gr
 import spaces
 from panna import SDXLTurboImg2Img
 
-
-model = SDXLTurboImg2Img()
+model = SDXLTurboImg2Img(device_name="cpu")
 title = "# Stable Diffusion 2 XL Turbo Image2Image"
 examples = [
     "A female model, high quality, fashion, Paris, Vogue, Maison Margiela, 8k",

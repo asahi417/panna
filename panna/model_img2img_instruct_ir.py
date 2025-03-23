@@ -260,9 +260,9 @@ class InstructIR:
             restored_img = x_hat.squeeze().permute(1, 2, 0).clamp_(0, 1).cpu().detach().numpy()
             restored_img = np.clip(restored_img, 0.0, 1.)
             restored_img = (restored_img * 255.0).round().astype(np.uint8)
-            output_list = Image.fromarray(restored_img)
+            output = Image.fromarray(restored_img)
             clear_cache()
-        return output_list
+        return output
 
     @staticmethod
     def export(data: Image, output_path: str, file_format: str = "png") -> None:

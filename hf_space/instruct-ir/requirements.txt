@@ -2,4 +2,4 @@ git+https://github.com/rwightman/pytorch-image-models.git
 git+https://github.com/huggingface/diffusers.git
 accelerate
 sentencepiece
-panna>=1.0.2
+panna>=1.0.1

@@ -16,11 +16,11 @@ pip install -e .
 cd projects/nervous
 ```
 
-## Run
-The [main.py](./projects/nervous/main.py) is the main script.
+## Generation Video
+The [generate_video.py](https://github.com/asahi417/panna/blob/main/projects/nervous/generate_video.py) is the main script.
 
 ```
-usage: main.py [-h] -v VIDEO [-f FPS] [-s START] -e END -o OUTPUT [--sd SD] --prompt1 PROMPT1 [--prompt2 PROMPT2] [--prompt3 PROMPT3] [--prompt4 PROMPT4]
+usage: generate_video.py [-h] -v VIDEO [-f FPS] [-s START] -e END -o OUTPUT [--sd SD] --prompt1 PROMPT1 [--prompt2 PROMPT2] [--prompt3 PROMPT3] [--prompt4 PROMPT4]
 
 I am NERVOUS!
 
@@ -43,29 +43,44 @@ options:
 
 ### Examples
 
-- Seasons
+- From Cubism to Impressionism
 ```shell
-python main.py \
--v sample.mp4 \
--f 5 \
--s 0 \
--e 2 \
--o sample_seasons.mp4 \
---sd 0.2 \
---prompt1 "Summer, shining, suns, beach, positive, happy, energetic, hot." \
---prompt2 "Winter, snow, dark, depressive, cold, dying."
+python generate_video.py \
+    -v "sample.mp4" \
+    -f 10 \
+    -s 0 \
+    -e 2 \
+    -o "sample_1.mp4" \
+    --sd 0.2 \
+    --prompt1 "Inspiring, surrealism, expressive, cubism, HQ, 4K" \
+    --prompt2 "Organic, nature, forest, meditative, Monet, impressionist"
 ```
 
-- Misc
 
+## Refine Video
+The [refine_video.py](https://github.com/asahi417/panna/blob/main/projects/nervous/refine_video.py) is a sub-script to refine the genrated video.
+
+```
+usage: refine_video.py [-h] -v VIDEO [-p PROMPT] -o OUTPUT
+
+Level up your NERVOUS video!
+
+options:
+  -h, --help            show this help message and exit
+  -v VIDEO, --video VIDEO
+                        Path to the input video.
+  -p PROMPT, --prompt PROMPT
+                        Prompt.
+  -o OUTPUT, --output OUTPUT
+                        Path to the output video.
+```
+
+
+### Examples
+- From Cubism to Impressionism
 ```shell
-python main.py \
--v "/Users/asahi/Downloads/763574630.249415.mp4" \
--f 10 \
--s 7 \
--e 14 \
--o sample_exmaple_2.mp4 \
---sd 0.2 \
---prompt1 "Aesthetic, inspiring, summer, shining, suns, beach, positive, happy, energetic, hot." \
---prompt2 "Aesthetic, inspiring, Winter, snow, dark, depressive, cold, dying."
+python refine_video.py \
+    -v "sample_1.mp4" \
+    -o "sample_1.refined.up.mp4" \
+    -u
 ```

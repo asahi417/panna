@@ -11,7 +11,9 @@ from torch import device, cuda, Generator, Tensor, linalg, randn, backends
 import numpy as np
 
 
-def get_device() -> device:
+def get_device(device_name: str | None) -> device:
+    if device_name:
+        return device(device_name)
     if cuda.is_available():
         return device("cuda")
     elif backends.mps.is_available():
@@ -97,6 +99,15 @@ def resize_image(
     return resized_image
 
 
+def upsample_image(image: Image.Image | np.ndarray, return_array: bool = False) -> Image.Image | np.ndarray:
+    if type(image) is Image.Image:
+        image = np.array(image)
+    image = cv2.pyrUp(image)
+    if return_array:
+        return image
+    return Image.fromarray(image)
+
+
 ###############
 # Video Utils #
 ###############
@@ -114,11 +125,11 @@ def get_frames(
     if not os.path.exists(path_to_video):
         raise ValueError(f"{path_to_video} not exist.")
     cap = cv2.VideoCapture(path_to_video)
-    height, width = size
-    if height is None:
-        height = cap.get(4)
-    if width is None:
-        width = cap.get(3)  # float `width`
+    if size is None:
+        height = int(cap.get(4))
+        width = int(cap.get(3))
+    else:
+        height, width = size
     video_fps = cap.get(cv2.CAP_PROP_FPS)
     fps = video_fps if fps is None else fps
     if fps > video_fps:
