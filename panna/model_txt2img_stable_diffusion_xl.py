@@ -221,8 +221,9 @@ class SDXLTurbo(SDXL):
     def __init__(self,
                  device_map_balanced: bool = True,
                  low_cpu_mem_usage: bool = True,
+                 device_name: str | None = None,
                  deep_cache: bool = False):
-        device = get_device()
+        device = get_device(device_name)
         config = dict(
             use_refiner=False,
             base_model_id="stabilityai/sdxl-turbo",

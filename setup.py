@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 with open('README.md', 'r', encoding="utf-8") as f:
     readme = f.read()
 
-version = '1.0.2'
+version = '1.0.3'
 setup(
     name='panna',
     packages=find_packages(exclude=["hf_space", "tests"]),
