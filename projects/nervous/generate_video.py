@@ -47,20 +47,24 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--video', type=str, required=True, help='Path to the input video.')
     parser.add_argument('-f', '--fps', type=int, default=5, help='FPS of the output video.')
     parser.add_argument('-s', '--start', type=float, default=0, help='Start of the video.')
-    parser.add_argument('-e', '--end', type=float, required=True, help='End of the video.')
+    parser.add_argument('-e', '--end', type=float, help='End of the video.')
     parser.add_argument('-o', '--output', type=str, required=True, help='Path to the output video.')
     parser.add_argument('--sd', type=float, default=0.25, help='SD when merging prompt embeddings.')
+    parser.add_argument('-n', '--noise', type=float, help='The noise scale (latent image).')
+    parser.add_argument('--noise-factor', type=int, default=4, help='Factor of noise scheduler.')
     parser.add_argument('--prompt1', type=str, required=True, help='The 1st prompt.')
     parser.add_argument('--prompt2', type=str, help='The 2nd prompt.')
     parser.add_argument('--prompt3', type=str, help='The 3rd prompt.')
     parser.add_argument('--prompt4', type=str, help='The 4th prompt.')
+    parser.add_argument('--prompt5', type=str, help='The 5th prompt.')
+    parser.add_argument('--prompt6', type=str, help='The 6th prompt.')
     args = parser.parse_args()
 
     logger.info("load model")
     model = SDXLTurboImg2Img()
 
     logger.info("get prompt embeddings")
-    prompts = list(filter(None, (args.prompt1, args.prompt2, args.prompt3, args.prompt4)))
+    prompts = list(filter(None, (args.prompt1, args.prompt2, args.prompt3, args.prompt4, args.prompt5, args.prompt6)))
     prompts_embeddings = []
     for n, prompt in enumerate(prompts):
         logger.info(f"generating embedding on prompt {n + 1}/{len(prompts)} ({prompt})...")
@@ -74,6 +78,12 @@ if __name__ == '__main__':
         fps=args.fps,
         size=(model.height, model.width)
     )
+    save_frames(
+        output_file=args.output.replace(".mp4", ".source.mp4"),
+        frames=frames,
+        fps=fps,
+        size=size
+    )
 
     logger.info("merge embeddings")
     prompts_embeddings = merge_embeddings(
@@ -82,6 +92,12 @@ if __name__ == '__main__':
         sd=args.sd
     )
 
+    logger.info("noise scheduler")
+    if args.noise:
+        get_noise = lambda x: (x/(len(frames) - 1)) ** args.noise_factor * args.noise
+    else:
+        get_noise = lambda x: None
+
     logger.info(f"generation over the {len(frames)} frames")
     generated_frames = []
     for n, frame in enumerate(frames):
@@ -89,6 +105,7 @@ if __name__ == '__main__':
         generated_frames.append(
             model(
                 prompt_embedding=prompts_embeddings[n],
+                noise_scale_latent_image=get_noise(n),
                 image=frame
             )
         )
@@ -97,12 +114,6 @@ if __name__ == '__main__':
     save_frames(
         output_file=args.output,
         frames=generated_frames,
-        fps=fps,
-        size=size
-    )
-    save_frames(
-        output_file=args.output.replace(".mp4", ".source.mp4"),
-        frames=frames,
         fps=fps,
         size=size
     )

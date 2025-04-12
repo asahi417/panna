@@ -73,6 +73,7 @@ options:
                         Prompt.
   -o OUTPUT, --output OUTPUT
                         Path to the output video.
+  -u, --up-sample       Up sample images.
 ```
 
 
