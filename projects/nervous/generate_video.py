@@ -113,7 +113,7 @@ if __name__ == '__main__':
                 image=frame
             )
         )
-        if args.debug:
+        if args.debug and n % 100 == 0:
             model.export(generated_frames[-1], f"{args.output}.{n}.png")
 
     logger.info(f"exporting generated frames to {args.output}")
