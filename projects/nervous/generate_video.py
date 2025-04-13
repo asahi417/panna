@@ -52,17 +52,21 @@ if __name__ == '__main__':
     parser.add_argument('--sd', type=float, default=0.25, help='SD when merging prompt embeddings.')
     parser.add_argument('-n', '--noise', type=float, help='The noise scale (latent image).')
     parser.add_argument('--noise-factor', type=int, default=4, help='Factor of noise scheduler.')
+    parser.add_argument('--height', type=int, help='Height of the output.')
+    parser.add_argument('--width', type=int, help='Width of the output.')
     parser.add_argument('--prompt1', type=str, required=True, help='The 1st prompt.')
     parser.add_argument('--prompt2', type=str, help='The 2nd prompt.')
     parser.add_argument('--prompt3', type=str, help='The 3rd prompt.')
     parser.add_argument('--prompt4', type=str, help='The 4th prompt.')
     parser.add_argument('--prompt5', type=str, help='The 5th prompt.')
     parser.add_argument('--prompt6', type=str, help='The 6th prompt.')
+    parser.add_argument('--debug', action="store_true", help='Debug mode.')
     args = parser.parse_args()
 
+    if not args.output.endswith(".mp4"):
+        raise ValueError("output file must be mp4.")
     logger.info("load model")
-    model = SDXLTurboImg2Img()
-
+    model = SDXLTurboImg2Img(height=args.height, width=args.width)
     logger.info("get prompt embeddings")
     prompts = list(filter(None, (args.prompt1, args.prompt2, args.prompt3, args.prompt4, args.prompt5, args.prompt6)))
     prompts_embeddings = []
@@ -109,6 +113,8 @@ if __name__ == '__main__':
                 image=frame
             )
         )
+        if args.debug:
+            model.export(generated_frames[-1], f"{args.output}.{n}.png")
 
     logger.info(f"exporting generated frames to {args.output}")
     save_frames(
