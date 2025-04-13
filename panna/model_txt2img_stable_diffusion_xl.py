@@ -222,14 +222,18 @@ class SDXLTurbo(SDXL):
                  device_map_balanced: bool = True,
                  low_cpu_mem_usage: bool = True,
                  device_name: str | None = None,
-                 deep_cache: bool = False):
+                 deep_cache: bool = False,
+                 height: int | None = None,
+                 width: int | None = None):
         device = get_device(device_name)
         config = dict(
             use_refiner=False,
             base_model_id="stabilityai/sdxl-turbo",
             guidance_scale=0.0,
             num_inference_steps=1,
-            deep_cache=deep_cache
+            deep_cache=deep_cache,
+            height=height,
+            width=width
         )
         if device.type in ["cuda", "mps"] and device_map_balanced:
             super().__init__(
@@ -257,7 +261,9 @@ class SDXLTurboImg2Img(SDXL):
                  device_map_balanced: bool = True,
                  low_cpu_mem_usage: bool = True,
                  device_name: str | None = None,
-                 deep_cache: bool = False):
+                 deep_cache: bool = False,
+                 height: int | None = None,
+                 width: int | None = None):
         device = get_device(device_name)
         config = dict(
             use_refiner=False,
@@ -265,7 +271,9 @@ class SDXLTurboImg2Img(SDXL):
             guidance_scale=0.0,
             num_inference_steps=2,
             img2img=True,
-            deep_cache=deep_cache
+            deep_cache=deep_cache,
+            height=height,
+            width=width
         )
         if device.type in ["cuda", "mps"] and device_map_balanced:
             super().__init__(

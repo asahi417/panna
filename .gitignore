@@ -12,4 +12,7 @@ __pycache__
 test/*/output
 .gradio
 *.mp4
+*.mov
+*.wav
+*.mp3
 prototype_*

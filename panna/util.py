@@ -115,12 +115,13 @@ def upsample_image(image: Image.Image | np.ndarray, return_array: bool = False) 
 
 def get_frames(
         path_to_video: str,
-        start_sec: int | None = None,
-        end_sec: int | None = None,
+        start_sec: float | None = None,
+        end_sec: float | None = None,
         fps: float | None = None,
         size: tuple[int, int] | None = None,
         return_array: bool = False
 ) -> tuple[list[np.ndarray | Image.Image], float, tuple[int, int]]:
+    identifier = path_to_video.split(".")[-1]
     # config
     if not os.path.exists(path_to_video):
         raise ValueError(f"{path_to_video} not exist.")
@@ -147,6 +148,11 @@ def get_frames(
     for frame_number in range(start_frame, end_frame):
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number-1)
         res, frame = cap.read()
+        if identifier.lower() == "mov":
+            try:
+                frame = np.rot90(frame, k=3, axes=(0, 1))
+            except Exception:
+                raise ValueError(f"{frame.shape}")
         if not res:
             raise ValueError("failed capture")
         frame = resize_image(frame, width, height, return_array=return_array)
