@@ -82,6 +82,7 @@ if __name__ == '__main__':
         fps=args.fps,
         size=(model.height, model.width)
     )
+    logger.info(f"{size}")
     save_frames(
         output_file=args.output.replace(".mp4", ".source.mp4"),
         frames=frames,

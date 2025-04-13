@@ -175,7 +175,7 @@ def save_frames(
         output_file,
         fourcc,
         fps,
-        size
+        size[::-1]
     )
     for frame in frames:
         if type(frame) is Image.Image:
