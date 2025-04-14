@@ -75,7 +75,6 @@ def resize_image(
         image: Image.Image | np.ndarray,
         width: int,
         height: int,
-        keep_aspect: bool = True,
         return_array: bool = False
 ) -> Image.Image | np.ndarray:
     if isinstance(image, np.ndarray):
