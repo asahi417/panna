@@ -29,7 +29,7 @@ if model_name == "sdxl_turbo_img2img":
     model = SDXLTurboImg2Img(
         height=height,
         width=width,
-        low_cpu_mem_usage=False,
+        low_cpu_mem_usage=True,
         deep_cache=True
     )
 else:
