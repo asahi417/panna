@@ -25,21 +25,11 @@ elif torch.backends.mps.is_available():
     device = "mps"
 logger.info(f"device: {device}")
 if model_name == "sdxl_turbo_img2img":
-    from panna import SDXL
-    model = SDXL(
-        use_refiner=False,
-        base_model_id="stabilityai/sdxl-turbo",
+    from panna import SDXLTurboImg2Img
+    model = SDXLTurboImg2Img(
         height=height,
         width=width,
-        guidance_scale=0.0,
-        num_inference_steps=2,
-        strength=0.5,
-        variant="fp16",
-        torch_dtype=torch.float16,
-        device_map=None,
         low_cpu_mem_usage=False,
-        img2img=True,
-        device=torch.device(device),
         deep_cache=True
     )
 else:
